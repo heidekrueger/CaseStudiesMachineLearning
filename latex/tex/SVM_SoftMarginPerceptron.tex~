@@ -1,0 +1,211 @@
+
+\newpage
+\subsection{Rosenblatt's Perceptron}
+
+The condition for a linear decision boundary reads:
+\ba
+\frac{y_i}{\norm\alpha} (\alpha^T x_{i} + b) \geq 0 
+\Leftrightarrow
+- y_i (\alpha^T x_{i} + b) \leq 0
+\ea
+
+As in the Support Vector machine we now state an optimization criterion, which will be constant, and the conditions:
+\ba
+\argmin_{\alpha,\,b} 0& \\
+\text{s.t. } &- y_i \left( \alpha^Tx_i+ b \right) \leq 0
+\ea
+Applying Lagrange's Formalism, we get:
+\ba
+\argmin_{\alpha,\,b} & - \sum_{i = 1}^m y_i \lambda_i \left( \alpha^Tx_i+ b \right) \\
+\text{s.t. } \lambda &\geq 0
+\ea
+Now we set $\lambda$ to be binary in the following sense:
+\ba
+\lambda_i = 
+\begin{cases} 
+0 &\mbox{if } - y_i \left( \alpha^Tx_i+ b \right) \leq 0 \\
+1 & \mbox{otherwise. }
+\end{cases}
+\ea
+This way we can reformulate the problem using the set of all misclassifications $\sM = \{ i\, : - y_i (\alpha^T x_{i} + b) > 0 \}$:
+\ba
+\argmin_{\alpha, b} -\sum_{i \in \sM} y_i \left( \alpha^Tx_i+ b \right). 
+\ea
+
+
+\newpage
+\subsection{Soft Margin Rosenblatt's Perceptron}
+
+The condition for a linear decision boundary reads:
+\ba
+\frac{y_i}{\norm\alpha} (\alpha^T x_{i} + b) > \frac{1}{\norm\alpha} 
+\Leftrightarrow
+1 - y_i (\alpha^T x_{i} + b) \leq 0
+\ea
+
+As in the Support Vector machine we now state an optimization criterion, which will be constant, and the \textbf{relaxed} conditions:
+\ban \label{relaxed_objective}
+\argmin_{\alpha, \xi, \,b} \, C& \;\norm \xi_1 \\
+\text{s.t. } 1 &- y_i \left( \alpha^Tx_i+ b \right) - \xi_i \leq 0 \nonumber \\
+&- \xi_i \leq 0 \nonumber 
+\ean
+Applying Lagrange's Formalism, we get:
+\ba
+\argmin_{\alpha,\,b} \, C & \norm \xi_1 + \sum_{i = 1}^m \lambda_i [ 1 - y_i \left( \alpha^Tx_i+ b \right) - \xi_i ] - \sum_{i = 1}^m \mu_i \xi_i \\
+\text{s.t. } \mu, \lambda &\geq 0
+\ea
+Now we set $\lambda$ and $\mu$ to be binary in the following sense:
+\ba
+\lambda_i = 
+\begin{cases} 
+0 &\mbox{if } 1 - y_i \left( \alpha^Tx_i+ b \right) - \xi_i \leq 0 \\
+1 & \mbox{otherwise}
+\end{cases}
+\text{ and  }
+\mu_i = 
+\begin{cases} 
+0 &\mbox{if } -\xi_i \leq 0 \\
+1 & \mbox{otherwise. }
+\end{cases}
+\ea
+This way we can reformulate the problem using a set $\sM$:
+\ba
+\argmin_{\alpha, b} k \norm \xi_1 -\sum_{i \in \sM} y_i \left( \alpha^Tx_i+ b \right) - \sum_{i \in \sM} \xi_i - \sum_{\xi_i > 0} \xi_i 
+\ea
+with $\sM = \{ i\, : 1 - y_i (\alpha^T x_{i} + b) - \xi_i > 0 \}$.
+Now we apply the method of gradient descent and we get the following iterations:
+\ba
+\alpha^{k+1} &= \alpha^{k} + \eta \sum_{i \in \sM} y_i  x_i \\
+b^{k+1} &= b^{k} + \nu \sum_{i \in \sM} y_i  \\
+\xi^{k+1} &= \xi^{k} - \tau \left( C - \sum_{i \in \sM} 1 - \sum_{\xi_i > 0} 1 \right)
+\ea
+where $\eta$, $\nu$ and $\tau$ are the step widths of the gradient step.
+
+\newpage
+\subsection*{Theorem}
+
+Let $1 < D := \max_i \norm{x_i}_2 < \infty$. 
+Assume that the two sets are not separable, i.e. there exits no $w$ such that $y_iw^Tx_i > 0$ for all i. 
+Assume further that the optimization problem \ref{relaxed_objective} has got a solution. 
+Then the Soft Margin Rosenblatt Algorithm converges for $0 < C < 1$.
+
+\subsubsection*{Proof:}
+We define $\hat x = [x^T 1]$ and $\hat \alpha := [ \alpha b ]$ and instead of $\hat x$ and $\hat \alpha$ we write $x$ and $\alpha$ again for convenience.
+The restriction in \ref{relaxed_objective} now reads $y_i \alpha^T x_i + \xi_i -1 \geq 0$.
+
+Let $\gamma := \min_i \{y_i \alpha^T x_i + \xi_i -1\} \geq 0$ and let $w \in \R^{d+1}$, $\norm w = 1$, and $\phi \in \R^m$ be solutions to the optimization problem above.
+
+First, have a look at how the inaccuracy $\xi$ develops during the iteration:
+\ba
+\norm{\xi^{(k+1)}}_\infty 
+&= \norm{\xi^{(k)} - C\xi^{(k)} + 1_{i \in \sM} + 1_{\xi_i < 0} }_\infty 
+\leq |1-c| \norm{\xi^{(k)}}_\infty + 2 \\
+&\leq |1-c|^n \norm{\xi^{(0)}}_\infty  + 2\sum_{l=0}^n |1-c|^l
+\leq \frac{2}{C} 
+\ea
+using an induction argument and the geometric series.
+We know that there is $u$ with $\norm u_2 = 1$ such that $y_i (u^T x_i) + \phi_i - 1 \geq \gamma$ for all i.
+This result can then be applied in order to obtain an estimation for the inner product of the weight vector in iteration $(k)$ with the optimal weight vector:
+\ba
+u^T\alpha^{(k+1)} 
+&\geq u^T\alpha^{(k)} + y_i u^Tx_i 
+\geq u^T\alpha^{(k)} + \gamma + 1 - \xi_i \\
+&\geq u^T\alpha^{(k)} + \gamma +1 - \frac{2}{C} 
+\geq n [\gamma + 1 - \frac{2}{C}].
+\ea
+Now assume the $(k+1)$-th step after a the misclassification has been made on a sample $(x_i, y_i)$. This means that $y_i (\alpha^{(k)})^Tx_i + \xi^{(k)}_i - 1 < 0$ and we get for the new weight vector:
+\ba
+\norm{\alpha^{(k+1)}}^2 
+&= \norm{\alpha^{(k)}}^2 + |y_i|\norm{x_i}^2 + 2 y_i (\alpha^{(k)})^T x_i 
+\leq \norm{\alpha^{(k)}}^2 + D^2 + 2 - 2\xi_i \\
+&\leq \norm{\alpha^{(k)}} + D^2 + 2
+\leq n [D^2 + 2].
+\ea
+
+Using the Cauchy-Schwarz-Inequality, we obtain
+\ba
+&n [\gamma + 1 - \frac{2}{C}]
+\leq u^T\alpha^{(k+1)}
+\leq \norm{\alpha^{(k+1)}} 
+\leq \sqrt n \sqrt{D^2 + 2} \\
+\Leftrightarrow \;\;
+& n \leq \frac{D^2 + 2}{\left(\gamma + 1 - \frac{2}{C}\right)^2}.
+\ea
+For convergence, we need to show that $\gamma < \frac{2}{C} - 1 $. Assume the opposite was true and $\gamma = \frac 2 C - 1 + \varepsilon$ for $\varepsilon > 0$. Then:
+\ba
+& y_i w^Tx_i + \frac{2}{C} - 1 \geq y_i w^Tx_i + \phi_i - 1\geq \gamma = \frac{2}{C} - 1 + \varepsilon \\
+\Leftrightarrow \; & y_i w^Tx_i \geq \varepsilon \;\, \forall i \, \forall \varepsilon > 0
+\ea
+Even in the limit as $\varepsilon$ approaches zero, this is a contradiction to the non-separability of the sets. Therefore $\gamma <  \frac{2}{C} $ and $n < \infty$.
+
+\hfill q.e.d.
+
+
+\newpage
+
+Proof:\\
+Assume in the k-th step that there is a $x_i$ such that $1 -  \xi_i - y_i( \dbr{\alpha^{(k)}}{x_i} + b^{(k)}) > 0$:
+\ba
+\norm{\alpha^{(k+1)}}^2 
+&= (1-\eta C)\norm{\alpha^{(k)}}^2 + 2 \eta \lambda_i y_i \dbr{\alpha^{(k)}}{x_i} + \eta^2 \lambda_i^2 y_i^2 \norm{x_i}^2 \\
+& \leq \norm{\alpha^{(k)}}^2 + 2 \eta \lambda_i y_i \dbr{\alpha^{(k)}}{x_i} + \eta^2 \lambda_i^2 y_i^2 D^2 
+\\
+[b^{(k+1)}]^2 
+&= [b^{(k)}]^2 + 2 \tau b^{(k)} \lambda_i y_i + \tau^2\lambda_i^2 y_i^2 
+\\
+\norm{\xi^{(k+1)}}^2 
+&= \norm{\xi^{(k)}}^2 + 2 \nu \lambda^T \xi^{(k)} + 2 \nu \mu^T \xi^{(k)} - 2 \sC \nu \norm{\xi^{(k)}}_1 + \nu^2 (\sC - \lambda_i - \mu_i )^2 \\
+\ea
+Therefore, assuming that $\eta = \nu = \tau$:
+\ba
+\norm{\alpha^{(k+1)}}^2 + [b^{(k+1)}]^2 + \norm{\xi^{(k+1)}}^2
+= \\
+\norm{\alpha^{(k)}}^2 + [b^{(k)}]^2 + \norm{\xi^{(k)}}^2
+&+
+2 \eta \left[\lambda_i y_i \dbr{\alpha^{(k)}}{x_i} + \lambda_i y_i b^{(k)} + \lambda^T \xi^{(k)} \right] - 2 \sC \nu \norm{\xi^{(k)}}_1 \\
+&+ \eta^2 (\lambda_i^2 y_i^2 \norm{x_i}^2 + \lambda_i^2 y_i^2 + (\sC - \lambda_i - \mu_i )^2) + 2 \nu \mu^T \xi^{(k)} 
+\ea
+Now we know that we have a misclassification. Thus:
+\ba
+2 \eta \left[\lambda_i y_i \dbr{\alpha^{(k)}}{x_i} + \lambda_i y_i b^{(k)} + \lambda^T \xi^{(k)} \right] - 2 \sC \nu \norm{\xi^{(k)}}_1 \leq 2 \eta \norm{\lambda}_\infty
+\ea
+We now apply the indoction hypothesis and we get:
+\ba
+\norm{\alpha^{(k+1)}}^2 + [b^{(k+1)}]^2 + \norm{\xi^{(k+1)}}^2
+\leq 
+(k+1) \left[ 2\eta \norm{\lambda}_\infty + \eta^2 (\lambda_i^2 \norm{x_i}^2 + \lambda_i^2 + (\sC - \lambda_i - \mu_i )^2) + \eta \norm{\mu}_\infty D \right]
+\ea
+Now we can use this for the following:
+\ba
+\left(
+\begin{pmatrix} \alpha^{(k+1)} \\ b^{(k+1)} \\ \xi^{(k+1)} \end{pmatrix}^T
+\begin{pmatrix} u  \\ d \\ \psi \end{pmatrix} 
+\right)^2
+&\leq
+\norm{\begin{pmatrix} \alpha^{(k+1)} \\ b^{(k+1)} \\ \xi^{(k+1)} \end{pmatrix}}^2
+\norm{\begin{pmatrix} u  \\ d \\ \psi \end{pmatrix}}^2
+\leq
+\norm{\begin{pmatrix} \alpha^{(k+1)} \\ b^{(k+1)} \\ \xi^{(k+1)} \end{pmatrix}}^2 (1+d^2 + \norm{\psi}_2^2) \\
+&=
+ \left[\norm{\alpha^{(k+1)}}^2 + [b^{(k+1)}]^2 + \norm{\xi^{(k+1)}}^2 \right] (1+d^2 + \norm{\psi}_2^2)
+\ea
+And thus:
+\ba
+\begin{pmatrix} \alpha^{(k+1)} \\ b^{(k+1)} \\ \xi^{(k+1)} \end{pmatrix}^T
+\begin{pmatrix} u  \\ d \\ \psi \end{pmatrix} 
+\leq 
+\sqrt{1+d^2 + \norm{\psi}_2^2} \sqrt{k+1} \left[ 2\eta \norm{\lambda}_\infty + \eta^2 (\norm{\lambda}_2 (D^2 + 1) + (\sC - \lambda_i - \mu_i )^2) + \eta \norm{\mu}_\infty D \right]^{\half 1}
+\ea
+
+On the other hand we know that $1 -  \xi_i - y_i( \dbr{\alpha^{(k)}}{x_i} + b^{(k)}) \leq -\gamma$ for some $\gamma > 0$:
+\ba
+\begin{pmatrix} \alpha^{(k+1)} \\ b^{(k+1)} \\ \xi^{(k+1)} \end{pmatrix}^T
+\begin{pmatrix} u  \\ d \\ \psi \end{pmatrix} 
+&= u^T \alpha^{(k+1)} + d b^{(k+1)} + \psi^T\xi^{(k+1)} \\
+&= 
+(1-\eta C) u^T\alpha^{(k)} + \eta \lambda_i y_i u^T x_i + d b^{(k)} + \eta \lambda_i y_i d + \psi^T\xi^{(k)} + \eta(\psi^T\lambda + \psi^T\mu - \sC \sum_i^m \psi_i) \\
+&\geq 
+u^T\alpha^{(k)} + d b^{(k)} + \psi^T\xi^{(k)} + \eta \lambda_i (1+\gamma) + \eta(\psi^T\mu - \sC \norm{\psi}_1) - \eta Cu^T\alpha^{(k)} \\
+&\geq 
+u^T\alpha^{(k)} + d b^{(k)} + \psi^T\xi^{(k)} + \eta \lambda_i (1+\gamma) + \eta(\psi^T\mu - \sC \norm{\psi}_1) - \eta Cu^T\alpha^{(k)} 
+\ea

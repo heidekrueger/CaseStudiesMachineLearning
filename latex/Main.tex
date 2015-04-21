@@ -1,0 +1,88 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Art des Dokuments
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[oneside,a4paper]{article}
+%\documentclass[12pt,a4paper,twoside,ngerman]{book}
+%\documentclass[12pt,oneside,a4paper]{scrartcl}
+%\documentclass[10pt, a4paper, landscape]{letter}
+%\documentclass[11pt,a4paper]{article}
+%\documentclass[12pt,a4paper]{dissertation}
+%\documentclass[t]{beamer}
+
+\include{struct/header}
+\include{struct/math}
+\setlength{\parindent}{0mm}
+\setlength{\parskip}{0mm }
+\newcommand{\TITEL}{Case Studies: Nonlinear Optimization}
+\title{\TITEL}
+\author{Fin, Stan, Stefan, Jakob, Roland }
+\newcommand{\TODO}{(TODOOOOOOOOOOOOOOOOO)}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+\newpage
+\tableofcontents
+\thispagestyle{empty}
+\newpage
+\setcounter{page}{1}
+
+\chapter{Notation}
+
+Math environment in aligned mode:
+\ba
+f(x) &= x \\
+	 &= e^{\log(x)}
+\ea The numbered versions of this is
+\ban
+\label{example:1}
+f(x) &= x \nonumber \\
+	 &= e^{\log(x)}
+\ean
+Citations work this way: \eqref{example:1}
+
+
+
+\chapter{Preprocessing}
+\label{Preprocessing}
+\input{tex/Preprocessing}
+	\section{Optimal Feature Transform}
+	\label{OFT}
+	We want to consider feature transforms $\Phi$ which operate on the digital signal $f$. The resulting feature vector $c = \Phi f$ is later used for classification.
+	
+	One of the aims in this section is to find an optimal feature transform. This can be a very challenging task, however. 
+	Therefore we first consider feature transforms which reduce the dimension of the feature space by projection on one or more axes, which is also called Linear Discriminant Analysis.
+		\label{LDA}
+		\input{tex/LDA}
+
+%% Referenzen
+%\nocite{*} % weiß nicht mehr wofür
+%\bibliography{Main}
+%\bibliography{LMain}
+%\bibliographystyle{plainnat} % das ist die style datei
+%\bibliographystyle{struct/alphadin}
+%Beispiel
+\newpage
+
+\appendix
+\pagenumbering{roman}
+\section{Appendix}
+\label{Appendix}
+\input{tex/Appendix}
+\newpage
+
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+

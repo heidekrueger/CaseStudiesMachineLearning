@@ -1,0 +1,51 @@
+
+
+\section{PCA}
+Input: A set of $K$ vectors $X_i \in \R^n$, $i \in \{1,\dots K\}$ with is normalized, i.e. \ba \frac{1}{ K} \sum_{i = 1}^K X_i = 0.\ea
+Task: Find a linear orthogonal transformation $\Phi : \R^n -> \R^m$ such that the spread of the features $\Phi X_i$ around the zero mean is maximized:
+\ba
+\max \left\{ \sum_{i=1}^K  \norm{\Phi X_i} - \sum_{k=1}^m \lambda_k (\norm{\phi_k}_2 - 1) \right\}
+\ea
+where $\norm \Phi_2$ is the Frobenius norm. The first part in the objective function is the spread of the transformed features, the second part poses a boundary condition on the length of the matrix vectors.
+
+We can rearrange the first part:
+\ba
+\sum_{i=1}^K \norm{\Phi X_i} 
+&= \sum_{i=1}^K X_i^T \Phi^T \Phi X_i 
+= \sum_{i=1}^K X_i^T \left( \sum_{k=1}^m \phi_k \phi_k^T \right) X_i \\
+&= \sum_{k=1}^m \phi_k^T \left( \sum_{i=1}^K X_i X_i^T \right) \phi_k 
+=:  \sum_{k=1}^m \phi_k^T \Sigma \phi_k 
+\ea
+with $\Sigma = \sum_{i=1}^K X_i X_i^T$, $K$-times the covariance matrix.
+
+At the maximum point we have that the derivitives with repect to $\phi$ are zero, i.e. for all k between 1 and M
+\ba
+&\frac{\partial}{\partial \phi_k} \sum_{k=1}^m \phi_k^T \Sigma \phi_k - \lambda_k( \norm{\phi_k}_2 - 1 ) = 0 \\
+& \Leftrightarrow 2 \Sigma \phi_k - 2 \lambda_k \phi_k = 0 \\
+& \Leftrightarrow \Sigma \phi_k = \lambda_k \phi_k 
+\ea
+
+\subsection*{PCA}
+\begin{enumerate}
+\item Normalize the data to zero mean.
+\item Compute the covariance matrix $\Sigma$ of $\{X_i\}_{i=1}^K$.
+\item Determine the eigenvalues and eigenvectors of $\Sigma$ using SVD
+\item Order the eigenvalues and eigenvectors in descending order.
+\item The higher the eingenvalue, the more important is the eigenface.
+\item For classification represent an normalized image as a linear combination of eigenvectors.
+\item Use the weights as feature vectors for classification.
+\item Use any classification algorithm to learn.
+\end{enumerate}
+
+\section{LDA}
+Let N be the number of classes and m be total number of feature vectors available. Then we define the absolute inter-class-distance and the absolute intra-class-distance as follows:
+\ba
+\Sigma_\text{inter} = \sum_k^N \sum_{l\neq k}^N \sum_i^m \sum_j^m \norm{c_i^k - c_j^l}^2 
+,\;\;\;
+\Sigma_\text{intra} = \sum_k^N \sum_i^m \sum_j^m \norm{c_i^k - c_j^k}^2 
+\ea
+
+\textbf{Rayleigh Quotient}
+\ba
+a^* = \argmax_a \frac{a^T \Sigma_\text{inter} a}{a^T \Sigma_\text{intra} a}
+\ea

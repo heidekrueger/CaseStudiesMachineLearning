@@ -1,0 +1,33 @@
+@article{Gorricha,
+  author = "Jorge M. L. Gorricha and Victor J. A. S. Lobo",
+  year = "Year ?",
+  title = "On the use of Three-dimensional Self-Organizing Maps for Visualizing Clusters in Geo-referenced Data",
+  publisher = "CINAV-Naval Research Center, Portuguese Naval Academy, and ISEGI-UNL"
+}
+
+@article{Vesanto,
+  author = {Juha Vesanto, Esa Alhoniemi},
+  year = "2000",
+  title = "Clustering of the Self-Organizing Map",
+  publisher = "IEEE Transactions on Neural Networks, Vol 11, No 3"
+}
+
+@online{Dickerson,
+  author = "Kyle Dickerson",
+  email = "kyle.dickerson@gmail.com",
+  year = "2008",
+  title = "sompy.py",
+  licence = "GNU GPL",
+  url = "https://github.com/kdickerson/Sompy"
+}
+@online{Chopra,
+  author = "Paras Chopra",
+  email = "paras1987@gmail.com",
+  title = "som.py",
+  url = "www.paraschopra.com"
+}
+@online{AIJunkie,
+	author = "AI-Junkie",
+	url = "http://www.ai-junkie.com/ann/som/som1.html",
+	access = "12.12.2013"
+}

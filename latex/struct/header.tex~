@@ -1,0 +1,327 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Fonts
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage[utf8]{inputenc} % Einlesen von Umlauten 
+\usepackage[T1]{fontenc} % Darstellung von Umlauten
+\usepackage[ngerman]{babel} % Silbentrennung
+\newcommand{\hide}[1]{  }
+
+\usepackage{hyperref}  % Referenzen
+\usepackage{natbib} 	% Zitieren
+\usepackage{ifthen} %% Fallunterscheidungen
+	%\ifthenelse{\equal{#1}{\empty}}{#then}{#else}
+	%\IfFileExists{file}{then-code}{else-code}
+	%\InputIfFileExists{file}{then-code}{else-code}
+
+
+%\usepackage{lmodern}
+%\usepackage{concrete}% fancy fonts
+%\usepackage{color} % for fancy section font and color
+%\allsectionsfont{\color{section_color}\sffamily\selectfont}
+%\usepackage{xcolor} % colour tricks ;)
+%\definecolor{section_color}{rgb}{0.35,0.0,0}
+%\usepackage{textcomp} % verschiedene Sonderzeichen, z.b. Euro
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Seitenformatierung
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\usepackage{layout}  % \layout
+%\usepackage{geometry} % page layout options
+%\usepackage[a4paper]{typearea} %\a6paper: DIN A6 (1051mm x 1481mm) 
+%\geometry{  
+%			head = 5mm, foot = 5mm, 
+%			landscape,
+%			papersize={74mm,52mm},
+%			text={60mm, 35mm},
+%			left=3cm,right=3cm,top=2cm,bottom=3cm,
+%			includeheadfoot
+%}
+%\usepackage{fancyhdr}
+%\fancyhead[LCR]{bsp} 
+%\fancyfoot[LCR]{bsp}
+%\renewcommand{\headrulewidth}{0.5pt}
+%\renewcommand{\footrulewidth}{0.5pt}
+%\fancyhf{} % clear all header and footer fields
+%\setlength{\textwidth}{15.5cm}
+%\setlength{\textheight}{23cm}
+%\setlength{\topmargin}{0cm}
+%\setlength{\oddsidemargin}{0.5cm}
+%\setlength{\evensidemargin}{0cm}
+%\setlength{\parskip}{1ex}
+%\setlength{\parindent}{0cm}
+%\setcounter{tocdepth}{4}
+%\setcounter{secnumdepth}{4}
+%\headheight16.0pt
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Textformatierung
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\usepackage{blindtext} % \blindtext
+%\usepackage{indentfirst} % indent
+%\setlength{\parskip}{0.3cm}
+%\setlength{\parindent}{5pt}
+% \renewcommand{\baselinestretch}{1.1}
+%\marginparwidth = 10pt
+%\footskip0mm
+%\hoffset-10mm
+%\voffset-5pt
+%\normalheading % Überschriftengröße auf zur Schriftgröße angepaßt
+%\usepackage{microtype} % für Blocksatz \flushright \flushleft
+%\clubpenalty = 10000 % Disable single lines at the start of a paragraph (Schusterjungen)
+%\widowpenalty = 10000 \displaywidowpenalty = 10000 % Disable single lines at the end of a paragraph (Hurenkinder)
+\usepackage{multicol} % Mehrere Spalten \begin{multicols}{2}  \end{multicols}
+%\usepackage{multirow}  % In Tabelle Zeilen zusammenfassen
+%\usepackage{multicolumn} % In Tabelle Spalten zusammenfassen
+%\usepackage{pdflscape}% landscape environment
+%\usepackage[square,numbers]{natbib}% fuer Zitate
+%\usepackage[babel,german=quotes]{csquotes}% fuer Zitate
+%\newcommand{\Banach}{\textsc{Banach}} % Kapitaelchen
+%\usepackage{longtable} % Mehrseitige Tabellen
+%\usepackage{tabularx} % Tabellen mit fester Gesamtbreite und variablen Spalten
+
+\hide{ 
+\renewcommand\cite[2][]{ \ifthenelse{\equal{#1}{\empty}}
+	{(\citeauthor{#2} \citeyear{#2})}
+	{(\citeauthor{#2} \citeyear{#2}, S. #1)}
+}
+\newcommand\fcite[2][]{\ifthenelse{\equal{#1}{\empty}}
+	{\footnote{\citeauthor{#2} \citeyear{#2}}.}
+	{\footnote{\citeauthor{#2} \citeyear{#2}, S. #1}.}
+}
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Innere Dokumentstruktur
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\usepackage[nottoc]{tocbibind}
+%\usepackage{tocloft} % Table of Contents
+%\setcounter{tocdepth}{5}  %  = Subparagraph
+%\setcounter{secnumdepth}{5} 
+%\renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}
+%\renewcommand{\theenumi}{\roman{enumi}} %% enumerate in i)
+%\newcommand{\romanno}[1]{\MakeUppercase{\romannumeral #1{}}} 
+%\newcommand{\romannom}[1]{\text{\MakeUppercase{\romannumeral #1{}}}} 
+%\usepackage{sectsty} % fancy section layouts -> google if needed
+%\usepackage[colorlinks=true, pdfborder={0 0 0}]{hyperref}
+%%%%%\usepackage{hyperref} 	% for internal referntial links
+%\hypersetup{
+%    unicode=false,          % non-Latin characters in Acrobats bookmarks
+%    pdfborder={0 0 0},       % border within links
+%    pdftoolbar=true,        % show Acrobats toolbar?
+%    pdfmenubar=true,        % show Acrobats menu?
+%    pdffitwindow=false,     % window fit to page when opened
+%    pdfstartview={FitH},    % fits the width of the page to the window
+%    pdftitle={\lectureName\ - \lectureProf},    % title
+%    pdfauthor={\authors},     % author
+%    pdfsubject={\lectureName},   % subject of the document
+%    pdfnewwindow=true,      % links in new window
+%    colorlinks=false,       % false: boxed links; true: colored links
+%    linkcolor=red,          % color of internal links
+%    citecolor=green,        % color of links to bibliography
+%    filecolor=magenta,      % color of file links
+%    urlcolor=cyan           % color of external links
+%    pagebackref=true        % activate back references inside bibliography
+%    bookmarksdepth=subsubsection %bookmarks are added to this depth
+%}
+% index generation: >> makeindex $NAME 
+%\usepackage{makeidx} %\index{example} \index{example!subentry} % \makeindex
+% 'list of notations' generation: >> makeindex $NAME.nlo -s nomencl.ist -o $NAME.nls
+%\usepackage[refpage]{nomencl}  % refer to the page where notation appears
+%\renewcommand{\nomname}{Nomenclature} % \makenomenclature
+%\renewcommand*{\pagedeclaration}[1]{\unskip\hfill\hyperpage{#1}} %\dotfill \nomenclature{Zeichen}{Erklärung}
+%\newcommand{\itemi}{\item[i)]}
+%\newcommand{\itemii}{\item[ii)]}
+%\newcommand{\itemiii}{\item[iii)]}
+%\newcommand{\itemiv}{\item[iv)]}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Matheumgebung
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{
+amsmath, % math environment 
+%amssymb, % Synbols 
+%stmaryrd, % Additional symbols
+dsfont, % For mathematical symbols
+%amsthm % %\newtheorem{name}{output}[derivation]
+}	
+%\usepackage[expert]{mathdesign} % additional fonts. e.g. \subseteq     
+%\usepackage{tikz} % TikZ ist kein Zeichenprogramm
+%\usetikzlibrary{calc,through,snakes,intersections}
+%\usepackage{listings} % For the usage of code
+%\lstset{numbers=left, numberstyle=\tiny, numbersep=5pt} \lstset{language=C}
+
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+\usepackage{listings}
+\usepackage{caption}
+\usepackage{upquote}
+\usepackage{xcolor}
+
+% This makes a gray box for the caption, with white text.
+\DeclareCaptionFont{white}{\color{white}}
+\DeclareCaptionFormat{listing}{\colorbox{gray}{\parbox{\textwidth}{#1#2#3}}}
+\captionsetup[lstlisting]{format=listing,labelfont=white,textfont=white}
+
+\lstset{
+language=Python,
+keywordstyle=\bfseries\ttfamily\color[rgb]{0,0,1},
+identifierstyle=\ttfamily,
+commentstyle=\color[rgb]{0.133,0.545,0.133},
+stringstyle=\ttfamily\color[rgb]{0.627,0.126,0.941},
+showstringspaces=false,
+basicstyle=\small,
+numberstyle=\footnotesize,
+numbers=left,
+stepnumber=1,
+numbersep=10pt,
+tabsize=2,
+breaklines=true,
+prebreak = \raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
+breakatwhitespace=false,
+aboveskip={1.5\baselineskip},
+columns=fixed,
+upquote=true,
+extendedchars=true,
+frame=bottomline,
+inputencoding=utf8
+}
+% % % %\lstinputlisting[language=Python, label=samplecode,caption=Example for code from a file]{ filename.py or text}
+%\usepackage{gnuplottex}
+%\begin{gnuplot}
+%set term epslatex color oldstyle rounded solid size 7cm,5cm
+% ... gnuplot-Befehle
+%\end{gnuplot}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%Bilder
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\usepackage{epsfig,bm,epsf,float} % Eps-Dateien
+%\usepackage[hang,small,bf]{caption}
+%\usepackage{subfigure, subcaption}
+%\usepackage[pdftex,dvips]{graphicx}
+%\pdfcompresslevel=9
+%\begin{figure}[thbp] % top head bottom page
+%	\centering
+%	\includegraphics[width=4cm,height=4cm,scale=0.5,bb= 0 0 100 100]{bild}
+%	\caption{Das hier ist ein 3D plot}
+%	\label{fig:figlabel
+%\end{figure}
+%\usepackage{floatflt} % Von Text umflossenes Bild
+%\begin{floatingfigure}[r]{breite}
+%    \centering
+%    \includegraphics{graphik.pdf}
+%    \caption{Bildunterschrift}
+%    \label{fig:figlabel}
+%\end{floatingfigure}
+%\usepackage{pdfpages} % Einbinden von Pdf-Dateien
+%\usepackage{eso-pic} % ShipOutPicture
+% \ClearShipoutPicture
+% \AddToShipoutPicture{
+%		\put(180,10){
+%			 \parbox[b][\paperheight]{\paperwidth}{%
+%			   bsp
+%	} } }
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Sonstiges
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\setbeamertemplate{footline}[frame number]%Seitenzahl in Fußnote
+%\newcommand{\blankpage}{% Leerseite ohne Seitennummer, nächste Seite rechts
+% \clearpage{\pagestyle{empty}\cleardoublepage}
+%}
+%\newcommand{\sub}[1]{\mbox{$_{\scriptstyle \rm #1}$}}
+%\newcommand{\super}[1]{\mbox{$^{\scriptstyle \rm #1}$}}
+%\renewcommand{\labelenumi}{\alph{enumi})}
+%\newcommand{\grad}{\ensuremath{^\circ}}
+% Kommentare
+% Align Umgebung
+\def\ba#1\ea{\begin{align*}#1\end{align*}}
+\def\ban#1\ean{\begin{align}#1\end{align}}
+\numberwithin{equation}{section} % reset numbering in each section
+% Theoreom-Umgebung
+%\newtheorem{dfn}{Definition}[subsection]
+%\newtheorem{thm}[dfn]{Theorem}
+%\newtheorem{lem}[dfn]{Lemma}
+%\newtheorem{dfnlem}[dfn]{Definition und Lemma}
+%\newtheorem{cor}[dfn]{Corollary}
+%\newtheorem{eg}[dfn]{Beispiel}
+%\newtheorem{note}[dfn]{Anmerkung:}
+%\def\bthm#1\ethm{\begin{thm}#1\end{thm}}
+%\renewcommand{\proof}{\textbf{Beweis: }}
+%\renewcommand{\qedsymbol}{q.e.d.}  % \boxempty  % stmaryd
+%\newcommand{\theorem} [1] {\begin{thm} [#1] 	\end{thm}  }
+% Bild einfügen
+%\newcommand{\img}[3]{
+%	\begin{figure}[!htbp]
+%		\centering
+%		\includegraphics[]{#3}
+%		\caption{#1}
+%		\label{#2}
+%	\end{figure}
+%}
+%% linear functional analysis
+%\newcommand{\vectorz}[2]{\begin{pmatrix}	#1\\	#2\end{pmatrix}}
+%\newcommand{\vectort}[3]{\begin{pmatrix}	#1\\	#2\\	#3\end{pmatrix}}
+%scalar product
+%\newcommand{\skp}[2]{\left( #1, #2 \right)}
+\newcommand{\dbr}[2]{\langle #1, #2 \rangle}
+%absolute value
+%\newcommand{\abs}[2][\empty]{\ifthenelse{\equal{#1}{\empty}}{\left| #2 \right|}{\left| #2 \right|_{#1}}}
+%norm
+\newcommand{\norm}[2][\empty]{\ifthenelse{\equal{#1}{\empty}}{\left\| #2 \right\|}{\left\| #2 \right\|_{#1}}}
+% math. Abkürzungen
+\newcommand{\C}{\mathds{C}}   	\newcommand{\K}{\mathds{K}}
+\newcommand{\R}{\mathds{R}}   	\newcommand{\N}{\mathds{N}}
+\newcommand{\Q}{\mathds{Q}}   	\newcommand{\Z}{\mathds{Z}}
+\newcommand{\sB}{\mathcal{B}} 	\newcommand{\sC}{\mathcal{C}}
+\newcommand{\sK}{\mathcal{K}} 	\newcommand{\sR}{\mathcal{R}}
+\newcommand{\sN}{\mathcal{N}} 	\newcommand{\sA}{\mathcal{A}}
+\newcommand{\sP}{\mathcal{P}} 	\newcommand{\sI}{\mathcal{I}}
+\newcommand{\sL}{\mathcal{L}} 	\newcommand{\sO}{\mathcal{O}}
+\newcommand{\sS}{\mathcal{S}} 	\newcommand{\sSs}{\mathcal{s}}
+\newcommand{\pt}{\partial}		\renewcommand{\epsilon}{\varepsilon}
+\newcommand{\dx}{\text{dx}} 	 	\newcommand{\ds}{\text{ds}}
+\newcommand{\dt}{\text{dt}}	 	\newcommand{\dy}{\text{dy}}
+\newcommand{\ifft}{\text{if and only if }}
+%\renewcommand{\qed}{\hfill \square}
+\newcommand{\half}[1]{\frac{#1}{2}}	%\newcommand{\over}[1]{\frac{1}{#1}}
+\newcommand{\One}{\mathds{1}}
+\newcommand{\weak}{\rightharpoonup}
+\newcommand{\weaks}{\stackrel{*}{\rightharpoonup}}
+
+\newcommand{\argmax}{\operatorname*{arg\,max}}
+\newcommand{\argmin}{\operatorname*{arg\,min}}
+\newcommand{\myarray}[1]{\begin{pmatrix} #1 \end{pmatrix}}
+
+
+%% plots
+%\input{Plots/plotsetup}
+%\newcommand{\epsilonval}{1}
+
+
+
+
+
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%CheckerHeader%%%%%%%%%%%%%%%%55
+%\usepackage{delarray}
+%\usepackage[babel,german=quotes]{csquotes}
+
+%\usepackage{placeins}
+%\usepackage{esint}
+%\usepackage{bibgerm}
+
+%\usepackage[numbers]{natbib} 
+%\def\btxandlong{und}
+
+% optischer Randausgleich, Verbesserung des Kernels ...
+%\usepackage{microtype}
+% Verschiedene Bug-Fixes
+%\usepackage{mparhack}
+% Fixt verschiedene Darstellungen, z.B. dass unnummerierte Kapitel 
+% mit hyperref die korrekten Sprungmarken bekommen
+%\usepackage[listings=false]{scrhack}
+% Bookmarks im pdf+
+
+

@@ -1,0 +1,202 @@
+
+\newpage
+
+\section*{Soft Margin Rosenblatt's Perceptron}
+
+We start out with the relaxed version of the Support Vector Machine Problem
+\ban
+\argmin_{\alpha,\,b,\,\xi} \half C \norm\alpha_2^2 + \sC \norm\xi_1 &\\
+\text{s.t. } 1  - \xi_i - y_i \left( \alpha^Tx_i+ b \right) &\leq 0 \nonumber\\
+-\xi_i &\leq 0\nonumber
+\ean
+with $C, \sC \geq 0$.
+Using the Lagrange function
+\ba
+\sL(\alpha, b, \xi, \lambda, \mu) 
+= \half C \norm \alpha_2^2 
++ \sC \norm\xi_1
++ \sum\limits_i \lambda_i \left(1 - \xi_i - y_i \left( \alpha^Tx_i + b \right) \right)
+- \mu^T \xi
+\ea
+we formulate the dual problem as
+\ban \label{relaxed_objective}
+\argmax_{\lambda, \mu} \left\{ \argmin_{\alpha,\,b,\,\xi} \sL(\alpha, b, \xi, \lambda, \mu) \right\} \\
+\sum\limits_i \lambda_i \left(1 - \xi_i - y_i \left( \alpha^Tx_i + b \right) \right) & = 0\nonumber \\
+\text{s.t. } -\xi_i &\leq 0 \nonumber\\
+-\lambda_i &\leq 0\nonumber
+\ean
+
+In order to solve this problem we aim for an stochastic gradient descent algorithm using the derivitive of $\sL(\alpha, b, \xi, \lambda, \mu)$ with respect to $\alpha, b$ and $\xi$. What we also want is to apply it in an online learning fashion. 
+For this reason assume that in iteration $k$ there is a misclassified sample $x_i$ with $1 -  \xi_i - y_i( \dbr{\alpha^{(k)}}{x_i} + b^{(k)}) > 0$. We choose to name this $i = i(k)$ and we update only with respect to this one sample.
+This can be achieved by defining the following conditions for $\lambda$ and $\mu$:
+\ba
+\lambda_i^{(k)} = 
+\begin{cases} 
+\tilde\lambda & \mbox{, if } i = i(k) \\
+0 & \mbox{, otherwise}
+\end{cases}
+\;\;\text{ and  }\;\;
+\mu_i^{(k)} = 
+\begin{cases} 
+\tilde\mu &\mbox{, if } \xi_i < 0 \\
+0 & \mbox{, otherwise. }
+\end{cases}
+\ea
+
+These definitions of $\lambda_i^{(k)}$ and $\mu_i^{(k)}$ also assure that the complementary slackness condition is fulfilled for all samples but $i(k)$.
+
+This leaves us with the following update rules for $ k \geq 0 $ using the relaxation coefficients $\eta > 0$ and starting values $\alpha^{(0)} = b^{(0)} = \xi^{(0)} = 0$:
+
+\ban
+\alpha^{(k+1)} 
+&= [1-C\eta] \alpha^{(k)} + \eta \tilde\lambda \, y_i x_i \\
+b^{(k+1)} &= b^{(k)} + \eta \tilde\lambda y_i  \\
+\xi^{(k+1)} &= \xi^{(k)} - \eta \left( \sC \mathbf{1} - \lambda^{(k)} - \mu^{(k)} \right)
+\ean
+
+\newpage
+
+\subsection*{Lemma}
+
+If $\norm{x_i} \leq D$ for all $i$ and $C \eta < 1$, then from the above update rule, one gets $\norm{\alpha^{(k)}} \leq \frac{1 - [1 - C \eta]^k}{C} \, \tilde\lambda \, D \leq \frac{\tilde\lambda \, D}{C}$ for all k. \\
+
+\subsubsection*{Proof:}
+
+Take any $x_i = x_{i(k)}$ and assume it is misclassified in the $i(k)$th step. We use the Cauchy-Schwartz-inequality in order to obtain for the update
+$k= 2$:
+\ba
+\norm{\alpha^{(2)}} &\leq [1 - C \eta] \norm{\alpha^{(1)}} + \eta \tilde\lambda \norm{x_i} 
+\leq [1 - C \eta] \left( [1 - C \eta] \norm{\alpha^{(0)}} + \eta \tilde\lambda D \right) + \eta \tilde\lambda D \\
+& = [1 - C \eta] \eta \tilde\lambda D + \eta \tilde\lambda D 
+= [2 - C \eta] \eta \tilde\lambda D 
+= \frac{1 - [1 - C \eta]^2}{1 - [1 - C \eta]} \eta \tilde\lambda D \\
+&= \frac{1 - [1 - C \eta]^2}{C} \tilde\lambda D \leq \frac{ \tilde\lambda D}{C}
+\ea
+since $\alpha^{(0)} = 0$. Now assume the assertion is true for all $l \leq k-1$. Then for $l = k$ we get:
+\ba
+\norm{\alpha^{(k)}} 
+&\leq [1 - C \eta] \norm{\alpha^{(k-1)}} + \eta \tilde\lambda \norm{x_i} \leq [1 - C \eta]\frac{1 - [1 - C \eta]^{k-1}}{1 - [1 - C\eta]} \, \eta \tilde\lambda \, D  \\
+&\leq [1 - C \eta] \sum_{l = 0}^{k-1} [1-C\eta]^l \eta \tilde\lambda D + \eta \tilde\lambda D 
+= \sum_{l = 0}^{k} [1-C\eta]^l \eta \tilde\lambda D \\
+& = \frac{1 - [1 - C \eta]^k}{C} \, \tilde\lambda \, D \leq \frac{\tilde\lambda \, D}{C}
+\ea
+q.e.d
+
+\subsection{Corollary}
+In the above setting we have $-y_i \dbr{\alpha^{(k)}}{x_i} \leq d \frac{\tilde\lambda \, D^2}{C}$ for all k.
+
+\subsubsection*{Proof:}
+From the above Lemma we know that $\norm{\alpha^{(k)}} \leq \frac{\tilde\lambda \, D}{C}$. We look at $- y_i \alpha_j x_{i,j} $ for each $j$. There are two cases: 
+
+$\alpha^{(k)}_j > 0$:
+Then $\alpha_j(- y_i x_{i,j}) \leq \alpha_j D \leq \frac{\tilde\lambda \, D^2}{C}$ because $ - y_i x_{i,j} \leq |x_{i,j}| \leq D$.
+
+If on the other hand $\alpha_j \leq 0$, then $-\alpha_j \geq 0$ and $\alpha_j(- y_i x_{i,j}) \leq -\alpha_j D \leq \frac{\tilde\lambda \, D^2}{C}$ because $ y_i x_{i,j} \leq |x_{i,j}| \leq D$ and $-\alpha_j \leq |\alpha_j| \leq \frac{\tilde\lambda \, D}{C}$.
+
+\subsection{Theorem}
+
+Let $1 < D := \max_i \norm{x_i}_2 < \infty$ and assume that the optimization problem \ref{relaxed_objective} has got a solution. 
+Then the Soft Margin Rosenblatt Algorithm converges for $0 < C < 1$.
+
+\subsubsection*{Proof:}
+
+\begin{itemize}
+\item[First Part]
+\end{itemize}
+Assume in the k-th step that there is a misclassification on $x_i$, $i = i(k)$ such that $1 -  \xi_i - y_i( \dbr{\alpha^{(k)}}{x_i} + b^{(k)}) > 0$. According to the update rule, we get the following norms for the coefficients $\alpha, b$ and $\xi$:
+\ba
+\norm{\alpha^{(k+1)}}^2 
+&= [1-\eta C]^2 \norm{\alpha^{(k)}}^2 + 2 [1 - \eta C] \eta \tilde\lambda y_i \dbr{\alpha^{(k)}}{x_i} + \eta^2 \tilde\lambda^2 y_i^2 \norm{x_i}^2 \\
+[b^{(k+1)}]^2 &= [b^{(k)}]^2 + 2 \eta b^{(k)} \tilde\lambda^ y_i + \eta^2 \tilde\lambda^2 y_i^2 \\
+\norm{\xi^{(k+1)}}^2 
+&= \norm{\xi^{(k)}}^2 + 2 \eta [\sC \mathbf{1} - \lambda - \mu]^T \xi^{(k)} + \eta^2 (\sC\sqrt d - \tilde\lambda - \tilde\mu )^2 \\
+\ea
+Using $y_i^2 = 1$, $\mu^T\xi = 0$ and $\eta C < 1$:
+\ba
+\norm{\alpha^{(k+1)}}^2 + [b^{(k+1)}]^2 + \norm{\xi^{(k+1)}}^2
+&\leq \norm{\alpha^{(k)}}^2 + [b^{(k)}]^2 + \norm{\xi^{(k)}}^2 \\
+&+
+2 \eta \left[\tilde\lambda y_i \dbr{\alpha^{(k)}}{x_i} + \tilde\lambda y_i b^{(k)} + \tilde\lambda \xi^{(k)}_i \right] \\
+&+ 2 \eta (\sC \sqrt d - C \tilde\lambda y_i \dbr{\alpha^{(k)}}{x_i}) \\
+&+ \eta^2 (\tilde\lambda^2 \norm{x_i}^2 + \tilde\lambda^2 + (\sC\sqrt d - \tilde\lambda - \tilde\mu )^2 )
+\ea
+Now we know that we have a misclassification. Thus:
+\ba
+2 \eta \left[\tilde\lambda y_i \dbr{\alpha^{(k)}}{x_i} + \tilde\lambda y_i b^{(k)} + \tilde\lambda \xi^{(k)}_i \right] 
+&\leq 2 \eta \tilde\lambda 
+\ea
+With the Corollary above we get $- C \tilde\lambda y_i \dbr{\alpha^{(k)}}{x_i}) \leq \tilde\lambda \, D^2$.
+Applying the indoction hypothesis and we get:
+\ba
+\norm{\alpha^{(k+1)}}^2 + [b^{(k+1)}]^2 + \norm{\xi^{(k+1)}}^2
+\leq 
+(k+1) s(\tilde\lambda, \tilde\mu, d, C, D, \sC, \eta)
+\ea
+using $s(\tilde\lambda, \tilde\mu, d, C, D, \sC, \eta) := 2 \eta [ \tilde\lambda + \sC \sqrt d + d \frac{\tilde\lambda \, D^2}{C}] 
++ \eta^2 [ \tilde\lambda^2 (D^2 + 1) + (\sC\sqrt d - \tilde\lambda - \tilde\mu )^2 ]$.
+
+
+\begin{itemize}
+\item[Second Part]
+\end{itemize}
+
+
+We know that for a solution $u,d,\phi$ of the optimization problem we know that $1 -  \phi_i - y_i( \dbr{u}{x_i} + d) \leq -\gamma$ for some $\gamma > 0$. Therefore:
+\ba
+\left( u^T \; d \; \psi^T \right)
+\begin{pmatrix} \alpha^{(k+1)} \\ b^{(k+1)} \\ \xi^{(k+1)}  \end{pmatrix} 
+&= 
+u^T\alpha^{(k)} + d b^{(k)}  + \psi^T\xi^{(k)} + \eta \tilde\lambda  [y_i u^T x_i + y_i d + \psi_i ] + \eta[ \psi^T\mu - \sC \sum_j^m \psi_j ] - \eta C u^T\alpha^{(k)}
+\ea
+With the feasibility, the Cauchy-Schwartz inequality:
+\ba
+\left( u^T \; d \; \psi^T \right)
+\begin{pmatrix} \alpha^{(k+1)} \\ b^{(k+1)} \\ \xi^{(k+1)}  \end{pmatrix} 
+& \geq
+u^T\alpha^{(k)} + d b^{(k)} + \psi^T\xi^{(k)} + \eta \tilde\lambda  [ 1 + \gamma ] + \eta \left[ \psi^T\mu - \sC \sum_j^m \psi_j - \tilde\lambda \, D \right]
+\ea
+Applying the induction hypothesis, we have
+\ba
+\left( u^T \; d \; \psi^T \right)
+\begin{pmatrix} \alpha^{(k+1)} \\ b^{(k+1)} \\ \xi^{(k+1)}  \end{pmatrix} 
+& \geq
+(k+1) \left\{ \eta \tilde\lambda  [ 1 + \gamma ] + \eta \left[ \psi^T\mu - \sC \sum_j^m \psi_j - \tilde\lambda \, D \right] \right\}
+\ea
+
+
+Now we can use this for the following:
+\ba
+\left|
+\begin{pmatrix} \alpha^{(k+1)} \\ b^{(k+1)} \\ \xi^{(k+1)} \end{pmatrix}^T
+\begin{pmatrix} u  \\ d \\ \psi \end{pmatrix} 
+\right|^2
+&\leq
+\norm{\begin{pmatrix} \alpha^{(k+1)} \\ b^{(k+1)} \\ \xi^{(k+1)} \end{pmatrix}}^2
+\norm{\begin{pmatrix} u  \\ d \\ \psi \end{pmatrix}}^2
+\leq
+\norm{\begin{pmatrix} \alpha^{(k+1)} \\ b^{(k+1)} \\ \xi^{(k+1)} \end{pmatrix}}^2 (1+d^2 + \norm{\psi}_2^2) \\
+&=
+ \left[\norm{\alpha^{(k+1)}}^2 + [b^{(k+1)}]^2 + \norm{\xi^{(k+1)}}^2 \right] (1+d^2 + \norm{\psi}_2^2) \\
+ &\leq (k+1) s(\tilde\lambda, \tilde\mu, d, C, D, \sC, \eta) (1+d^2 + \norm{\psi}_2^2)
+\ea
+
+\begin{itemize}
+\item[Final Part]
+\end{itemize}
+
+\ba
+(k+1)^2 \left\{ \eta \tilde\lambda  [ 1 + \gamma ] + \eta \left[ \psi^T\mu - \sC \sum_j^m \psi_j - \tilde\lambda \, D \right] \right\}^2
+&\leq \left|
+\begin{pmatrix} \alpha^{(k+1)} \\ b^{(k+1)} \\ \xi^{(k+1)} \end{pmatrix}^T
+\begin{pmatrix} u  \\ d \\ \psi \end{pmatrix} 
+\right|^2 \\
+&\leq 
+(k+1) s(\tilde\lambda, \tilde\mu, d, C, D, \sC, \eta) (1+d^2 + \norm{\psi}_2^2)
+\ea
+So:
+\ba
+(k+1) 
+&\leq 
+\frac{s(\tilde\lambda, \tilde\mu, d, C, D, \sC, \eta) (1+d^2 + \norm{\psi}_2^2)} {\eta \left\{ \tilde\lambda  [ 1 + \gamma - D] + \left[ \psi^T\mu - \sC \psi^T 1\right] \right\}^2}
+\ea
+So as long as $\gamma < D - 1$, we have $k < \infty$ and convergence.

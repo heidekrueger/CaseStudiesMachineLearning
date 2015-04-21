@@ -1,0 +1,23 @@
+
+%plot a function
+
+\begin{figure}
+	\begin{subfigure}[b]{.5\linewidth}
+		\centering
+
+		\begin{tikzpicture}[   domain = 0 : 1   , smooth, samples = 1000, xscale = 1, yscale = 1, scale = 8]
+			% setup xmin xmax ymin ymax
+			\plotsetup{0}{1}{0.9}{1.3}
+			%plots
+			\draw[thin, color=black] plot[id=name] function{1/(1-0.1*x)} 
+				node[right] {f};		
+			
+		\end{tikzpicture}
+
+		\caption{Some formula}
+
+	\end{subfigure}
+
+	\caption{a lot of pictures}
+\end{figure}
+

@@ -1,4 +1,11 @@
 
+
+###
+### COMPILATION
+###
+Simply type "make" in the linux terminal
+
+
 ###
 ### LATEX COMMANDS
 ###

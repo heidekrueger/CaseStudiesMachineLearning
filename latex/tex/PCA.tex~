@@ -1,0 +1,82 @@
+
+\subsection{Model}
+Suppose you are given a set of $K$ vectors $X_i \in \R^n$, $i \in \{1,\dots K\}$ with zero mean $\bar X = \frac{1}{ K} \sum_{i = 1}^K X_i = 0$. 
+The goal in PCA is to find a orthogonal normalized linear transformation $\Phi : \R^n \rightarrow \R^m$, $m \leq n$, such that the spread of the features $\Phi X_i$ is maximized. 
+\ba
+\max_{\Phi \in \R^{m \times n}} \sum_{i=1}^K \norm{\Phi X_i}_2^2 \;\; s.t. \norm{\phi_k}_2^2 \leq 1 \;\; (k = 1,\dots, m) 
+\ea
+where the $\phi_k \in \R^n$ are the columns of $\Phi = [\phi_1, \phi_2,\dots \phi_m]$. Using the Lagrange Formulation of this optimization problem we get
+\ban
+\label{PCA:objective}
+\max_{\Phi \in \R^{m \times n}} \left\{ \sum_{i=1}^K  \norm{\Phi X_i}_2^2 - \sum_{k=1}^m \lambda_k (\norm{\phi_k}_2^2 - 1) \right\}
+\ean
+for $\lambda_k \in \R$. The first part represents the spread of the transformed features, the second part poses a boundary condition on the length of the matrix vectors.
+
+\subsection{Reformulation}
+We can rearrange the first part in the objective function \eqref{PCA:objective}:
+\ba
+\sum_{i=1}^K \norm{\Phi X_i}^2
+&= \sum_{i=1}^K X_i^T \Phi^T \Phi X_i 
+= \sum_{i=1}^K X_i^T \left( \sum_{k=1}^m \phi_k \phi_k^T \right) X_i \\
+&= \sum_{k=1}^m \phi_k^T \left( \sum_{i=1}^K X_i X_i^T \right) \phi_k 
+=:  \sum_{k=1}^m \phi_k^T \Sigma \phi_k 
+\ea
+with $\Sigma = \sum_{i=1}^K X_i X_i^T$, which is $K$-times the covariance matrix.
+At the maximum point we have that the first derivitive $D\phi$ of $\Phi$ is zero, and in particular for all $k = 1, \dots M$ the gradients the columns of $D \Phi$ are zero:
+\ba
+&\nabla \phi_k^T \Sigma \phi_k - \nabla \lambda_k( \phi_k^T\phi_k - 1 ) = 0 \\
+& \Leftrightarrow 2 \Sigma \phi_k - 2 \lambda_k \phi_k = 0 \\
+& \Leftrightarrow \Sigma \phi_k = \lambda_k \phi_k \;\;(k = 1,\dots m)
+\ea
+i.e. The solution to the PCA problem is the solution of the eigenvalue problem $\Sigma \phi_k = \lambda_k \phi_k$.
+
+\subsection{Solution of the eigenvalue problem}
+In order to solve the eigenvalue problem, we make use of the Principal Axis Theorem. Since the matrix $\Sigma$ is symmetric and real, there exists a orthogonal matrix $U \in \R^{n \times n}$ such that
+\ba
+\Sigma = U D U^T \text{,  with diagnonal matrix } D \text{ containing the eigenvalues of } \Sigma.
+\ea 
+Moreover, the orthogonal normal matrix $U^{-1} = U^T$ transformes any vector $ c \in \R^N $ into the basis of the eigenvectors of $\Sigma$.
+
+We can use the Singular Value Decomposition (SVD) in order to compute the Hauptachsentransfromation of $\Sigma$.
+
+, we get a basis of eigenvectors such that the eigenvalues are a set of ordered non-negative real numbers.
+\ba
+\Sigma &= U D U^T = \left(U D^{\half1} \right) \left(U D^{\half1} \right)^T \text{, and} \\
+\Sigma^{-1} &= \left(U D^{\half1} \right)^{-T} \left(U D^{\half1} \right)^{-1} = \left(D^{-\half1} U^T \right)^T \left(D^{-\half1} U^T \right) 
+\ea
+In other words: By multiplying each sample $\{X_i \in \R^N\}_{i=1}^M $ with the matrix $B := D^{-\half1} U^T$, we get a normalized set of vectors with zero mean and uniform covariance.
+
+\subsection{Solution to the PCA problem}
+
+Using the steps above we have now found a soulution to \eqref{PCA:objective} above in the special case where $m$ equals $n$. If we want to have $m < n$, according to the eigenvalue problem, we have to limit the number of eigenvectors we want to use. For this we order the eigenvalues and the column vectors of the matrix $U$ in descending order of the diagnonal entries of $D$.
+
+Then, we apply the transform $B = D^{-\half1} U^T$ to all the features $X_i$ and we only keep the top $m$ entries of the transformed vectors $ B X_i$.
+
+\subsection{Classification}
+
+For classification using PCA transformed feature vectors, it is necessary to transform the whole Dataset into the new basis of eigenvectors. Features which we want to classify will be transformed by subtracting the mean $\bar X$ from them, applying the transformation matrix $B$ and discard all entries with index larger than m.
+
+\subsection{Algorithm}
+\begin{enumerate}
+\item Normalize the data to zero mean.
+\item Compute the covariance matrix $\Sigma$ of $\{X_i\}_{i=1}^K$.
+\item Determine the eigenvalues and eigenvectors of $\Sigma$ using SVD
+\item Order the eigenvalues and eigenvectors in descending order.
+\item Save the transformation matrix $B = D^{-\half1} U^T$.
+\item For classification subtract $\bar X$ and transform using $B$.
+\item Use only the top $m$ entries of the transformed vectors.
+\item Use any classification algorithm for learning.
+\end{enumerate}
+
+\section{LDA}
+Let N be the number of classes and m be total number of feature vectors available. Then we define the absolute inter-class-distance and the absolute intra-class-distance as follows:
+\ba
+\Sigma_\text{inter} = \sum_k^N \sum_{l\neq k}^N \sum_i^m \sum_j^m \norm{c_i^k - c_j^l}^2 
+,\;\;\;
+\Sigma_\text{intra} = \sum_k^N \sum_i^m \sum_j^m \norm{c_i^k - c_j^k}^2 
+\ea
+
+\textbf{Rayleigh Quotient}
+\ba
+a^* = \argmax_a \frac{a^T \Sigma_\text{inter} a}{a^T \Sigma_\text{intra} a}
+\ea

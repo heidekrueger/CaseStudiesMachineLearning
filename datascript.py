@@ -25,6 +25,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
 lfw_people = fetch_lfw_people(min_faces_per_person=70, resize=0.4)
 
 # introspect the images arrays to find the shapes (for plotting)
+# nb of samples and, height/width (62/47)
 n_samples, h, w = lfw_people.images.shape
 
 # for machine learning we use the 2 data directly (as relative pixel
@@ -66,6 +67,7 @@ eigenfaces = pca.components_.reshape((n_components, h, w))
 
 print("Projecting the input data on the eigenfaces orthonormal basis")
 t0 = time()
+# Projection of the data set onto the orthogonals vectors obtained with PCA
 X_train_pca = pca.transform(X_train)
 X_test_pca = pca.transform(X_test)
 print("done in %0.3fs" % (time() - t0))
@@ -78,7 +80,13 @@ print("Fitting the classifier to the training set")
 t0 = time()
 param_grid = {'C': [1e3, 5e3, 1e4, 5e4, 1e5],
               'gamma': [0.0001, 0.0005, 0.001, 0.005, 0.01, 0.1], }
-clf = GridSearchCV(SVC(kernel='rbf', class_weight='auto'), param_grid)
+
+# Selecting the best set of parameters
+
+# Instatiation of the GridSearch
+clf = GridSearchCV(SVC(kernel='rbf', class_weight='auto', probability=True),
+                   param_grid)
+# Fitting the Gridsearch
 clf = clf.fit(X_train_pca, y_train)
 print("done in %0.3fs" % (time() - t0))
 print("Best estimator found by grid search:")
@@ -91,6 +99,8 @@ print(clf.best_estimator_)
 print("Predicting people's names on the test set")
 t0 = time()
 y_pred = clf.predict(X_test_pca)
+y_prob = clf.predict_proba(X_test_pca)
+print(y_prob.shape)
 print("done in %0.3fs" % (time() - t0))
 
 print(classification_report(y_test, y_pred, target_names=target_names))
@@ -129,4 +139,5 @@ plot_gallery(X_test, prediction_titles, h, w)
 eigenface_titles = ["eigenface %d" % i for i in range(eigenfaces.shape[0])]
 plot_gallery(eigenfaces, eigenface_titles, h, w)
 
+print(y_prob[0:5, :])
 plt.show()

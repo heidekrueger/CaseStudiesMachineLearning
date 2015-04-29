@@ -1,7 +1,8 @@
 # CaseStudiesMachineLearning
-Case Studies in NLO : Machine Learning Group
 
-This repository gathers :
-- Team schedules
-- Scripts used or writen
-- ...
+This repository gathers several sub rep :
+- Meeting Minutes
+- booth : material for the booth
+- latex : summary of theoretical presentations
+- papers : papers to read
+

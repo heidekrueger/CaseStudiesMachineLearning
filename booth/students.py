@@ -13,16 +13,16 @@ import Image
 def load_standardised_image( filename, width, height ):
 	
 	###
-	### Load Image
+	### Load Image in Greyscale
 	###
 
-	image = Image.open(filename)
+	image = Image.open(filename)#.convert('LA')
 
 	### 
 	### Scale Image
 	###
 
-	resied_image = image.resize((width, height), Image.ANTIALIAS)    # best down-sizing filter
+	resized_image = image.resize((width, height), Image.ANTIALIAS)    # best down-sizing filter
 
-	return resied_image
+	return resized_image
 	

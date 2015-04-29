@@ -47,10 +47,10 @@ for i in range(0, n_set):
         X[j + i * n_pts, :] = [x0[j], y0[j]]
         Y[j + i * n_pts] = i
 
-num_subsamples = int(0.1 * n_pts)
+
 
 sampled_indexes = [np.random.randint(0, X.shape[0])
-                   for i in range(num_subsamples)]
+                   for i in range(int(0.1 * n_pts))]
 
 X = np.asarray([X[i] for i in sampled_indexes])
 Y = np.asarray([Y[i] for i in sampled_indexes])

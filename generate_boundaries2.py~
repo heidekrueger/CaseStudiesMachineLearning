@@ -9,7 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 n_set = 4  # number of sets / classes
-n_pts = 20000  # number of points per class
+n_pts = 200  # number of points per class
 
 means = [[2, -2], [-5, 5], [3, 5], [-4, -4]]
 cov0 = [[1, 0], [0, 1]]
@@ -83,9 +83,10 @@ Y_plot = [Y, Y_sub, Y]
 for i, clf in enumerate((svc, svc_sub, svc_sub)):
     # Plot the decision boundary. For that, we will assign a color to each
     # point in the mesh [x_min, m_max]x[y_min, y_max].
-    plt.subplot(3, 1, i + 1)
-    plt.subplots_adjust(wspace=0.4, hspace=0.4)
+    #plt.subplot(1, 1, i + 1)
+    #plt.subplots_adjust(wspace=0.4, hspace=0.4)
 
+	fig = plt.figure()
     Z = clf.predict(np.c_[xx.ravel(), yy.ravel()])
 
     # Put the result into a color plot
@@ -101,5 +102,11 @@ for i, clf in enumerate((svc, svc_sub, svc_sub)):
     plt.xticks(())
     plt.yticks(())
     plt.title(titles[i])
+		
+    
+    #ax = fig.add_subplot(111)
+    #ax.imshow(data,interpolation='none')
+
+    fig.savefig('plot %d.eps' %i)
 
 plt.show()

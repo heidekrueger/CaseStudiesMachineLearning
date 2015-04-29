@@ -83,10 +83,11 @@ Y_plot = [Y, Y_sub, Y]
 for i, clf in enumerate((svc, svc_sub, svc_sub)):
     # Plot the decision boundary. For that, we will assign a color to each
     # point in the mesh [x_min, m_max]x[y_min, y_max].
-    plt.subplot(3, 1, i + 1)
-    plt.subplots_adjust(wspace=0.4, hspace=0.4)
+    #plt.subplot(1, 1, i + 1)
+    #plt.subplots_adjust(wspace=0.4, hspace=0.4)
 
     Z = clf.predict(np.c_[xx.ravel(), yy.ravel()])
+    fig = plt.figure()
 
     # Put the result into a color plot
     Z = Z.reshape(xx.shape)
@@ -101,5 +102,11 @@ for i, clf in enumerate((svc, svc_sub, svc_sub)):
     plt.xticks(())
     plt.yticks(())
     plt.title(titles[i])
+		
+    
+    #ax = fig.add_subplot(111)
+    #ax.imshow(data,interpolation='none')
+
+    fig.savefig('plot %d.eps' %i)
 
 plt.show()

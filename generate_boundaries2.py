@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 
 n_set = 4  # number of sets / classes
 n_pts = 200  # number of points per class
+colormap = plt.cm.winter
 
 means = [[2, -2], [-5, 5], [3, 5], [-4, -4]]
 cov0 = [[1, 0], [0, 1]]
@@ -18,7 +19,9 @@ cov2 = [[0, 1], [1, 0]]
 cov3 = [[2, 1], [1, 2]]
 
 cov = [cov0, cov1, cov2, cov3]
-colors = ['r', 'b', 'y', 'g']
+colors = []
+for i in range(1,5):
+    colors.append(colormap(i/4.0))
 
 x = []
 y = []
@@ -74,8 +77,8 @@ xx, yy = np.meshgrid(np.arange(x_min, x_max, h),
                      np.arange(y_min, y_max, h))
 
 # title for the plots
-titles = ['Whole data set',
-          'Subsampled data set',
+titles = ['Boundaries found by SVM: Whole data set',
+          'Boundaries found by SVM: Subsampled data set',
           'Comparison']
 
 X_plot = [X, X_sub, X]
@@ -91,12 +94,12 @@ for i, clf in enumerate((svc, svc_sub, svc_sub)):
 
     # Put the result into a color plot
     Z = Z.reshape(xx.shape)
-    plt.contourf(xx, yy, Z, cmap=plt.cm.Paired, alpha=0.8)
-    print( plt.cm.Paired 	)
+    plt.contourf(xx, yy, Z, cmap=colormap, alpha=0.8)
+    print( colormap 	)
     # Plot also the training points
-    plt.scatter(X_plot[i][:, 0], X_plot[i][:, 1], c=Y_plot[i], cmap=plt.cm.Paired)
-    plt.xlabel('Sepal length')
-    plt.ylabel('Sepal width')
+    plt.scatter(X_plot[i][:, 0], X_plot[i][:, 1], c=Y_plot[i], cmap=colormap)
+    plt.xlabel('Dimension 1')
+    plt.ylabel('Dimension 2')
     plt.xlim(xx.min(), xx.max())
     plt.ylim(yy.min(), yy.max())
     plt.xticks(())

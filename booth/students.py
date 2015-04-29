@@ -3,9 +3,6 @@ import os,sys
 
 import Image
 
-import glob
-import subprocess
-
 ##
 ## USAGE
 ##

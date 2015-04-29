@@ -29,8 +29,3 @@ def load_standardised_image( filename, width, height ):
 
 	return resied_image
 	
-#res.save("images/ANTIALIAS.jpg")
-#subprocess.call(['firefox', "images/ANTIALIAS.jpg"])
-
-
-

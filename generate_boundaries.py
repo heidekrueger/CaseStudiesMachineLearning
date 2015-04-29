@@ -22,6 +22,7 @@ colors = ['r', 'b', 'y', 'g']
 
 x = []
 y = []
+<<<<<<< HEAD
 
 for i in range(0, 4):
     m0 = means[i]
@@ -37,3 +38,37 @@ for i in range(0, 4):
 
 plt.show()
 
+=======
+x, y = np.random.multivariate_normal(means[0], cov0, 500).T
+
+
+from matplotlib.markers import MarkerStyle
+
+marker = MarkerStyle(marker=None, fillstyle=u'full')
+Bases: object
+
+MarkerStyle
+
+Parameters:	
+marker : string or array_like, optional, default: None
+
+See the descriptions of possible markers in the module docstring.
+
+fillstyle : string, optional, default: ‘full’
+
+‘full’, ‘left”, ‘right’, ‘bottom’, ‘top’, ‘none’
+
+Attributes
+
+markers	(list of known markes)
+fillstyles	(list of known fillstyles)
+filled_markers	(list of known filled markers.)
+filled_markers = (u'o', u'v', u'^', u'<', u'>', u'8', u's', u'p', u'*', u'h', u'H', u'D', u'd')
+fillstyles = (u'full', u'left', u'right', u'bottom', u'top', u'none')
+
+
+
+plt.plot(x, y, 'x')
+plt.axis('equal')
+plt.show()
+>>>>>>> 2a13995c3fe43ef49b8d5be45ca578c6d61c8652

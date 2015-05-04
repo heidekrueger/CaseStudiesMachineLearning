@@ -59,6 +59,7 @@ def load_student_database( folder, width, height):
 			
 			try:
 				image = load_standardised_image( root + name, width, height )					
+				image = np.asarray(image)
 			except:
 				print "Error loading standardized Image:", root + name
 				continue
@@ -68,6 +69,12 @@ def load_student_database( folder, width, height):
 	
 	return images, labels
 	
-X, Y = load_student_database( "../../faces/", 20, 20)
-for label in Y:
-	print label
+def TEST_load_student_database():
+	X, Y = load_student_database( "faces/", 20, 20)
+	print "data shape:"
+	print np.shape( X )
+	print "labels:"
+	print Y
+
+TEST_load_student_database()
+

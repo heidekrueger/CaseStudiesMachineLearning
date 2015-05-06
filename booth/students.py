@@ -27,6 +27,21 @@ def load_standardised_image( filename, width, height ):
     resized_image = image.resize((width, height), Image.ANTIALIAS)    # best down-sizing filter
 
     return resized_image
+
+##
+## Load feature vector in standardized format
+##
+def load_features_from_image( filename, width, height ):
+    
+    image = load_standardised_image( filename, width, height )
+
+    ### 
+    ### Convert to array and flatten
+    ###
+
+    image = np.asarray(image).flatten()
+    
+    return image
     
 
 ###
@@ -58,8 +73,7 @@ def load_student_database( folder, width, height):
             ##
             
             try:
-                image = load_standardised_image( root + name, width, height )                    
-                image = np.asarray(image)
+                image = load_features_from_image( root + name, width, height )                    
             except:
                 print "Error loading standardized Image:", root + name
                 continue

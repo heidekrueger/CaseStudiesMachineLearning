@@ -26,13 +26,13 @@ def def_savename():
 
 def change_name(s):
     '''
-    This function modifies the name of the photos just taken
+    This function modif2015-05-06-151352ies the name of the photos just taken
     '''
 
     print "saving name : " + s
 
     n = 10
-    old_b = "2015-05-06-151352"
+    old_b = raw_input("Enter filebase : ")
     f_ext = ".jpg"
     path = "faces/"
 

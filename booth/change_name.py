@@ -31,17 +31,23 @@ def change_name(s):
 
     print "saving name : " + s
 
-    n = 10
-    old_b = raw_input("Enter filebase : ")
-    f_ext = ".jpg"
+    date = '06-05-2015'
     path = "faces/"
+    f_ext = ".jpg"
 
-    for i in range(1, n + 1):
-        old_s = path + old_b + "_" + str(i) + f_ext
-        new_s = path + s + "_" + str(i) + f_ext
-        print old_s
-        print new_s
-        os.rename(old_s, new_s)
+    prefixed = [fn for fn in os.listdir(path) if fn.startswith(date)]
+    print len(prefixed)
+
+    prefixed.sort()
+
+    i = 1
+    new_s = [s + "_" + str(i) + f_ext for i in range(1, 11)]
+    new_s.sort()
+
+    for i in range(10):
+        o_s = path + prefixed[i]
+        n_s = path + new_s[i]
+        os.rename(o_s, n_s)
 
 if __name__ == "__main__":
     s = "empty"

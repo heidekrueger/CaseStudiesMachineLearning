@@ -31,7 +31,7 @@ def change_name(s):
 
     print "saving name : " + s
 
-    date = '06-05-2015'
+    date = '2015-05-06'
     path = "faces/"
     f_ext = ".jpg"
 
@@ -45,9 +45,12 @@ def change_name(s):
     new_s.sort()
 
     for i in range(10):
-        o_s = path + prefixed[i]
-        n_s = path + new_s[i]
-        os.rename(o_s, n_s)
+        try:
+            o_s = path + prefixed[i]
+            n_s = path + new_s[i]     
+            os.rename(o_s, n_s)
+        except:
+            print("could not find file")
 
 if __name__ == "__main__":
     s = "empty"

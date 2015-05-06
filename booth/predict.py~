@@ -19,7 +19,7 @@ def depickle_classifier():
 
 if __name__ == "__main__":    
     
-    folder = "./faces/"
+    folder = "/home/roland/Pictures/Webcam/"
     name = raw_input("Dateiname: ")
     ext = ".jpg"
     

@@ -19,7 +19,7 @@ def depickle_classifier():
 
 if __name__ == "__main__":    
     
-    folder = "./faces/"
+    folder = "./uglyfaces/"
     name = raw_input("Dateiname: ")
     ext = ".jpg"
     

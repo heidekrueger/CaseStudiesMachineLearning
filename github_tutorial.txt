@@ -1,0 +1,14 @@
+GITHUB TUTORIAL:
+
+This a short tutorial about how to use github and its functionnalities
+
+Main functions:
+1. clone : copy the github repository on your own laptop
+2. checkout : to not reference some files
+3. pull : get the last up to date version from the github rep.
+4. merge : merge different versions of the same scripts
+
+- git add my_script.py : this adds a script newly created or newly modificated to your git
+- git commit -m "my message" : commits a modification to your git, this means that the modification just added will now be referenced and described with "my message"
+- git push :
+- git pull :

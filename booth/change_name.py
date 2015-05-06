@@ -32,11 +32,15 @@ def change_name(s):
     print "saving name : " + s
 
     n = 10
-    old_b = "s_c"
-    f_ext = ".txt"
+    old_b = "Roland"
+    f_ext = ".jpg"
+    path = "faces/"
+
     for i in range(1, n + 1):
-        old_s = old_b + str(i) + f_ext
-        new_s = s + "_" + str(i) + f_ext
+        old_s = path + old_b + "_" + str(i) + f_ext
+        new_s = path + s + "_" + str(i) + f_ext
+        print old_s
+        print new_s
         os.rename(old_s, new_s)
 
 if __name__ == "__main__":

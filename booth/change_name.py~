@@ -32,7 +32,7 @@ def change_name(s):
     print "saving name : " + s
 
     n = 10
-    old_b = "2015-05-06-151352"
+    old_b = "2015-05-06-151041"
     f_ext = ".jpg"
     path = "faces/"
 

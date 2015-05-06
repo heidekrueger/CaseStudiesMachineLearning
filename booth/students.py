@@ -13,21 +13,21 @@ import Image
 ## res = load_standardised_image( name , 10, 10 )
 ##
 def load_standardised_image( filename, width, height ):
-	
-	###
-	### Load Image in Greyscale
-	###
+    
+    ###
+    ### Load Image in Greyscale
+    ###
 
-	image = Image.open(filename).convert('F')
+    image = Image.open(filename).convert('F')
 
-	### 
-	### Scale Image
-	###
+    ### 
+    ### Scale Image
+    ###
 
-	resized_image = image.resize((width, height), Image.ANTIALIAS)    # best down-sizing filter
+    resized_image = image.resize((width, height), Image.ANTIALIAS)    # best down-sizing filter
 
-	return resized_image
-	
+    return resized_image
+    
 
 ###
 ### Load, standardize and label image data
@@ -36,45 +36,83 @@ def load_standardised_image( filename, width, height ):
 ###
 def load_student_database( folder, width, height):
 
-	images = []
-	labels = []
-	
-	##
-	## Walk the dir and get all image files
-	##
-	
-	for root, dirs, files in os.walk(folder):
-		for name in files:
-			
-			## 
-			## Get label
-			##
-			
-			ext = name[-3:]
-			label = re.sub("_\d+.%s" % ext, "", name)
-			
-			##
-			## Load standardized image
-			##
-			
-			try:
-				image = load_standardised_image( root + name, width, height )					
-				image = np.asarray(image)
-			except:
-				print "Error loading standardized Image:", root + name
-				continue
-				
-			images.append(image)
-			labels.append(label)
-	
-	return images, labels
-	
-def TEST_load_student_database():
-	X, Y = load_student_database( "faces/", 20, 20)
-	print "data shape:"
-	print np.shape( X )
-	print "labels:"
-	print Y
+    images = []
+    labels = []
+    
+    ##
+    ## Walk the dir and get all image files
+    ##
+    
+    for root, dirs, files in os.walk(folder):
+        for name in files:
+            
+            ## 
+            ## Get label
+            ##
+            
+            ext = name[-3:]
+            label = re.sub("_\d+.%s" % ext, "", name)
+            
+            ##
+            ## Load standardized image
+            ##
+            
+            try:
+                image = load_standardised_image( root + name, width, height )                    
+                image = np.asarray(image)
+            except:
+                print "Error loading standardized Image:", root + name
+                continue
+                
+            images.append(image)
+            labels.append(label)
+    
+    return images, labels
 
-TEST_load_student_database()
+
+def TEST_load_student_database():
+    X, Y = load_student_database( "faces/", 20, 20)
+    print "data shape:"
+    print np.shape( X )
+    print "labels:"
+    print Y
+
+    
+###
+### For machine learning we need to convert the label names into digits
+###
+def get_labels_numbered(labels):
+    label_list = list(set(labels))
+    digit_dict = dict()
+    for i in range(len(label_list)):
+        digit_dict[label_list[i]] = i
+    return [ digit_dict[label] for label in labels ]
+
+###
+### split into train and test samples where test_each will be used as test samples
+###
+def train_test_split(X, y, test_each = 2):
+    ## shuffle
+    perm = np.random.permutation(len(y))
+    X = [ X[i] for i in perm ]
+    y = [ y[i] for i in perm ]
+    
+    test_set = []
+    for i in set(y):
+        count = 0
+        for j in range(len(y)):
+            if i == y[j]:
+                test_set.append(j)
+                count += 1
+            if count >= test_each:
+                break;
+
+    X_test = [ X[j] for j in test_set ]
+    y_test = [ y[j] for j in test_set ]
+
+    X_train = [ X[j] for j in range(len(y)) if j not in test_set ]
+    y_train = [ y[j] for j in range(len(y)) if j not in test_set ]
+
+    return X_train, X_test, y_train, y_test
+    
 

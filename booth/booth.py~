@@ -27,7 +27,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
 ## Download the data, if not already on disk and load it as numpy arrays
 ##
 folder = "./faces/"
-w, h = 30, 50
+w, h = 10, 20
 images, names = students.load_student_database( folder, w, h )
 
 # for machine learning we use the 2 data directly (as relative pixel

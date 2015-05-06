@@ -9,7 +9,7 @@ import os
 def def_savename():
     '''
     This function ask you to enter your first and family name
-    to produce a saving name used tor rename the photos
+    to produce a saving name used tor rename the photos just taken
     '''
 
     check = False

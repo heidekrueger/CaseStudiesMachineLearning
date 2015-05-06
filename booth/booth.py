@@ -13,7 +13,6 @@ from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 from sklearn.decomposition import RandomizedPCA
 from sklearn.svm import SVC
-import pickle as pkl
 
 from sklearn.ensemble import RandomForestClassifier
 
@@ -22,60 +21,20 @@ import students
 print(__doc__)
 
 # Display progress logs on stdout
-logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s') 0.01  0.01  0.    0.11  0.15  0.08  0.    0.03  0.55  0.06]
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
 
+##
+## Download the data, if not already on disk and load it as numpy arrays
+##
 folder = "./faces/"
 w, h = 30, 50
-def get_trained_classifier(folder):
-
-	## load data
-	images, names = students.load_student_database( folder, w, h )
-	X = [ image.flatten() for image in images ]
-	y = students.get_labels_numbered(names)
-	target_names=list(set(names))
-
-	## classifier
-	param_grid = {'n_estimators': [100], }
-	clf = GridSearchCV(
-		RandomForestClassifier(n_jobs = 4), 
-		param_grid)
-
-	## fit
-	clf = clf.fit(X_train, y_train)
-
-	with open("classifier.pkl", "wb") as keeptrace:
-	    pickler = pkl.Pickler(keeptrace)
-	    pickler.dump(clf)
-
-def predict(ugly_face):
-	with open("classifier.pkl", "rb") as keeptrace:
-	    clf = pkl.load(keeptrace)
-	y_pred = clf.predict(ugly_face)
-	y_prob = clf.predict_proba(ugly_face)
-
-	    
-	    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 images, names = students.load_student_database( folder, w, h )
 
 # for machine learning we use the 2 data directly (as relative pixel
 # positions info is ignored by this model)
 X = [ image.flatten() for image in images ]
 
-# the label to predict  0.01  0.01  0.    0.11  0.15  0.08  0.    0.03  0.55  0.06] 0.01  0.01  0.    0.11  0.15  0.08  0.    0.03  0.55  0.06]is the id of the person
+# the label to predict is the id of the person
 y = students.get_labels_numbered(names)
 target_names=list(set(names))
 
@@ -155,17 +114,5 @@ def plot_gallery(images, titles, h, w, n_row=2, n_col=2):
         plt.yticks(())
 
 
-# plot the result of the prediction on a portion of the test set
-
-def title(y_pred, y_test, target_names, i):
-    pred_name = target_names[y_pred[i]].rsplit(' ', 1)[-1]
-    true_name = target_names[y_test[i]].rsplit(' ', 1)[-1]
-    return 'predicted: %s\ntrue:      %s' % (pred_name, true_name)
-
-prediction_titles = [title(y_pred, y_test, target_names, i)
-                     for i in range(y_pred.shape[0])]
-
-#plot_gallery(X_test, prediction_titles, h, w)
 print(y_prob[:, :])
-plt.show()
 

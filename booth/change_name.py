@@ -35,7 +35,7 @@ def change_name(s):
     date = '2015-05-07'
 
     # path to the webcam rep
-    path_webcam = "../../random_rep/"
+    path_webcam = "/home/roland/Pictures/Webcam/"
 
     # path to the faces rep
     path_faces = "faces/"
@@ -50,35 +50,38 @@ def change_name(s):
     prefixed = [fn for fn in os.listdir(path_webcam) if fn.startswith(date)]
 
     prefixed.sort()
-
+    print(prefixed)
+    ugly_names = []
     for i in range(len(prefixed)):
+        
         o_s = path_webcam + prefixed[i]
-        print o_s
-
-        l = prefixed[i]
-        l = l.split("-")
+        #print o_s
 
         # if the file is the ugly face
-        if len(l) == 4:
-            l = l[-1]
-            l = l.split(".")
-            l = l[0]
+        if "_" not in prefixed[i]:
+            l = prefixed[i].split("-")[-1]
+            l = l.split(".")[0]
+            ugly_names.append(l)
             n_s = path_uglyfaces + l + f_ext
-            print n_s
+            #print n_s
 
         # if the file is a normal face
         else:
             n_s = path_faces + s + "_" + str(i) + f_ext
-            print n_s
+            #print n_s
 
         # move the file
         try:
             os.rename(o_s, n_s)
-            print "file moved with succes"
+            print "file %s moved to %s with succes" %(o_s, n_s)
 
         except:
             print("could not find file")
-
+    
+    print("Ugly names:")
+    for n in ugly_names:
+        print n
+    
 if __name__ == "__main__":
     s = "empty"
 

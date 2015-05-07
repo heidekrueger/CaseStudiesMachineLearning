@@ -7,10 +7,11 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn import svm
 
 n_set = 4  # number of sets / classes
 n_pts = 200  # number of points per class
-colormap = plt.cm.winter
+colormap = plt.cm.gist_rainbow
 
 means = [[2, -2], [-5, 5], [3, 5], [-4, -4]]
 cov0 = [[1, 0], [0, 1]]
@@ -19,8 +20,9 @@ cov2 = [[0, 1], [1, 0]]
 cov3 = [[2, 1], [1, 2]]
 
 cov = [cov0, cov1, cov2, cov3]
+markers = ['o', '^', 's', 'p']
 colors = []
-for i in range(1,5):
+for i in range(1, 5):
     colors.append(colormap(i/4.0))
 
 x = []
@@ -37,7 +39,7 @@ for i in range(0, 4):
 for i in range(0, 4):
     x0 = x[i]
     y0 = y[i]
-    plt.scatter(x0, y0, c=colors[i], edgecolors='none')
+    plt.scatter(x0, y0, c=colors[i], s=25, edgecolors='none', marker=markers[i])
 
 # plt.show()
 
@@ -59,7 +61,7 @@ X_sub = np.asarray([X[i] for i in sampled_indexes])
 Y_sub = np.asarray([Y[i] for i in sampled_indexes])
 
 h = .02  # step size in the mesh
-from sklearn import svm
+
 
 # we create an instance of SVM and fit out data. We do not scale our
 # data since we want to plot the support vectors
@@ -86,8 +88,8 @@ Y_plot = [Y, Y_sub, Y]
 for i, clf in enumerate((svc, svc_sub, svc_sub)):
     # Plot the decision boundary. For that, we will assign a color to each
     # point in the mesh [x_min, m_max]x[y_min, y_max].
-    #plt.subplot(1, 1, i + 1)
-    #plt.subplots_adjust(wspace=0.4, hspace=0.4)
+    # plt.subplot(1, 1, i + 1)
+    # plt.subplots_adjust(wspace=0.4, hspace=0.4)
 
     Z = clf.predict(np.c_[xx.ravel(), yy.ravel()])
     fig = plt.figure()
@@ -95,9 +97,12 @@ for i, clf in enumerate((svc, svc_sub, svc_sub)):
     # Put the result into a color plot
     Z = Z.reshape(xx.shape)
     plt.contourf(xx, yy, Z, cmap=colormap, alpha=0.8)
-    print( colormap 	)
+    print(colormap 	)
     # Plot also the training points
-    plt.scatter(X_plot[i][:, 0], X_plot[i][:, 1], c=Y_plot[i], cmap=colormap)
+    plt.scatter(X_plot[i][:, 0],
+                X_plot[i][:, 1],
+                c=Y_plot[i],
+                cmap=colormap)
     plt.xlabel('Dimension 1')
     plt.ylabel('Dimension 2')
     plt.xlim(xx.min(), xx.max())
@@ -105,11 +110,10 @@ for i, clf in enumerate((svc, svc_sub, svc_sub)):
     plt.xticks(())
     plt.yticks(())
     plt.title(titles[i])
-		
-    
-    #ax = fig.add_subplot(111)
-    #ax.imshow(data,interpolation='none')
 
-    fig.savefig('plot %d.eps' %i)
+    # ax = fig.add_subplot(111)
+    # ax.imshow(data,interpolation='none')
+
+    fig.savefig('plot %d.eps' % i)
 
 plt.show()

@@ -8,7 +8,7 @@ import os
 
 def def_savename():
     '''
-    This function ask you to enter your first and family name
+    This function asks you to enter your first and family name
     to produce a saving name used tor rename the photos just taken
     '''
 
@@ -26,7 +26,7 @@ def def_savename():
 
 def change_name(s):
     '''
-    This function modif2015-05-06-151352ies the name of the photos just taken
+    This function modifies the name of the photos just taken
     '''
 
     print "saving name : " + s
@@ -53,9 +53,8 @@ def change_name(s):
     print(prefixed)
     ugly_names = []
     for i in range(len(prefixed)):
-        
         o_s = path_webcam + prefixed[i]
-        #print o_s
+        # print o_s
 
         # if the file is the ugly face
         if "_" not in prefixed[i]:
@@ -63,25 +62,25 @@ def change_name(s):
             l = l.split(".")[0]
             ugly_names.append(l)
             n_s = path_uglyfaces + l + f_ext
-            #print n_s
+            # print n_s
 
         # if the file is a normal face
         else:
             n_s = path_faces + s + "_" + str(i) + f_ext
-            #print n_s
+            # print n_s
 
         # move the file
         try:
             os.rename(o_s, n_s)
-            print "file %s moved to %s with succes" %(o_s, n_s)
+            print "file %s moved to %s with success" %(o_s, n_s)
 
         except:
             print("could not find file")
-    
+
     print("Ugly names:")
     for n in ugly_names:
         print n
-    
+
 if __name__ == "__main__":
     s = "empty"
 

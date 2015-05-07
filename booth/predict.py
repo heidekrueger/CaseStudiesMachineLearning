@@ -20,11 +20,11 @@ def depickle_classifier():
     return clf
 
 
-if __name__ == "__main__":    
-    
-    folder = "uglyfaces/"    
+if __name__ == "__main__":
+
+    folder = "uglyfaces/"
     ext = ".jpg"
-    
+
     ## check for command line arguments
     if len(sys.argv) > 1:
         name = sys.argv[-1]

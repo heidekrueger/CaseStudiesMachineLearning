@@ -2,7 +2,7 @@ from matplotlib import pyplot as plt
 import matplotlib
 
 marker=ur'$\u263A$'
-
+## http://unicode-table.com/de/search/?q=emoticon
 plt.plot(0, 1, "g", marker=marker, markersize=20)
 plt.plot(2, 1, "g", marker=ur'$\u263C$', markersize=20)
 

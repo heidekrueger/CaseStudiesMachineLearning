@@ -10,8 +10,12 @@ import matplotlib.pyplot as plt
 from sklearn import svm
 
 n_set = 4  # number of sets / classes
-n_pts = 200  # number of points per class
-colormap = plt.cm.gist_rainbow
+classes = range(n_set)
+n_pts = 30  # number of points per class
+num_subsamples = int(5)
+colormap = plt.cm.coolwarm # the python colormap that defines the colors of the plot
+            # see: 
+symSize = 200 # the size of data points
 
 means = [[2, -2], [-5, 5], [3, 5], [-4, -4]]
 cov0 = [[1, 0], [0, 1]]
@@ -20,10 +24,10 @@ cov2 = [[0, 1], [1, 0]]
 cov3 = [[2, 1], [1, 2]]
 
 cov = [cov0, cov1, cov2, cov3]
-markers = ['o', '^', 's', 'p']
+markers = [r'$\clubsuit$', r'$\spadesuit$', ur'$\u2666$', ur'$\u2665$']
 colors = []
-for i in range(1, 5):
-    colors.append(colormap(i/4.0))
+for i in range(1, n_set+1): 
+    colors.append(colormap((i-1)/float(n_set-1)))
 
 x = []
 y = []
@@ -39,20 +43,22 @@ for i in range(0, 4):
 for i in range(0, 4):
     x0 = x[i]
     y0 = y[i]
-    plt.scatter(x0, y0, c=colors[i], s=25, edgecolors='none', marker=markers[i])
+    plt.scatter(x0, y0, c=colors[i], s=symSize, edgecolor='none', marker=markers[i])
 
+# add unknown data point
+plt.scatter(-3,2,c='k',s=symSize,marker = r'$?$')
 # plt.show()
 
 X = np.zeros((n_pts * n_set, 2))
 Y = np.zeros((n_pts * n_set))
-for i in range(0, n_set):
+for i in classes: 
     x0 = x[i]
     y0 = y[i]
     for j in range(0, n_pts):
         X[j + i * n_pts, :] = [x0[j], y0[j]]
         Y[j + i * n_pts] = i
 
-num_subsamples = int(0.1 * n_pts)
+
 
 sampled_indexes = [np.random.randint(0, X.shape[0])
                    for i in range(num_subsamples)]
@@ -96,13 +102,17 @@ for i, clf in enumerate((svc, svc_sub, svc_sub)):
 
     # Put the result into a color plot
     Z = Z.reshape(xx.shape)
-    plt.contourf(xx, yy, Z, cmap=colormap, alpha=0.8)
+    plt.contourf(xx, yy, Z, cmap=colormap, alpha=0.5)
     print(colormap 	)
     # Plot also the training points
-    plt.scatter(X_plot[i][:, 0],
-                X_plot[i][:, 1],
-                c=Y_plot[i],
-                cmap=colormap)
+    for cl in classes:
+        plt.scatter(X_plot[i][cl*n_pts:cl*n_pts+n_pts, 0],
+                    X_plot[i][cl*n_pts:cl*n_pts+n_pts, 1],
+                    c=colors[cl],#Y_plot[i][cl*n_pts:cl*n_pts+n_pts],
+                    s=symSize,
+                    marker=markers[cl]
+                    )
+    plt.scatter(-3,2,c='k',s=symSize,marker = r'$!$')
     plt.xlabel('Dimension 1')
     plt.ylabel('Dimension 2')
     plt.xlim(xx.min(), xx.max())

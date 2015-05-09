@@ -7,14 +7,29 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.colors as pltcol
+import matplotlib as mpl
 from sklearn import svm
 
 n_set = 4  # number of sets / classes
 classes = range(n_set)
 n_pts = 30  # number of points per class
 num_subsamples = int(5)
-colormap = plt.cm.coolwarm # the python colormap that defines the colors of the plot
-            # see: 
+mywhite = '#F1F0F0'
+myblue = '#03508D'
+myred = '#D22727'
+myblack = '#0E070A'
+mygray = '#727273'
+
+mpl.rc('axes',edgecolor=mywhite) #set default axis color
+
+# colormap = plt.cm.coolwarm # the python colormap that defines the colors of the plot
+colormap = pltcol.LinearSegmentedColormap.from_list('mycmap', [(0 / 3.0, myblue),
+                                                    (1 / 3.0, mywhite),
+                                                    (2 / 3.0, mygray),
+                                                    (3/3.0, myred)]
+                                        )
+
 symSize = 200 # the size of data points
 
 means = [[2, -2], [-5, 5], [3, 5], [-4, -4]]
@@ -25,13 +40,14 @@ cov3 = [[2, 1], [1, 2]]
 
 cov = [cov0, cov1, cov2, cov3]
 markers = [r'$\clubsuit$', r'$\spadesuit$', ur'$\u2666$', ur'$\u2665$']
-colors = []
-for i in range(1, n_set+1): 
-    colors.append(colormap((i-1)/float(n_set-1)))
+colors = [myblue,mywhite,mygray,myred]
+edgecolors = ['none','none','none',mywhite]
 
 x = []
 y = []
 X = []
+
+fig = plt.figure(facecolor=None)
 
 for i in range(0, 4):
     m0 = means[i]
@@ -43,10 +59,17 @@ for i in range(0, 4):
 for i in range(0, 4):
     x0 = x[i]
     y0 = y[i]
-    plt.scatter(x0, y0, c=colors[i], s=symSize, edgecolor='none', marker=markers[i])
+    plt.scatter(x0, y0, c=colors[i], s=symSize, edgecolor=edgecolors[i], marker=markers[i])
 
+plt.xlabel('Hauptkomponente 1',color=mywhite)
+plt.ylabel('Hauptkomponente 2', color = mywhite)
+plt.xticks(())
+plt.yticks(())
 # add unknown data point
-plt.scatter(-3,2,c='k',s=symSize,marker = r'$?$')
+plt.scatter(-3,2,c='y',s=symSize*2,marker = r'$?$',edgecolor='none')
+# plt.scatter(-3,2,c='none',s=symSize+8,marker = 'o',edgecolor='y') # draw a circle around the '?'
+
+fig.savefig('plot %d.eps' % 0, transparent=True)
 # plt.show()
 
 X = np.zeros((n_pts * n_set, 2))
@@ -69,7 +92,7 @@ Y_sub = np.asarray([Y[i] for i in sampled_indexes])
 h = .02  # step size in the mesh
 
 
-# we create an instance of SVM and fit out data. We do not scale our
+# we create an instance of SVM and fit our data. We do not scale our
 # data since we want to plot the support vectors
 C = 10  # SVM regularization parameter
 print("1")
@@ -108,22 +131,22 @@ for i, clf in enumerate((svc, svc_sub, svc_sub)):
     for cl in classes:
         plt.scatter(X_plot[i][cl*n_pts:cl*n_pts+n_pts, 0],
                     X_plot[i][cl*n_pts:cl*n_pts+n_pts, 1],
-                    c=colors[cl],#Y_plot[i][cl*n_pts:cl*n_pts+n_pts],
+                    c=colors[cl],
                     s=symSize,
                     marker=markers[cl]
                     )
     plt.scatter(-3,2,c='k',s=symSize,marker = r'$!$')
-    plt.xlabel('Dimension 1')
-    plt.ylabel('Dimension 2')
+    plt.xlabel('Hauptkomponente 1',color=mywhite)
+    plt.ylabel('Hauptkomponente 2', color = mywhite)
     plt.xlim(xx.min(), xx.max())
     plt.ylim(yy.min(), yy.max())
-    plt.xticks(())
-    plt.yticks(())
-    plt.title(titles[i])
+    plt.xticks((),color = mywhite)
+    plt.yticks((), color = mywhite)
+    plt.title(titles[i], color = mywhite)
 
     # ax = fig.add_subplot(111)
     # ax.imshow(data,interpolation='none')
 
-    fig.savefig('plot %d.eps' % i)
+    fig.savefig('plot %d.eps' % (i+1), transparent=True)
 
 plt.show()

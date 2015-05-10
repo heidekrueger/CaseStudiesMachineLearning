@@ -33,7 +33,7 @@ colormap = pltcol.LinearSegmentedColormap.from_list('mycmap', [(0 / 3.0, myblue)
 symSize = 350 # the size of data points
 
 means = [[2, -2], [-5, 5], [3, 5], [-4, -4]]
-cov0 = [[1, 0], [0, 1]]
+cov0 = [[1, 0], [0, 2]]
 cov1 = [[5, 3], [3, 5]]
 cov2 = [[0, 1], [1, 0]]
 cov3 = [[2, 1], [1, 2]]
@@ -42,6 +42,7 @@ cov = [cov0, cov1, cov2, cov3]              # diamond       #hearts
 markers = [r'$\clubsuit$', r'$\spadesuit$', ur'$\u2666$', ur'$\u2665$']
 colors = [myblue,mywhite,mygray,myred]
 edgecolors = [mywhite,'none',mywhite,mywhite]
+edgecolors2 = [mywhite, mygray, mywhite, mywhite]
 
 x = []
 y = []
@@ -133,7 +134,8 @@ for i, clf in enumerate((svc, svc_sub, svc_sub)):
                     X_plot[i][cl*n_pts:cl*n_pts+n_pts, 1],
                     c=colors[cl],
                     s=symSize,
-                    marker=markers[cl]
+                    marker=markers[cl],
+                    edgecolor=edgecolors2[cl]
                     )
     plt.scatter(-3,2.5,c=myblack,s=symSize*2,marker = r'$!$', edgecolor='none')
     plt.xlabel('Hauptkomponente 1',color=mywhite)

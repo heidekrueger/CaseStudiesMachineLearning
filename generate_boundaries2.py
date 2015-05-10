@@ -66,7 +66,7 @@ plt.ylabel('Hauptkomponente 2', color = mywhite)
 plt.xticks(())
 plt.yticks(())
 # add unknown data point
-plt.scatter(-3,2,c='y',s=symSize*2,marker = r'$?$',edgecolor='none')
+plt.scatter(-3,2.5,c=myblack,s=symSize*2,marker = r'$?$',edgecolor='none')
 # plt.scatter(-3,2,c='none',s=symSize+8,marker = 'o',edgecolor='y') # draw a circle around the '?'
 
 fig.savefig('plot %d.eps' % 0, transparent=True)
@@ -135,14 +135,14 @@ for i, clf in enumerate((svc, svc_sub, svc_sub)):
                     s=symSize,
                     marker=markers[cl]
                     )
-    plt.scatter(-3,2,c='k',s=symSize,marker = r'$!$')
+    plt.scatter(-3,2.5,c=myblack,s=symSize*2,marker = r'$!$', edgecolor='none')
     plt.xlabel('Hauptkomponente 1',color=mywhite)
     plt.ylabel('Hauptkomponente 2', color = mywhite)
     plt.xlim(xx.min(), xx.max())
     plt.ylim(yy.min(), yy.max())
     plt.xticks((),color = mywhite)
     plt.yticks((), color = mywhite)
-    plt.title(titles[i], color = mywhite)
+    # plt.title(titles[i], color = mywhite)
 
     # ax = fig.add_subplot(111)
     # ax.imshow(data,interpolation='none')

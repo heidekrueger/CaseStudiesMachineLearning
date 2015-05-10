@@ -30,7 +30,7 @@ colormap = pltcol.LinearSegmentedColormap.from_list('mycmap', [(0 / 3.0, myblue)
                                                     (3/3.0, myred)]
                                         )
 
-symSize = 200 # the size of data points
+symSize = 350 # the size of data points
 
 means = [[2, -2], [-5, 5], [3, 5], [-4, -4]]
 cov0 = [[1, 0], [0, 1]]
@@ -38,10 +38,10 @@ cov1 = [[5, 3], [3, 5]]
 cov2 = [[0, 1], [1, 0]]
 cov3 = [[2, 1], [1, 2]]
 
-cov = [cov0, cov1, cov2, cov3]
+cov = [cov0, cov1, cov2, cov3]              # diamond       #hearts
 markers = [r'$\clubsuit$', r'$\spadesuit$', ur'$\u2666$', ur'$\u2665$']
 colors = [myblue,mywhite,mygray,myred]
-edgecolors = ['none','none','none',mywhite]
+edgecolors = [mywhite,'none',mywhite,mywhite]
 
 x = []
 y = []

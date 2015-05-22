@@ -1,0 +1,113 @@
+\documentclass[11pt]{beamer}
+\usetheme{Rochester}
+
+\usepackage[utf8]{inputenc}
+\usepackage[german]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{tikz}
+
+\usetikzlibrary{arrows, shapes, trees}
+\tikzset{every node/.style = {rectangle, draw, fill = blue, minimum size = 1cm, text centered}}
+\tikzset{edge from parent/.style = {draw}}
+
+\author{Fin Bauer, Stanislas Chambon, Roland Halbig, \\Stefan Heidekrüger, Jakob Heuke}
+\title{Stochastic Optimization in Machine Learning}
+%\subtitle{}
+%\logo{}
+\institute{Technische Universität München}
+%\date{}
+%\subject{}
+%\setbeamercovered{transparent}
+\setbeamertemplate{navigation symbols}{}
+
+\begin{document}
+	
+	\maketitle
+	
+	\begin{frame}
+		\frametitle{Outline}
+		\tableofcontents
+	\end{frame}
+	
+	
+	\section{Introduction}
+	
+		\begin{frame}
+			\frametitle{Introduction (1)}
+			\begin{block}{Status Quo}
+				\begin{itemize}
+					\item increasing amount of data in Machine Learning \\
+					\item need of more and more robust and efficient algorithms \\
+					\item ... \\
+				\end{itemize}
+			\end{block}
+			\huge $\Rightarrow$ Stochastic Optimization
+		\end{frame}
+		
+		\begin{frame}
+			\frametitle{Introduction (2)}
+			\begin{block}{Proposition}
+				\begin{itemize}
+					\item Stochastic Optimization
+				\end{itemize}
+			\end{block}
+		\end{frame}
+		
+		\begin{frame}
+			\frametitle{Structure of this Case Study}
+			\begin{figure}
+				\begin{tikzpicture}[grow = down, sibling distance = 5cm]
+					\node {Problem}
+					child{node {Implementing Stochastic BFGS}
+						child{node {Testing on example}}}
+					child{node {Implementing Proximal}
+						child{node {Testing on example}}};
+				\end{tikzpicture}
+			\end{figure}
+		\end{frame}
+	
+	
+	\section{Stochastic Quasi-Newton Method}
+	\subsection{Algorithm}
+	
+		\begin{frame}{Algorithm}
+			Inhalt...
+		\end{frame}
+		
+	\subsection{Application-Problem}
+		
+		\begin{frame}{Application-Problem}
+			Inhalt...
+		\end{frame}
+		
+	\subsection{Algorithm Benchmarking}
+	
+		\begin{frame}{Algorithm-Benchmarking}
+			Inhalt...
+		\end{frame}
+	
+	
+	\section{Proximal Newton-type Method}
+	\subsection{Algorithm}
+	
+		\begin{frame}{Algorithm}
+			Inhalt...
+		\end{frame}
+	
+	\subsection{Application-Problem}
+	
+		\begin{frame}{Application Problem}
+			Inhalt...
+		\end{frame}
+	
+	\subsection{Algorithm Benchmarking}
+	
+		\begin{frame}{Algorithm Benchmarking}
+			Inhalt...
+		\end{frame}
+		
+		
+\end{document}

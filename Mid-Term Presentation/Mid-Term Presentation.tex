@@ -8,10 +8,12 @@
 \usepackage{amssymb}
 \usepackage{graphicx}
 \usepackage{tikz}
+\usepackage{algorithm2e}
+\usepackage{algorithmic}
 
 \usetikzlibrary{arrows, shapes, trees}
-\tikzset{every node/.style = {rectangle, draw, fill = blue, minimum size = 1cm, text centered}}
-\tikzset{edge from parent/.style = {draw}}
+\tikzset{every node/.style = {rectangle, fill = title.bg, text = title.fg, minimum size = 0.7 cm, text centered, font = \scriptsize, align = center}}
+\tikzset{edge from parent/.style = {draw,->,thick}}
 
 \author{Fin Bauer, Stanislas Chambon, Roland Halbig, \\Stefan Heidekrüger, Jakob Heuke}
 \title{Stochastic Optimization in Machine Learning}
@@ -35,79 +37,234 @@
 	
 	\section{Introduction}
 	
-		\begin{frame}
-			\frametitle{Introduction (1)}
-			\begin{block}{Status Quo}
-				\begin{itemize}
-					\item increasing amount of data in Machine Learning \\
-					\item need of more and more robust and efficient algorithms \\
-					\item ... \\
-				\end{itemize}
-			\end{block}
-			\huge $\Rightarrow$ Stochastic Optimization
-		\end{frame}
+	\begin{frame}{Introduction (1)}
+		\begin{block}{Challenges in Machine Learning}
+			\begin{itemize}
+				\item massive amounts of training data 
+				\item construction of very large models
+				\item how to handle the high memory/computational demands?
+			\end{itemize}
+		\end{block}
 		
-		\begin{frame}
-			\frametitle{Introduction (2)}
-			\begin{block}{Proposition}
-				\begin{itemize}
-					\item Stochastic Optimization
-				\end{itemize}
-			\end{block}
-		\end{frame}
-		
-		\begin{frame}
-			\frametitle{Structure of this Case Study}
-			\begin{figure}
-				\begin{tikzpicture}[grow = down, sibling distance = 5cm]
-					\node {Problem}
-					child{node {Implementing Stochastic BFGS}
-						child{node {Testing on example}}}
-					child{node {Implementing Proximal}
-						child{node {Testing on example}}};
-				\end{tikzpicture}
-			\end{figure}
-		\end{frame}
+		\begin{center}
+			\huge{   $\Downarrow$ }
+		\end{center}  
+		\textbf{Stochastic Methods:} Update on small amounts of training data!
+	\end{frame}
 	
+	\begin{frame}{Introduction (2)}
+		\begin{block}{Optimization Problem}
+			\begin{equation*}
+				\min_{w\in \mathbb{R}^n} F(w) = \mathbb{E} \lbrack f(w; \xi) \rbrack,
+			\end{equation*}
+			where $f(w; \xi) = f(w; x_i, z_i)=\mathcal{L}(h(w; x_i); z_i))$.
+		\end{block}
+		\begin{block}{Empirical Form of Objective Function}
+			\begin{equation*}
+				F(w) = \frac{1}{N} \sum_{i = 1}^N f(w; x_i, z_i)
+			\end{equation*}
+		\end{block}
+	\end{frame}
+	
+	\begin{frame}{Introduction (3)}
+		\begin{block}{Mini-batch Stochastic Gradient}
+			Consider small subset $\mathcal{S} \subset \{1, \dots, N\}$, with $b := |S| \ll N$ \\
+			\vspace{0.3cm}
+			Construct
+			\begin{equation*}
+				\widehat{\nabla} F(w)=\frac{1}{b} \sum_{i \in \mathcal{S} } \nabla f(w; x_i, z_i)
+			\end{equation*}
+		\end{block}
+	\end{frame}	
+	
+	\begin{frame}{Structure of this Case Study}
+		\begin{figure}
+			\begin{tikzpicture}[grow = down, sibling distance = 6cm]
+			\node {Choose Machine Learning Problems}
+			child{node {Choose Appropriate Optimization Models}
+				child{node {Implement Stochastic \\ Quasi-Newton Method}
+					child{node (A) {Benchmark versus \\ State-of-the-Art Algorithms}} 
+					edge from parent node[fill = none, text = fg, left = 0.2cm]
+					{Smooth}}
+				child{node {Implement \\ Proximal Methods}
+					child{node (B) {Benchmark versus \\ State-of-the-Art Algorithms}}
+					edge from parent node[fill = none, text = fg, right = 0.2cm]
+					{Non-Smooth}}};
+			\path (A) -- node (C) [below = 1cm]{Compare Methods} (B);
+			\path (A) edge[->, thick] (C);
+			\path (B) edge[->, thick] (C);
+			\end{tikzpicture}
+		\end{figure}
+	\end{frame}
+	
+	
+	\section{Machine Learning Problems and Optimization Models}
+	
+	\begin{frame}{Machine Learning Problems and Optimization Models}
+		Possible Applications:
+		\begin{itemize}
+			\item Face recognition
+			\item Text classification
+			\item Speech recognition
+		\end{itemize}
+		\vspace{0.3cm}
+		\pause
+		Possible Optimization Models:
+		\begin{itemize}
+			\item Linear Regression: $\min_w \frac{1}{N} \sum^{N}_{i = 1} \| z_i - x_i w \|^2_2$
+			\item Binary Classification: 
+			\begin{equation*}
+				f(w; x_i, z_i) = z_i \log(c(w; x_i)) + (1 - z_i) \log(1 - c(w; x_i))
+			\end{equation*}
+			with $c(w; x_i) = \frac{1}{1 + \exp(-x^T_i w)}$
+			\item Neural Nets: Back propagation
+		\end{itemize}
+	\end{frame}
 	
 	\section{Stochastic Quasi-Newton Method}
 	\subsection{Algorithm}
 	
-		\begin{frame}{Algorithm}
-			Inhalt...
-		\end{frame}
-		
-	\subsection{Application-Problem}
-		
-		\begin{frame}{Application-Problem}
-			Inhalt...
-		\end{frame}
-		
+	\begin{frame}{Stochastic Quasi-Newton Method (1)}
+		Problem:
+		\begin{itemize}
+			\item Incorporating second-order information via full Hessian too expensive for
+			large-scale problems
+			\item Use of curvature information highly beneficial for algorithm performance
+		\end{itemize}
+		\pause
+		Idea:
+		\begin{itemize}
+			\item Adapt BFGS method to stochastic framework
+			\item Employ limited memory version of BFGS algorithm (L-BFGS)
+			\item Compute gradient based on sample $\mathcal{S}$ of training set
+			\item Compute Hessian update at regular intervals of length $L$ based on small 
+			subsample $\mathcal{S}_H$ of training set
+		\end{itemize}
+	\end{frame}
+	
+	\begin{frame}{Stochastic Quasi-Newton Method (2)}
+		\begin{block}{Iteration}
+			\vspace{-0.3 cm}
+			\begin{equation*}
+				w_{k+1} = w_k - \alpha_k H_t \widehat{\nabla}F(w_k)
+			\end{equation*}
+		\end{block}
+		\begin{block}{Hessian-Update}
+			Choose
+			\begin{equation*}
+				s_t = \bar{w}_t - \bar{w}_{t-1} \qquad y_t = \widehat{\nabla}^2 F(\bar{w}_t) s_t,
+			\end{equation*}
+			with $\bar{w}_t := \sum^k_{i = k-L} w_i$ and $\widehat{\nabla}^2 F(w)
+			:= \frac{1}{b_H} \sum_{i \in \mathcal{S}_H} \nabla^2 f(w; x_i, z_i)$.\\
+			\vspace{0.3 cm}
+			Compute
+			\begin{equation*}
+				H_{t+1} = (I - \rho_t s_t y^T_t) H_t (I - \rho_t y_t s^T_t) + \rho_t s_t s^T_t,
+			\end{equation*}
+			with $\rho_t = \frac{1}{y^T_t s_t}$.
+		\end{block}
+	\end{frame}
+	
+	\begin{frame}{Stochastic Quasi-Newton Method (3)}
+		\begin{block}{Stochastic L-BFGS Algorithm}
+			\begin{algorithm}[H]
+				\begin{algorithmic}[1]
+					\STATE Initialize $w_1$, $H_1$, step-length sequence $\alpha_k > 0$ \\
+					\FOR{$k = 1, \dots,$}
+					\STATE Choose a sample $\mathcal{S} \subset \{1, \dots, N\}$
+					\STATE Compute $w_{k+1} = w_k - \alpha^k H_t \widehat{\nabla}F(w^k)$
+					\IF{$\mod(k, L) = 0$}
+					\STATE Choose a sample $\mathcal{S}_H \subset \{1, \dots, N\}$ \\
+					\STATE Compute $H_t$ \\
+					\ENDIF
+					\ENDFOR
+				\end{algorithmic}
+			\end{algorithm}
+		\end{block}
+	\end{frame}
+	
 	\subsection{Algorithm Benchmarking}
 	
-		\begin{frame}{Algorithm-Benchmarking}
-			Inhalt...
-		\end{frame}
+	\begin{frame}{Benchmarking of Stochastic Quasi-Newton Method}
+		Challenge: Economical implementation of Algorithm is necessary for meaningful 
+		benchmarking
+		\begin{itemize}
+			\item Memory-efficient sparse coding
+			\item Calculation of Hessian-Vector Product without storing the Hessian
+			\item Computation of BFGS-Update via two-loop recursion
+		\end{itemize}
+		\vspace{0.3cm}
+		\pause
+		Benchmarking:
+		\begin{itemize}
+			\item Comparison to Stochastic Gradient Descent Method, Standard L-BFGS Method, 
+			(Stochastic) Conjugate Gradient Descent
+			\item Comparison of run-time, accuracy, access-points etc. under different parameter 
+			regimes and objective functions
+		\end{itemize}
+	\end{frame}
 	
 	
-	\section{Proximal Newton-type Method}
+	\section{Sparsity: Proximal Methods}
 	\subsection{Algorithm}
 	
-		\begin{frame}{Algorithm}
-			Inhalt...
-		\end{frame}
+	\begin{frame}{Inducing Sparsity}
+		\begin{block}{Dictionary Learning}
+			\begin{equation*}
+				\min_{D, \alpha} \frac{1}{N} \sum_{i=1}^N \|x_i - D \alpha_i \|_2^2 + \lambda \| 
+				\alpha_i \|_1
+			\end{equation*}
+			\begin{itemize}
+				\item control on $D$ and $\alpha$
+				\item better convergence
+				\item modifications of the algorithms
+			\end{itemize}
+		\end{block}
+	\end{frame}
 	
-	\subsection{Application-Problem}
+	\begin{frame}{Sparsity: General Formulation}
+		\begin{block}{Problem}
+			\begin{equation*}
+				\min \; f(x) +g(x)
+			\end{equation*}
+		\end{block}
+		\begin{block}{Proximal Gradient Method}
+			\begin{align*}
+				prox_{\lambda f}(v) &:= argmin_x f(x) + \frac{1}{2 \lambda} \|x - v \|^2\\
+				x^{k+1} &:= prox_{\lambda^k g} \left(x^k - \lambda^k \nabla f(x^k) \right)
+			\end{align*}
+		\end{block}
+	\end{frame}
 	
-		\begin{frame}{Application Problem}
-			Inhalt...
-		\end{frame}
+	\begin{frame}{Sparse Formulation}
+		\begin{block}{Proximal Gradient Method}
+			Given $x^k$, $\lambda^{k-1}$, $\beta \in (0, 1)$\\
+			Let $\lambda := \lambda^{k-1}$\\
+			Repeat:\\
+			\begin{enumerate}
+				\item Let $z:= prox_{\lambda g} \left(x^k - \lambda \nabla f(x^k) \right)$
+				\item Break if $f(z) \leq \hat{f}_{\lambda}(z, x^k)$
+				\item Update $\lambda := \beta \lambda $
+			\end{enumerate}
+			Return $\lambda^k := \lambda, x^{k+1} := z$
+		\end{block}
+	\end{frame}
 	
-	\subsection{Algorithm Benchmarking}
+	\subsection{Conclusion}
+	\begin{frame}{Conclusion}
+		\begin{block}{Situation}
+			\begin{itemize}
+				\item Increasing amount of data in Machine Learning applications
+				\item Need for robust and fast algorithms for smooth and non smooth optimization
+			\end{itemize}
+		\end{block}
+		\begin{block}{Stochastic Second-Order Methods}
+			\begin{itemize}
+				\item Faster convergence through curvature information
+				\item Moderate computational cost through mini-batches
+			\end{itemize}
+		\end{block}
+	\end{frame}
 	
-		\begin{frame}{Algorithm Benchmarking}
-			Inhalt...
-		\end{frame}
-		
-		
+	
 \end{document}

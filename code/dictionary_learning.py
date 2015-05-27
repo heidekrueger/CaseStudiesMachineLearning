@@ -9,17 +9,17 @@ from time import time
 
 
 # Global variables
-m = 20
-k = 10
-lamb = 1.0
-D_0 = np.random.rand(m, k)
-T = 100
+m = 49
+k = 20
+l = 0.00001
+d0 = np.random.rand(m, k)
+t = 3
 
 
 def load_data():
     '''
     code from sklearn application of dictionary learning
-    
+
     RETURNS:
     - data: n_patches, dim_patch array like. collection of patches
     '''
@@ -53,41 +53,85 @@ def load_data():
     return data
 
 
-# def generate(n):
-#     '''
-#     This functions generate iid rv from R^m
-#     '''
-#     mu = np.random.rand(m)
-#     S = np.random.rand(m, m)
-#     S = 1 + (S + np.transpose(S)) / 2
+def algorithm1(x, l, D, t):
+    '''
+    Online dictionary learning algorithm
 
-#     X = np.random.multivariate_normal(mu, S, n)
+    INPUTS:
+    - x : (n_samples, m) array like, data
+    - l, regularization parameter
+    - d0, (m, k) initial dictionary
+    - t, int, number of iterations
+    '''
+    n_s = len(x[:, 0])
 
-#     return X
+    # 1: initialization :
+    # A : (k, k) zero matrix
+    # B : (m, k) zero matrix
+    A = np.zeros((k, k))
+    B = np.zeros((m, k))
+    print A.shape
+    print B.shape
+
+    # 2: Loop
+    for i in range(1, t):
+        # 3: Draw xj from x
+        j = np.random.randint(0, n_s)
+        xj = x[j, :]
+
+        # 4: Sparse coding with LARS
+        from sklearn.linear_model import LassoLars
+        lars = LassoLars(alpha=l)
+
+        lars.fit(D, xj)
+        alpha = lars.coef_
+        alpha = (np.asmatrix(alpha)).T
+
+        # 5: Update A
+        A = A + (alpha).dot(alpha.T)
+
+        # 6: Update B
+        xj = (np.asmatrix(xj)).T
+        B = B + xj.dot(alpha.T)
+
+        D = algorithm2(D, A, B)
+
+    # 9 : Return learned dictionary
+    return D
 
 
-# def online_dict_learning()
+def algorithm2(D, A, B):
+    '''
+    Dictionary update
 
+    INPUTS:
+    - D, (m, k), input dictionary
+    - A, (k, k)
+    - B, (m, k)
 
-# def lars_solver(x, D, lamb):
-# 	'''
-# 	This function solves the min problem (8)
-# 	'''
+    OUTPUT:
+    - D, updated dictionary
+    '''
 
-# def dict_uptdater(D, A, B, X, lamb):
-# 	'''
-#     This function compute the new update of D cf algo 2
-#     what is a warm restart ?
-#     '''
-#     # while loop : criterion of convergence ?
-#     for j in range(0, k):
-#         u = (1 / A[j, j]) * (b[:, j] - np.dot(D, a[:, j]) + D[:, j])
+    # print D.shape
+    # print A.shape
+    # print B.shape
 
-#         # renormalisation
-#         renorm = max(np.linalg.norm(u), 1)
-#         d[:, j] = u / renorm
+    # Loop until convergence => What kind of cv ?
+    for j in range(0, k):
 
-# 	return D
+        # 3: Update the j-th column of d
+        u = (1 / A[j, j]) * (B[:, j] - D.dot(A[:, j])) + np.asmatrix(D[:, j]).T
+
+        # renormalisation
+        renorm = max(np.linalg.norm(u), 1)
+        for p in range(0, m):
+            D[p, j] = u[p] / renorm
+
+    return D
+
 
 if __name__ == "__main__":
-    data = load_data()
+    x = load_data()
+
+    algorithm1(x, l, d0, t)

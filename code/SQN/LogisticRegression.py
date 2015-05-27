@@ -19,7 +19,10 @@ def LogisticRegression(X,y):
 
 	def f(w):
 		"""
-		Loss functions
+		Loss functions as column vector
 		"""
 		hyp = h(w)
-		return -np.dot(np.log(hyp),y)-np.dot(math.log(1-hyp),(1-y))
+		return -y*np.log(hyp)-(1-y)*np.log(1-hyp)
+
+
+	F  = lambda w: f(w).sum()/X.shape[0]

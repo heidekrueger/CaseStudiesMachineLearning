@@ -1,5 +1,5 @@
 """
-    @author : stan
+    @author : stan/stefan
 
     This script is made to generate sets of points from different
     classes and plot them and boundaries between
@@ -21,16 +21,17 @@ myred = '#D22727'
 myblack = '#0E070A'
 mygray = '#727273'
 
-mpl.rc('axes',edgecolor=mywhite) #set default axis color
+mpl.rc('axes', edgecolor=mywhite)  # set default axis color
 
-# colormap = plt.cm.coolwarm # the python colormap that defines the colors of the plot
-colormap = pltcol.LinearSegmentedColormap.from_list('mycmap', [(0 / 3.0, myblue),
-                                                    (1 / 3.0, mywhite),
-                                                    (2 / 3.0, mygray),
-                                                    (3/3.0, myred)]
-                                        )
 
-symSize = 350 # the size of data points
+colormap = pltcol.LinearSegmentedColormap.from_list(
+        'mycmap',
+        [(0 / 3.0, myblue),
+            (1 / 3.0, mywhite),
+            (2 / 3.0, mygray),
+            (3/3.0, myred)])
+
+symSize = 350  # the size of data points
 
 means = [[2, -2], [-5, 5], [3, 5], [-4, -4]]
 cov0 = [[1, 0], [0, 2]]
@@ -40,8 +41,8 @@ cov3 = [[2, 1], [1, 2]]
 
 cov = [cov0, cov1, cov2, cov3]              # diamond       #hearts
 markers = [r'$\clubsuit$', r'$\spadesuit$', ur'$\u2666$', ur'$\u2665$']
-colors = [myblue,mywhite,mygray,myred]
-edgecolors = [mywhite,'none',mywhite,mywhite]
+colors = [myblue, mywhite, mygray, myred]
+edgecolors = [mywhite, 'none', mywhite, mywhite]
 edgecolors2 = [mywhite, mygray, mywhite, mywhite]
 
 x = []
@@ -60,28 +61,30 @@ for i in range(0, 4):
 for i in range(0, 4):
     x0 = x[i]
     y0 = y[i]
-    plt.scatter(x0, y0, c=colors[i], s=symSize, edgecolor=edgecolors[i], marker=markers[i])
+    plt.scatter(x0, y0,
+                c=colors[i],
+                s=symSize,
+                edgecolor=edgecolors[i],
+                marker=markers[i])
 
-plt.xlabel('Hauptkomponente 1',color=mywhite)
-plt.ylabel('Hauptkomponente 2', color = mywhite)
+plt.xlabel('Hauptkomponente 1', color=mywhite)
+plt.ylabel('Hauptkomponente 2', color=mywhite)
 plt.xticks(())
 plt.yticks(())
 # add unknown data point
-plt.scatter(-3,2.5,c=myblack,s=symSize*2,marker = r'$?$',edgecolor='none')
-# plt.scatter(-3,2,c='none',s=symSize+8,marker = 'o',edgecolor='y') # draw a circle around the '?'
+plt.scatter(-3, 2.5, c=myblack, s=symSize*2, marker=r'$?$', edgecolor='none')
 
 fig.savefig('plot %d.eps' % 0, transparent=True)
-# plt.show()
+
 
 X = np.zeros((n_pts * n_set, 2))
 Y = np.zeros((n_pts * n_set))
-for i in classes: 
+for i in classes:
     x0 = x[i]
     y0 = y[i]
     for j in range(0, n_pts):
         X[j + i * n_pts, :] = [x0[j], y0[j]]
         Y[j + i * n_pts] = i
-
 
 
 sampled_indexes = [np.random.randint(0, X.shape[0])
@@ -137,13 +140,14 @@ for i, clf in enumerate((svc, svc_sub, svc_sub)):
                     marker=markers[cl],
                     edgecolor=edgecolors2[cl]
                     )
-    plt.scatter(-3,2.5,c=myblack,s=symSize*2,marker = r'$!$', edgecolor='none')
-    plt.xlabel('Hauptkomponente 1',color=mywhite)
-    plt.ylabel('Hauptkomponente 2', color = mywhite)
+    plt.scatter(-3, 2.5, c=myblack, s=symSize*2, marker=r'$!$',
+                edgecolor='none')
+    plt.xlabel('Hauptkomponente 1', color=mywhite)
+    plt.ylabel('Hauptkomponente 2', color=mywhite)
     plt.xlim(xx.min(), xx.max())
     plt.ylim(yy.min(), yy.max())
-    plt.xticks((),color = mywhite)
-    plt.yticks((), color = mywhite)
+    plt.xticks((), color=mywhite)
+    plt.yticks((), color=mywhite)
     # plt.title(titles[i], color = mywhite)
 
     # ax = fig.add_subplot(111)

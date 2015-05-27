@@ -7,7 +7,9 @@
     - structure of algorithm2
 
     TODO :
-    add a stopping criterion for while loop in algorithm2
+    - add a stopping criterion for while loop in algorithm2
+    - test convergence criterion (cf renormalisation)
+    - mini batch
 """
 
 
@@ -19,6 +21,7 @@ from time import time
 m = 49
 k = 20
 l = 0.00001
+# could take as a matrix.
 d0 = np.random.rand(m, k)
 t = 3
 
@@ -72,7 +75,9 @@ def algorithm1(x, l, D, t):
     '''
     n_s = len(x[:, 0])
 
-    # 1: initialization :
+    # 1: initialization : => think about another way to initialize
+    # - identity matrix or Epsilon * Identity
+    # - random matrix
     # A : (k, k) zero matrix
     # B : (m, k) zero matrix
     A = np.zeros((k, k))
@@ -121,22 +126,32 @@ def algorithm2(D, A, B):
     '''
 
     # counter to simulation a stopping criterion
+    # take the gradient of the lagragian : eq 10 similar to it
     c = 0
     c_max = 10
+    eps = 0.0001
 
     # Loop until convergence => What kind of cv ?
-    while c < c_max:
+    converged = False
+    while not converged or c < c_max:
         c = c + 1
+        converged = True
         for j in range(0, k):
 
             # 3: Update the j-th column of d
             u = (1 / A[j, j]) * (B[:, j] - D.dot(A[:, j]))
             u = u + np.asmatrix(D[:, j]).T
-
             # renormalisation
             renorm = max(np.linalg.norm(u), 1)
+            u = np.divide(u, renorm)
+
+            # Convergence test
+            norm = np.linalg.norm(u - np.asmatrix(D[:, j]).T)
+            if norm > eps:
+                converged = False
+
             for p in range(0, m):
-                D[p, j] = u[p] / renorm
+                D[p, j] = u[p]
 
     return D
 

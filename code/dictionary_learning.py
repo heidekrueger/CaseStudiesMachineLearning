@@ -1,6 +1,13 @@
 """
     @Stan
-    Implementation of online dictionary learning algo
+    Implementation of online dictionary learning algorithms 1 and 2
+
+    DONE :
+    - algorithm1
+    - structure of algorithm2
+
+    TODO :
+    add a stopping criterion for while loop in algorithm2
 """
 
 
@@ -113,20 +120,23 @@ def algorithm2(D, A, B):
     - D, updated dictionary
     '''
 
-    # print D.shape
-    # print A.shape
-    # print B.shape
+    # counter to simulation a stopping criterion
+    c = 0
+    c_max = 10
 
     # Loop until convergence => What kind of cv ?
-    for j in range(0, k):
+    while c < c_max:
+        c = c + 1
+        for j in range(0, k):
 
-        # 3: Update the j-th column of d
-        u = (1 / A[j, j]) * (B[:, j] - D.dot(A[:, j])) + np.asmatrix(D[:, j]).T
+            # 3: Update the j-th column of d
+            u = (1 / A[j, j]) * (B[:, j] - D.dot(A[:, j]))
+            u = u + np.asmatrix(D[:, j]).T
 
-        # renormalisation
-        renorm = max(np.linalg.norm(u), 1)
-        for p in range(0, m):
-            D[p, j] = u[p] / renorm
+            # renormalisation
+            renorm = max(np.linalg.norm(u), 1)
+            for p in range(0, m):
+                D[p, j] = u[p] / renorm
 
     return D
 

@@ -28,10 +28,7 @@ def get_trained_classifier(folder, w, h):
 	##
 	## classifier: Random Forest
 	##
-	param_grid = {'n_estimators': [100], }
-	clf = GridSearchCV(
-		RandomForestClassifier(n_jobs = 4), 
-		param_grid)
+	clf = RandomForestClassifier(n_jobs = 1, n_estimators = 100)
 	##
 	## fit
 	##
@@ -50,7 +47,11 @@ def pickle_classifier(clf):
 if __name__ == "__main__":	
 	folder = "./faces/"
 	w, h = 30, 50		
+	
+	print("\nTraining...\n")
+	
 	clf = get_trained_classifier(folder, w, h)
+	print(clf)
 	pickle_classifier(clf)
 	
 	print("\nTraining finished!\n")

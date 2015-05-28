@@ -24,7 +24,7 @@ def depickle_classifier():
 
 def create_labeled_image(filename, text):
     
-    text = re.sub("_", " ", text)
+    #text = re.sub("_", " ", text)
     split = filename.split("/")
     img_name = "print/" + split[-1]
 
@@ -57,11 +57,10 @@ def create_labeled_image(filename, text):
     
     img.save(img_name,"JPEG",quality=100)  
 
-if __name__ == "__main__":    
-    
-    folder = "uglyfaces/"    
-    ext = ".jpg"
-    
+
+def predict_face(folder, name = "", ext = ".jpg", clf = None):
+
+    '''
     ## check for command line arguments
     if len(sys.argv) > 1:
         name = sys.argv[-1]
@@ -71,8 +70,9 @@ if __name__ == "__main__":
             name = re.sub(ext, "", name)
         if folder in name:
             name = re.sub(folder, "", name)
+    '''
     ## create prompt
-    else:
+    if len(name) == 0:
         name = raw_input("Dateiname: ")
     
     ## create filename
@@ -81,20 +81,27 @@ if __name__ == "__main__":
     ## params
     w, h = 30, 50        
         
-    clf = depickle_classifier()
+    if clf is None:
+        clf = depickle_classifier()
     ugly_face = students.load_features_from_image(filename, w, h)      
 
     y_pred = clf.predict(ugly_face)
     y_prob = clf.predict_proba(ugly_face)
     
+    return y_pred[0], y_prob.max()
+    
+    
+    
+
+if __name__ == "__main__":
+    folder = "uglyfaces/"
+    ext = ".jpg"
+    name, prob = predict_face(folder)
     print("")
-    print("Predicted Name:", y_pred[0])
-    print("With probability:", y_prob.max())
+    print("Predicted Name:", name)
+    print("With probability:", prob)
     print("")
     
-    text = "Predicted Name: " + str(y_pred[0]) + " with probability " + str(int(y_prob.max()*100)) + "%"
+    text = "Predicted Name: " + str(name) + " with probability " + str(int(prob*100)) + "%"
     
     create_labeled_image(filename, text)
-    
-    
-    

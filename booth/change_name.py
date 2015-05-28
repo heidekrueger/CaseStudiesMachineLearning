@@ -32,16 +32,16 @@ def change_name(s):
     print "saving name : " + s
 
     # date of the photo
-    date = '2015-05-07'
+    date = '2015-05-27'
 
     # path to the webcam rep
-    path_webcam = "/home/roland/Pictures/Webcam/"
+    path_webcam = "Fotos/"
 
     # path to the faces rep
-    path_faces = "faces/"
+    path_faces = "Datenbank/"
 
     # path to the ugly faces
-    path_uglyfaces = "uglyfaces/"
+    path_uglyfaces = "Grimassen/"
 
     # extension
     f_ext = ".jpg"

@@ -66,7 +66,7 @@ def load_student_database( folder, width, height):
             ##
             
             ext = name[-3:]
-            label = re.sub("_\d+.%s" % ext, "", name)
+            label = re.sub("-\d+.%s" % ext, "", name)
             
             ##
             ## Load standardized image

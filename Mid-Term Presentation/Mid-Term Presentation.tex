@@ -127,9 +127,9 @@
 	\begin{frame}{Stochastic Quasi-Newton Method (1)}
 		Problem:
 		\begin{itemize}
+			\item Use of curvature information highly beneficial for algorithm performance
 			\item Incorporating second-order information via full Hessian too expensive for
 			large-scale problems
-			\item Use of curvature information highly beneficial for algorithm performance
 		\end{itemize}
 		\pause
 		Idea:
@@ -154,7 +154,7 @@
 			\begin{equation*}
 				s_t = \bar{w}_t - \bar{w}_{t-1} \qquad y_t = \widehat{\nabla}^2 F(\bar{w}_t) s_t,
 			\end{equation*}
-			with $\bar{w}_t := \sum^k_{i = k-L} w_i$ and $\widehat{\nabla}^2 F(w)
+			with $\bar{w}_t := \frac{1}{L} \sum^k_{i = k-L} w_i$ and $\widehat{\nabla}^2 F(w)
 			:= \frac{1}{b_H} \sum_{i \in \mathcal{S}_H} \nabla^2 f(w; x_i, z_i)$.\\
 			\vspace{0.3 cm}
 			Compute

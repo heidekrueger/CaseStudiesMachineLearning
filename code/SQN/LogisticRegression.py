@@ -1,6 +1,7 @@
 import numpy as np
 import math
 from sklearn import datasets
+import sklearn as sk
 
 class LogisticRegression():
 	"""
@@ -26,17 +27,22 @@ class LogisticRegression():
 		"""
 		Loss functions as column vector
 		"""
-		print "testing:"
-		print y
-		print "  "
+		if np.isscalar(y):
+			y = np.array([y])
 		hyp = self.h(w, X)
-		return -y.dot(np.log(hyp))-(1-y).dot(np.log(1-hyp))
+		return -y*np.log(hyp)- (1-y)*(np.log(1-hyp))
 
 
 	def F(self, w, X, y):
+		"""
+		Overall objective function
+		"""
 		return self.f(w, X, y).sum()/float(X.shape[0])
 
 	def g(self, w, X, y):
+		"""
+		Gradient of F
+		"""
 		hyp = self.h(w, X)
 		return np.dot(X.T, hyp-y)/X.shape[0]
 
@@ -46,15 +52,21 @@ class LogisticRegressionTest(LogisticRegression):
 
 	def testF(self):
 		iris = datasets.load_iris()
-		X, y = iris.data[:5,:], iris.target[:5]
+		X, y = iris.data[:5,:], iris.target[:5,np.newaxis]
+
+		clf = sklearn.linear_model.LogisticRegression(penalty='l2', dual=False, tol=0.0001, C=1.0, fit_intercept=True, intercept_scaling=1, class_weight=None, random_state=None, solver='liblinear', max_iter=100, multi_class='ovr', verbose=0)
 
 		w= np.zeros([X.shape[1],1])
+
+		print X
+
+		print y
 
 		print "f complete"
 		print self.f(w, X, y)
 		print "f for first entry"
 		print self.f(w, X[0,:], y[0])
 		print "F"
-		print self.f(w,X,y)
+		print self.F(w,X,y)
 		print "g complete"
 		print self.g(w, X, y)

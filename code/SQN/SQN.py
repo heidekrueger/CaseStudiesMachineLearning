@@ -66,13 +66,18 @@ def getH(s, y):
 
 	return H
 
-def correctionPairs(w, wPrevious):
+def correctionPairs(w, wPrevious, g, X, y):
 	"""
 	returns correction pairs s,y
-	"""
-	raise NotImplementedError
 
-def solveSQN(f, grad, X, y=None, w1, M=10, L=1.0, beta=1):
+	"""
+	s = w-wPrevious
+	#TODO: replace explicit stochastic gradient
+	y = calculateStochasticGradient(w, g, X, y) - calculateStochasticGradient(wPrevious, g, X, y)
+
+	return (s, y)
+
+def solveSQN(f, g, X, y=None, w1, M=10, L=1.0, beta=1):
 	"""
 	Parameters:
 		f:= f_i = f_i(omega, x, y[.]), loss function for one sample. The goal is to minimize
@@ -124,7 +129,7 @@ def solveSQN(f, grad, X, y=None, w1, M=10, L=1.0, beta=1):
 			if t>0:
 			#choose a Sample S_H \subset [nSamples] to define Hbar
 				sampleH = chooseSample(nSamples)
-				(s_t, y_t) = correctionPairs(w, wPrevious)
+				(s_t, y_t) = correctionPairs(w, wPrevious, X[sampleH,:], y[sampleH])
 				s.append(s_t)
 				y.append(y_t)
 				if len(s) > M:
@@ -133,3 +138,8 @@ def solveSQN(f, grad, X, y=None, w1, M=10, L=1.0, beta=1):
 			wbar = 0
 
 	return w
+
+
+if __name__ == "__main__":
+	rosenbrock = lambda x: (1-x[0])**2+100*(x[1]-x[0]**2)**2
+	rosengrad = 

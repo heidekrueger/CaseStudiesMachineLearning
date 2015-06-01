@@ -2,6 +2,7 @@ import numpy as np
 import scipy as sp
 import random as rd
 import itertools
+from collections import deque
 
 def hasTerminated(f,g,w,k):
 	"""
@@ -30,25 +31,48 @@ def chooseSample(N,b=.2):
 	"""
 	return rd.sample(range(N), int(b*N))
 
-def calculateStochasticGradient(w):
+def calculateStochasticGradient(w, g, X, y=None):
 	"""
 	Calculates Stochastic gradient of F at w as per formula (1.4)
 	"""
-	raise NotImplementedError
+	nSamples, nFeatures = X.shape
+	if y is None:
+		return sum([g(w,X[i,:]) for i in range(X.shape(0))])
+	else:
+		assert(len(X)==len(y), "Error: Dimensions mus match")
+		return sum([g(w,X[i,:],y[i]) for i in range(X.shape(0))])
 
-def getH(t):
+
+def getH(s, y):
 	"""
 	returns H_t as defined in algorithm 2
 	"""
-	raise NotImplementedError 
+	assert(len(s)>0, "s cannot be empty.")
+	assert(len(s)==len(y), "s and y must have same length")
+	assert(s[0].shape == y[0].shape, "s and y must have same shape")
+	assert(y[-1].abs().sum() != 0, "last y entry cannot be 0!")
+	# H = (s_t^T y_t^T)/||y_t||^2 * I
 
-def correctionPairs(w,wPrevious):
+	# TODO: Two-Loop Recursion
+	# TODO: Hardcode I each time to save memory. (Or sparse???)
+	I= np.identity(len(s[0]))
+	H = np.dot( (np.inner(s[-1], y[-1]) / np.inner(y[-1], y[-1])), I)
+
+	for (s_j, y_j) in itertools.izip(s, y):
+		rho = 1/np.inner(y_j, s_j)
+
+		H = (I - rho* np.outer(s_j, y_j)).dot(H).dot(I - rho* np.outer(y_j, s_j))
+		H += rho * np.outer(s_j, s_j) 
+
+	return H
+
+def correctionPairs(w, wPrevious):
 	"""
 	returns correction pairs s,y
 	"""
 	raise NotImplementedError
 
-def solveSQN(f,grad,X,y=None,w1,M=1,L=1.0,beta=1):
+def solveSQN(f, grad, X, y=None, w1, M=10, L=1.0, beta=1):
 	"""
 	Parameters:
 		f:= f_i = f_i(omega, x, y[.]), loss function for one sample. The goal is to minimize
@@ -63,6 +87,9 @@ def solveSQN(f,grad,X,y=None,w1,M=1,L=1.0,beta=1):
 
 		M: Memory-Parameter
 	"""
+	assert(M>0, "Memory Parameter M must be a positive integer!")
+
+
 	# step sizes alpha_k
 	alpha = lambda k: beta/k
 
@@ -73,16 +100,19 @@ def solveSQN(f,grad,X,y=None,w1,M=1,L=1.0,beta=1):
 	wbar = np.zeros(w1.shape)
 	wPrevious = wbar
 
+	s, y = deque(), deque()
+
+
 	for k in itertools.count():
 		if hasTerminated(f,g,w,k):
 			break
 
 		S = chooseSample(nSamples)
-		grad = calculateStochasticGradient(w)
+		grad = calculateStochasticGradient(w, g, X[S,:], y[S])
 		wbarPrevious = wbar
 		wPrevious = w
-		wbar = wbar +w
-		if k<= 2*L:
+		wbar = wbar + w
+		if k <= 2*L:
 			w = w - alpha(k)*grad
 		else:
 			w = w-alpha(k)*getH(t)*grad
@@ -94,7 +124,12 @@ def solveSQN(f,grad,X,y=None,w1,M=1,L=1.0,beta=1):
 			if t>0:
 			#choose a Sample S_H \subset [nSamples] to define Hbar
 				sampleH = chooseSample(nSamples)
-				s,y = correctionPairs(w,wPrevious)
+				(s_t, y_t) = correctionPairs(w, wPrevious)
+				s.append(s_t)
+				y.append(y_t)
+				if len(s) > M:
+					s.popleft()
+					y.popleft() 
 			wbar = 0
 
 	return w

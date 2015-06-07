@@ -57,10 +57,19 @@ def correctionPairs(g, w, wPrevious, X, z):
 	returns correction pairs s,y
 
 	"""
-	s = w-wPrevious
+	s = w - wPrevious
 	#TODO: replace explicit stochastic gradient
-	y = calculateStochasticGradient(g, w, X, z) - calculateStochasticGradient(g, wPrevious, X, z)
-
+	sg = lambda x: calculateStochasticGradient(g, x, X, z)
+	y = ( sg(w) - sg(wPrevious) ) #/ ( np.linalg.norm(s) + 1)
+		
+	## 
+	## Perlmutters Trick:
+	## https://justindomke.wordpress.com/2009/01/17/hessian-vector-products/
+	## H(x) v \approx \frac{g(x+r v) - g(x-r v)} {2r}
+	## TODO: Not working??
+	##r = 1e-2
+	##y = ( sg(w + r*s) - sg(w - r*s) ) / 2*r
+	
 	return (s, y)
 
 

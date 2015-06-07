@@ -28,12 +28,12 @@ def test_rosenbrock(sqn_method):
 			2*(a-x[0])*(-1) + 2*(x[1]-x[0]**2)*(-2*x[1]), 
 			2*(x[1]-x[0]**2)
 									])
-	print sqn_method(rosenbrock, rosengrad, X=X, z=None, w1 = None, M=10, L=1.0, beta=0.1)
+	print sqn_method(rosenbrock, rosengrad, X=X, z=None, w1 = None, dim = 2, M=10, L=1.0, beta=0.1)
 
 if __name__ == "__main__":
-	print "SQN:"
+	print "\nSQN:"
 	test_rosenbrock(SQN.solveSQN)
-	print "SQN_LAZY:"
+	print "\nSQN_LAZY:"
 	test_rosenbrock(SQN_LAZY.solveSQN)
 	
 	

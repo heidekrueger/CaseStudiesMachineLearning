@@ -9,13 +9,13 @@ import scipy.optimize
 from stochastic_tools import sample_batch as chooseSample
 from stochastic_tools import stochastic_gradient as calculateStochasticGradient
 
-def hasTerminated(f,y,w,k, max_iter = 1e4):
+def hasTerminated(f, y, w, k, max_iter = 1e4):
 	"""
 	Checks whether the algorithm has terminated
 
 	Parameters:
 		f: function for one sample
-		g: gradient entry for one sample
+		y: difference of gradients
 		w: current variable
 		k: current iteration
 
@@ -64,7 +64,7 @@ def correctionPairs(g, w, wPrevious, X, z):
 	return (s, y)
 
 
-def solveSQN(f, g, X, z = None, w1 = None, M=10, L=1.0, beta=1, batch_size = 1, batch_size_H = 1, debug = False):
+def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batch_size = 1, batch_size_H = 1, max_iter = 1e4, debug = False):
 	"""
 	Parameters:
 		f:= f_i = f_i(omega, x, z[.]), loss function for one sample. The goal is to minimize
@@ -80,68 +80,65 @@ def solveSQN(f, g, X, z = None, w1 = None, M=10, L=1.0, beta=1, batch_size = 1, 
 		M: Memory-Parameter
 	"""
 	assert M > 0, "Memory Parameter M must be a positive integer!"
-
-	##
-	## TODO: Give dimensions!
-	##
-	if w1 == None:
-		w1 = np.zeros(2)
-	w = w1
+	assert w1 != None or dim != None, "Please privide either a starting point or the dimension of the optimization problem!"
 	
 	## dimensions
 	(nSamples, nFeatures) = np.shape(X)
 	
+	if w1 == None:  w1 = np.zeros(dim)
+	w = w1
+	
 	#Set wbar = wPrevious = 0
 	wbar = np.zeros(w1.shape)
-	wPrevious = wbar
+	gbar = np.zeros(w1.shape)
+	wPrevious = np.zeros(w1.shape)
 	
 	# step sizes alpha_k
+	alpha_k = beta
 	alpha = lambda k: beta/(k + 1)
 
-	t = -1
 	s, y = deque(), deque()
 	
-	alpha_counter = 0
 	## accessed data points
+	t = -1
 	adp = 0
 	
 	for k in itertools.count():
 		
-		if hasTerminated(f ,y ,w ,k):
-			if debug: print "terminated"
+		##
+		## Check Termination Condition
+		##
+		if hasTerminated(f ,y ,w ,k, max_iter = max_iter):
 			iterations = k
 			break
 		
 		##
 		## Draw mini batch
 		##		
-		
-		X_S, z_S = chooseSample(nSamples, X, z, b = batch_size)
-		adp += batch_size
+		X_S, z_S, adp = chooseSample(nSamples, X, z, b = batch_size, adp=adp)
 		
 		## 
 		## Determine search direction
 		##
 		grad = calculateStochasticGradient(g, w, X_S, z_S)
-		search_dir = -grad if k <= 2*L else -getH(s,y).dot(grad)
+		search_direction = -grad if k <= 2*L else -getH(s,y).dot(grad)
 		
 		##
 		## Compute step size alpha
 		##
 		f_S = lambda x: f(x, X_S) if z == None else lambda x: f(x, X_S, z_S)
 		g_S = lambda x: g(x, X_S) if z == None else lambda x: g(x, X_S, z_S)
-		alpha_k = scipy.optimize.line_search(f_S, g_S, w, search_dir)[0]
+		alpha_k = scipy.optimize.line_search(f_S, g_S, w, search_direction)[0]
 		alpha_k = alpha(k) if alpha_k == None else alpha_k
 		if debug: print "alpha", alpha_k
 		
 		##
 		## Perform update
 		##
-		wbarPrevious = wbar
 		wPrevious = w
-		wbar = wbar + w
-		w = w + alpha_k*search_dir
-	
+		w = w + alpha_k*search_direction
+		wbar += w
+		
 		if debug: print "w: ", w
 		
 		##
@@ -150,12 +147,11 @@ def solveSQN(f, g, X, z = None, w1 = None, M=10, L=1.0, beta=1, batch_size = 1, 
 		if k%L == 0:
 		    
 			t += 1
-			wbar = wbar/float(L) 
+			wbar /= float(L) 
 			
 			if t>0:
 				#choose a Sample S_H \subset [nSamples] to define Hbar
-				X_SH, y_SH = chooseSample(nSamples, X, z, b = batch_size_H)
-				adp += batch_size_H
+				X_SH, y_SH, adp = chooseSample(nSamples, X, z, b = batch_size_H, adp = adp)
 				
 				(s_t, y_t) = correctionPairs(g, w, wPrevious, X_SH, y_SH)
 				s.append(s_t)
@@ -164,8 +160,12 @@ def solveSQN(f, g, X, z = None, w1 = None, M=10, L=1.0, beta=1, batch_size = 1, 
 					s.popleft()
 					y.popleft() 
 					
-			wbar = 0
+			wbar = np.multiply(wbar, 0) 
+			
 
-	print iterations, alpha_counter, adp
+	if iterations < max_iter:
+	    print "Terminated successfully!" 
+	print "Iterations:\t\t", iterations
+	print "Accessed Data Points:\t", adp
 	return w
 

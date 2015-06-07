@@ -7,62 +7,26 @@ import scipy.optimize
 
 from stochastic_tools import sample_batch as chooseSample
 from stochastic_tools import stochastic_gradient as calculateStochasticGradient
-
+import SQN
 
 def hasTerminated(f, wbars, gbars, k, max_iter = 1e4):
-	"""
-	Checks whether the algorithm has terminated
+    if len(wbars) < 2 and len(gbars) < 2:
+	return SQN.hasTerminated(f, [], [], k, max_iter)
+    else:
+	return SQN.hasTerminated(f, gbars[-1] - gbars[-2], wbars[-1] - wbars[-2], k, max_iter)
 
-	Parameters:
-		f: function for one sample
-		g: gradient entry for one sample
-		w: current variable
-		k: current iteration
-
-	"""
-	eps = 1e-6
-	if k > max_iter:
-		return True
-	elif len(gbars) > 1 and np.linalg.norm(gbars[-1] - gbars[-2]) < eps:
-		return True
-	else:
-		return False
-
-
-def getH(wbars, gbars):
-	"""
-	returns H_t as defined in algorithm 2
-	"""
-	
-	assert len(wbars)>0, "s cannot be empty."
-	assert len(wbars)==len(gbars), "s and y must have same length"
-	assert wbars[0].shape == gbars[0].shape, "s and y must have same shape"
-	
-	##
-	## get correction pairs
-	##
+def get_correction_pairs(wbars, gbars):
 	s, y = [], []
 	for i in range(len(wbars)-1):
 	    s.append(wbars[i+1] - wbars[i])
-	    y.append((gbars[i+1]) - (gbars[i]))
-	#s = [ np.array(a) + np.array(b) for (a,b) in zip( list(wbars)[1:] - list(wbars)[:-1] ) ]
-	#y = [ a + b for (a,b) in zip( list(gbars)[1:] - list(gbars)[:-1] ) ]
-	assert abs(y[-1]).sum() != 0, "latest y entry cannot be 0!"
-	
-	# H = (s_t^T y_t^T)/||y_t||^2 * I
-	# TODO: Two-Loop Recursion
-	# TODO: Hardcode I each time to save memory. (Or sparse???)
-	I= np.identity(len(s[0]))
-	H = np.dot( (np.inner(s[-1], y[-1]) / np.inner(y[-1], y[-1])), I)
-	for (s_j, y_j) in itertools.izip(s, y):
-		rho = 1/np.inner(y_j, s_j)
-		H = (I - rho* np.outer(s_j, y_j)).dot(H).dot(I - rho* np.outer(y_j, s_j))
-		H += rho * np.outer(s_j, s_j) 
+	    y.append(gbars[i+1] - gbars[i])
+	return s, y
 
-	return H
-
+def getH(wbars, gbars):
+    s, y = get_correction_pairs(wbars, gbars)
+    return SQN.getH(s, y)
 		
-def solveSQN(f, g, X, z = None, w1 = None, M=10, L=1.0, beta=1, batch_size = 1, debug = False):
+def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batch_size = 1, max_iter = 1e4, debug = False):
 	"""
 	Parameters:
 		f:= f_i = f_i(omega, x, z[.]), loss function for one sample. The goal is to minimize
@@ -78,83 +42,84 @@ def solveSQN(f, g, X, z = None, w1 = None, M=10, L=1.0, beta=1, batch_size = 1, 
 		M: Memory-Parameter
 	"""
 	assert M > 0, "Memory Parameter M must be a positive integer!"
-
-	##
-	## TODO: Give dimensions!
-	##
-	if w1 == None:
-		w1 = np.zeros(2)
-	w = w1
+	assert w1 != None or dim != None, "Please privide either a starting point or the dimension of the optimization problem!"
 	
 	## dimensions
 	(nSamples, nFeatures) = np.shape(X)
 	
+	if w1 == None:  w1 = np.zeros(dim)
+	w = w1
+	
 	#Set wbar = wPrevious = 0
 	wbar = np.zeros(w1.shape)
 	gbar = np.zeros(w1.shape)
-	wPrevious = wbar
+	wPrevious = np.zeros(w1.shape)
 
 	# step sizes alpha_k
 	alpha_k = beta
 	alpha = lambda k: beta/(k + 1)
 
 	wbars, gbars = deque(), deque()
-
-	adp = 0
 		
-	alpha_counter = 0
+	## accessed data points
+	adp = 0
+	
 	for k in itertools.count():
-		if hasTerminated(f , wbars, gbars, k):
-			if debug: print "terminated"
+		
+		##
+		## Check Termination Condition
+		##
+		if hasTerminated(f , wbars, gbars, k, max_iter = max_iter):
 			iterations = k
 			break
 		
 		##
 		## Draw mini batch
 		##		
-		X_S, z_S = chooseSample(nSamples, X, z, b = batch_size)
-		adp += batch_size
+		X_S, z_S, adp = chooseSample(nSamples, X, z, b = batch_size, adp=adp)
 		
 		## 
 		## Determine search direction
 		##
 		grad = calculateStochasticGradient(g, w, X_S, z_S)
-		search_dir = -grad if k <= 2*L else -getH(wbars,gbars).dot(grad)
+		search_direction = -grad if k <= 2*L else -getH(wbars, gbars).dot(grad)
 		
 		##
 		## Compute step size alpha
 		##
 		f_S = lambda x: f(x, X_S) if z == None else lambda x: f(x, X_S, z_S)
 		g_S = lambda x: g(x, X_S) if z == None else lambda x: g(x, X_S, z_S)
-		alpha_k = scipy.optimize.line_search(f_S, g_S, w, search_dir)[0]
+		alpha_k = scipy.optimize.line_search(f_S, g_S, w, search_direction)[0]
 		alpha_k = alpha(k) if alpha_k == None else alpha_k
 		if debug: print "alpha", alpha_k
 		
 		##
 		## Perform update
 		##
-		wbarPrevious = wbar
 		wPrevious = w
-		w = w + alpha_k*search_dir
-		if debug: print "w: ", w
-		
 		wbar += w
+		w = w + alpha_k*search_direction
 		gbar += grad
+		
+		if debug: print "w: ", w
 				
 		##
 		## compute Correction pairs every L iterations
 		##
 		if k%L == 0:
-			wbar = wbar/float(L)
-			gbar = gbar/float(L)
+			wbar = wbar / float(L)
+			gbar = gbar / float(L)
 			wbars.append(wbar)
 			gbars.append(gbar)
 			if len(wbars) > M + 1:
 			    wbars.popleft()
-			    gbars.popleft() 	
-			wbar = 0
-			gbar *= 0
-			
-	print iterations, alpha_counter, adp
+			    gbars.popleft() 
+			wbar = np.multiply(wbar, 0) 
+			gbar = np.multiply(gbar, 0) 
+	
+	if iterations < max_iter:
+	    print "Terminated successfully!" 
+	print "Iterations:\t\t", iterations
+	print "Accessed Data Points:\t", adp
 	return w
 

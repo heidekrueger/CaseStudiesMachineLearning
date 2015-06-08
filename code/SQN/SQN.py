@@ -59,12 +59,10 @@ def correctionPairs(g, w, wPrevious, X, z):
 	returns correction pairs s,y
 
 	"""
-	print w, wPrevious
 	s = w - wPrevious
 	#TODO: replace explicit stochastic gradient
 	sg = lambda x: calculateStochasticGradient(g, x, X, z)
 	y = ( sg(w) - sg(wPrevious) ) #/ ( np.linalg.norm(s) + 1)
-	print "corr pair", s, y
 	## 
 	## Perlmutters Trick:
 	## https://justindomke.wordpress.com/2009/01/17/hessian-vector-products/
@@ -105,7 +103,7 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batc
 	#Set wbar = wPrevious = 0
 	wbar = w1
 	wPrevious = w
-	print w.shape
+	if debug: print w.shape
 	# step sizes alpha_k
 	alpha_k = beta
 	alpha = lambda k: beta/(k + 1)
@@ -152,12 +150,12 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batc
 		#g_S = lambda x: g(x, X_S) if z == None else lambda x: g(x, X_S, z_S)
 		
 		f_S = lambda x: f(x, X_S, z_S)
-		print "f", f_S(w)
+		if debug: print "f", f_S(w)
 		g_S = lambda x: calculateStochasticGradient(g, x, X_S, z_S)
 		
 		#alpha_k = scipy.optimize.line_search(f_S, g_S, w, search_direction)[0]
-		#alpha_k = armijo_rule(f_S, g_S, w, search_direction, beta=.5, gamma= 1e-2 )
-		alpha_k = 0.01   
+		alpha_k = armijo_rule(f_S, g_S, w, search_direction, start = beta, beta=.5, gamma= 1e-2 )
+		#alpha_k = 0.01   
 		if debug: print "alpha", alpha_k
 		
 		##
@@ -165,15 +163,15 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batc
 		##
 		wPrevious = w
 		
-		print "LOL?!"
-		print w
+		if debug: print "LOL?!"
+		if debug: print w
 		#print search_direction
 		#print alpha_k
 		w = w + np.multiply(alpha_k, search_direction)
 		wbar += w
-		print ""
+		if debug: print ""
 		if debug: print w
-		print "" 
+		if debug: print "" 
 		##
 		## compute Correction pairs every L iterations
 		##
@@ -187,7 +185,7 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batc
 				
 				(s_t, y_t) = correctionPairs(g, w, wPrevious, X_SH, y_SH)
 				
-				print "correction shapes", s_t, y_t
+				if debug: print "correction shapes", s_t, y_t
 				s.append(s_t)
 				y.append(y_t)
 				if len(s) > M:

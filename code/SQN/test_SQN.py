@@ -41,7 +41,7 @@ def test_Logistic_Regression(sqn_method):
 	func = lambda w, X, z: logreg.F(w, X, z)
 	grad = lambda w, X, z: logreg.g(w, X, z)
 	
-	w = sqn_method(func, grad, X=X, z=z, w1 = None, dim = 3, M=10, L=2, beta=1, batch_size = 10, batch_size_H = 10, max_iter=2500, debug = True)
+	w = sqn_method(func, grad, X=X, z=z, w1 = None, dim = 3, M=10, L=2, beta=0.1, batch_size = 10, batch_size_H = 10, max_iter=500, debug = False)
 	print w
 	print func(w, X, z)
     
@@ -55,6 +55,6 @@ if __name__ == "__main__":
 	test_Logistic_Regression(SQN.solveSQN)
 	
 	print "Logistic Regression: Lazy SQN"
-	#test_Logistic_Regression(SQN_LAZY.solveSQN)
+	test_Logistic_Regression(SQN_LAZY.solveSQN)
 	
 	

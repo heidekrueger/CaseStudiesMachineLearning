@@ -67,7 +67,7 @@ def stochastic_gradient(g, w, X=None, z=None):
 		#print " one gradient:" , g(w,X[0],z[0])
 		return sum([g(w,X[i],z[i]) for i in range(nSamples)])
  
-def armijo_rule(f, g, x, s, beta=.5, gamma= 1e-2 ):
+def armijo_rule(f, g, x, s, start = 1.0, beta=.5, gamma= 1e-2 ):
 	"""
 	Determines the armijo-rule step size alpha for approximating 
 	line search min f(x+omega*s)
@@ -79,7 +79,7 @@ def armijo_rule(f, g, x, s, beta=.5, gamma= 1e-2 ):
 		s:= x_k search direction
 		beta, gamma: parameters of rule
 	"""
-	candidate = 10
+	candidate = start
 	#print "armijo"
 	#print f(x + np.multiply(candidate, s)) 
 	#print "fa", f(x)

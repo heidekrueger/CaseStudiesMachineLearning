@@ -28,7 +28,15 @@ def load_data1():
 def load_data2():
     dataset = np.genfromtxt(open('ex2data2.txt','r'), delimiter=',', dtype='f8')
     X = dataset[:,:2]
-    z = dataset[:,2]
+    z = dataset[:,2][:,np.newaxis]
+    
+    X = normalize(X)
+    
     X = np.concatenate( (np.ones( (len(z), 1)), X), axis=1)
-    return X, z
+    X_new = []
+    for i in range(len(z)):
+	x = np.array(list(X[i,:]))
+	x.shape = (len(x), 1)
+	X_new.append(x)
+    return X_new, list(z)
 

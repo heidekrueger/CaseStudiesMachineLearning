@@ -139,39 +139,25 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batc
 		else:
 		    search_direction = -(getH(s,y).dot(grad))
 		
-		
-		#search_direction = np.multiply( 1/np.linalg.norm(search_direction) , search_direction)
-		
 		if debug: print "Direction:", search_direction.T
+	
 		##
 		## Compute step size alpha
 		##
-		#f_S = lambda x: f(x, X_S) if z == None else lambda x: f(x, X_S, z_S)
-		#g_S = lambda x: g(x, X_S) if z == None else lambda x: g(x, X_S, z_S)
-		
 		f_S = lambda x: f(x, X_S, z_S)
-		if debug: print "f", f_S(w)
 		g_S = lambda x: calculateStochasticGradient(g, x, X_S, z_S)
-		
-		#alpha_k = scipy.optimize.line_search(f_S, g_S, w, search_direction)[0]
 		alpha_k = armijo_rule(f_S, g_S, w, search_direction, start = beta, beta=.5, gamma= 1e-2 )
-		#alpha_k = 0.01   
+		if debug: print "f\n", f_S(w)
+		if debug: print "w\n", w
 		if debug: print "alpha", alpha_k
 		
 		##
 		## Perform update
 		##
 		wPrevious = w
-		
-		if debug: print "LOL?!"
-		if debug: print w
-		#print search_direction
-		#print alpha_k
 		w = w + np.multiply(alpha_k, search_direction)
 		wbar += w
-		if debug: print ""
-		if debug: print w
-		if debug: print "" 
+		
 		##
 		## compute Correction pairs every L iterations
 		##

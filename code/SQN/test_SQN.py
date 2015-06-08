@@ -30,10 +30,26 @@ def test_rosenbrock(sqn_method):
 									])
 	print sqn_method(rosenbrock, rosengrad, X=X, z=None, w1 = None, dim = 2, M=10, L=1.0, beta=0.1)
 
+
+from LogisticRegression import LogisticRegression
+def test_Logistic_Regression(sqn_method):
+	logreg = LogisticRegression()
+	
+	func = lambda w, X, z: logreg.F(w, X, z)
+	grad = lambda w, X, z: logreg.g(w, X, z)
+	
+	print sqn_method(func, grad, X=X, z=None, w1 = None, dim = 2, M=10, L=1.0, beta=0.1)
+    
 if __name__ == "__main__":
 	print "\nSQN:"
 	test_rosenbrock(SQN.solveSQN)
-	print "\nSQN_LAZY:"
+	print "\nLazy SQN:"
 	test_rosenbrock(SQN_LAZY.solveSQN)
+	
+	print "Logistic Regression: SQN"
+	test_Logistic_Regression(SQN.solveSQN)
+	
+	print "Logistic Regression: Lazy SQN"
+	test_Logistic_Regression(SQN_LAZY.solveSQN)
 	
 	

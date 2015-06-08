@@ -49,7 +49,6 @@ def getH(s, y, debug = False):
 		if debug: print s_j, y_j
 		H = (I - rho* np.outer(s_j, y_j)).dot(H).dot(I - rho* np.outer(y_j, s_j))
 		H += rho * np.outer(s_j, s_j) 
-
 	return H
 
 def correctionPairs(g, w, wPrevious, X, z):
@@ -137,7 +136,7 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batc
 		##
 		f_S = lambda x: f(x, X_S) if z == None else lambda x: f(x, X_S, z_S)
 		g_S = lambda x: g(x, X_S) if z == None else lambda x: g(x, X_S, z_S)
-		alpha_k = scipy.optimize.line_search(f_S, g_S, w, search_direction)[0]
+		#alpha_k = scipy.optimize.line_search(f_S, g_S, w, search_direction)[0]
 		alpha_k = alpha(k) if alpha_k == None else alpha_k
 		if debug: print "alpha", alpha_k
 		

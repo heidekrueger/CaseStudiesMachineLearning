@@ -62,3 +62,20 @@ def stochastic_gradient(g, w, X=None, z=None):
 	else:
 		assert len(X)==len(z), "Error: Dimensions must match" 
 		return sum([g(w,X[i,:],z[i]) for i in range(nSamples)])
+ 
+def armijo_rule(f, g, x, s, beta=.5, gamma= 1e-2 ):
+	"""
+	Determines the armijo-rule step size alpha for approximating 
+	line search min f(x+omega*s)
+
+	Parameters:
+		f: objective function
+		g: gradient
+		x:= x_k
+		s:= x_k search direction
+		beta, gamma: parameters of rule
+	"""
+	candidate = 1
+	while f(x+candidate*s) - f(x) > candidate * gamma * g(x).T * s:
+		candidate/= beta
+	return candidate

@@ -8,6 +8,7 @@ import scipy.optimize
 
 from stochastic_tools import sample_batch as chooseSample
 from stochastic_tools import stochastic_gradient as calculateStochasticGradient
+from stochastic_tools import armijo_rule
 
 def hasTerminated(f, grad, w, k, max_iter = 1e4):
 	"""
@@ -34,8 +35,10 @@ def getH(s, y, debug = False):
 	"""
 	returns H_t as defined in algorithm 2
 	"""
+	
 	assert len(s)>0, "s cannot be empty."
 	assert len(s)==len(y), "s and y must have same length"
+	
 	assert s[0].shape == y[0].shape, "s and y must have same shape"
 	assert abs(y[-1]).sum() != 0, "latest y entry cannot be 0!"
 	# H = (s_t^T y_t^T)/||y_t||^2 * I
@@ -60,8 +63,7 @@ def correctionPairs(g, w, wPrevious, X, z):
 	s = w - wPrevious
 	#TODO: replace explicit stochastic gradient
 	sg = lambda x: calculateStochasticGradient(g, x, X, z)
-	y = ( sg(w) - sg(wPrevious) )[:,np.newaxis] #/ ( np.linalg.norm(s) + 1)
-	print s.shape, y.shape
+	y = ( sg(w) - sg(wPrevious) ) #/ ( np.linalg.norm(s) + 1)
 	print "corr pair", s, y
 	## 
 	## Perlmutters Trick:
@@ -93,15 +95,17 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batc
 	assert w1 != None or dim != None, "Please privide either a starting point or the dimension of the optimization problem!"
 	
 	## dimensions
-	(nSamples, nFeatures) = np.shape(X)
+	nSamples = len(z)
+	nFeatures = len(X[0])
 	
-	if w1 == None:  w1 = np.zeros(dim)[:,np.newaxis]
+	if w1 == None:  
+	    w1 = np.zeros(dim)[:,np.newaxis]
 	w = w1
 	
 	#Set wbar = wPrevious = 0
-	wbar = w1#np.zeros(w1.shape)
+	wbar = w1
 	wPrevious = w
-	
+	print w.shape
 	# step sizes alpha_k
 	alpha_k = beta
 	alpha = lambda k: beta/(k + 1)
@@ -113,11 +117,12 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batc
 	adp = 0
 	
 	for k in itertools.count():
+		
 		if debug: print "Iteration", k
 		##
 		## Check Termination Condition
 		##
-		if hasTerminated(f , g(w, X, z) ,w ,k, max_iter = max_iter):
+		if hasTerminated(f , calculateStochasticGradient(g, w, X, z) ,w ,k, max_iter = max_iter):
 			iterations = k
 			break
 		
@@ -129,12 +134,16 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batc
 		## 
 		## Determine search direction
 		##
-		grad = calculateStochasticGradient(g, w, X_S, z_S)[:,np.newaxis]
-		if k <= 2*L:
+		grad = calculateStochasticGradient(g, w, X_S, z_S)
+		
+		if True or k <= 2*L:
 		    search_direction = -grad 
 		else:
 		    search_direction = -(getH(s,y).dot(grad))
+		
+		
 		#search_direction = np.multiply( 1/np.linalg.norm(search_direction) , search_direction)
+		
 		if debug: print "Direction:", search_direction.T
 		##
 		## Compute step size alpha
@@ -142,31 +151,29 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batc
 		#f_S = lambda x: f(x, X_S) if z == None else lambda x: f(x, X_S, z_S)
 		#g_S = lambda x: g(x, X_S) if z == None else lambda x: g(x, X_S, z_S)
 		
-		f_S = lambda x: f(x, X, z)
+		f_S = lambda x: f(x, X_S, z_S)
+		print "f", f_S(w)
 		g_S = lambda x: calculateStochasticGradient(g, x, X_S, z_S)
-		#if debug: print "f\n", f_S(w)
-		#print "Linesearch", g_S(w), search_direction, np.dot(g_S(w), search_direction)
-		alpha_k = scipy.optimize.line_search(f_S, g_S, w, search_direction)[0]
-		if alpha_k == None:
-		    print "None"
-		    #alpha_k = alpha(k) 
-		#alpha_k = alpha(k)#0.01#alpha(k) 
-		if alpha_k == 0 or alpha_k == None: alpha_k = alpha(k)#0.01
+		
+		#alpha_k = scipy.optimize.line_search(f_S, g_S, w, search_direction)[0]
+		#alpha_k = armijo_rule(f_S, g_S, w, search_direction, beta=.5, gamma= 1e-2 )
+		alpha_k = 0.01   
 		if debug: print "alpha", alpha_k
 		
 		##
 		## Perform update
 		##
 		wPrevious = w
-		#print "LOL?!"
-		#print w
+		
+		print "LOL?!"
+		print w
 		#print search_direction
 		#print alpha_k
 		w = w + np.multiply(alpha_k, search_direction)
 		wbar += w
-		
-		#if debug: print "w: ", w
-		
+		print ""
+		if debug: print w
+		print "" 
 		##
 		## compute Correction pairs every L iterations
 		##
@@ -174,12 +181,12 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batc
 		    
 			t += 1
 			wbar /= float(L) 
-			
 			if t>0:
 				#choose a Sample S_H \subset [nSamples] to define Hbar
 				X_SH, y_SH, adp = chooseSample(X, z, b = batch_size_H, adp = adp)
 				
 				(s_t, y_t) = correctionPairs(g, w, wPrevious, X_SH, y_SH)
+				
 				print "correction shapes", s_t, y_t
 				s.append(s_t)
 				y.append(y_t)
@@ -187,7 +194,7 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batc
 					s.popleft()
 					y.popleft() 
 					
-			wbar = np.multiply(wbar, 0) 
+			wbar = np.multiply(0, wbar) 
 			
 
 	if iterations < max_iter:

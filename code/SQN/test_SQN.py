@@ -31,17 +31,17 @@ def test_rosenbrock(sqn_method):
 	print sqn_method(rosenbrock, rosengrad, X=X, z=None, w1 = None, dim = 2, M=10, L=1.0, beta=0.1)
 
 
-from LogisticRegression import LogisticRegression
+from LogisticRegression import LogisticRegression_1D
 import datasets
 def test_Logistic_Regression(sqn_method):
-	logreg = LogisticRegression()
+	logreg = LogisticRegression_1D()
 	
 	X, z = datasets.load_data1()
 	
 	func = lambda w, X, z: logreg.F(w, X, z)
 	grad = lambda w, X, z: logreg.g(w, X, z)
 	
-	w = sqn_method(func, grad, X=X, z=z, w1 = None, dim = 3, M=10, L=1.0, beta=1, batch_size = 100, max_iter=2e3, debug = True)
+	w = sqn_method(func, grad, X=X, z=z, w1 = None, dim = 3, M=10, L=2, beta=1, batch_size = 10, batch_size_H = 10, max_iter=2500, debug = True)
 	print w
 	print func(w, X, z)
     

@@ -20,7 +20,7 @@ def sample_batch(X, z = None, b = None, r = None, debug = False, adp = None):
 	
 	assert b != None or r!= None, "Choose either absolute or relative sample size!"
 	assert (b != None) != (r!= None), "Choose only one: Absolute or relative sample size!"
-	N = X.shape[0]
+	N = len(X)
 	if b != None:
 	    nSamples = b
 	else:
@@ -35,7 +35,7 @@ def sample_batch(X, z = None, b = None, r = None, debug = False, adp = None):
 	random_indices = rd.sample( range(N), int(nSamples)) 
 	if debug: print "random indices", random_indices
 	 
-	X_S = np.asarray([X[i,:] for i in random_indices])
+	X_S = np.asarray([X[i] for i in random_indices])
 	z_S = np.asarray([z[i] for i in random_indices]) if z != None else None
 	
 	##
@@ -56,12 +56,16 @@ def stochastic_gradient(g, w, X=None, z=None):
 	"""
 	Calculates Stochastic gradient of F at w as per formula (1.4)
 	"""
-	(nSamples, nFeatures) = np.shape(X)
+	nSamples = len(z)
+	nFeatures = len(X[0])
+	#print nSamples
+	#print X[0].shape, w.shape
 	if z is None:
-		return np.matrix(sum( [ g(w,X[i,:]) for i in range(nSamples) ] )).T
+		return np.matrix(sum( [ g(w,X[i]) for i in range(nSamples) ] ))
 	else:
 		assert len(X)==len(z), "Error: Dimensions must match" 
-		return sum([g(w,X[i,:],z[i]) for i in range(nSamples)])
+		#print " one gradient:" , g(w,X[0],z[0])
+		return sum([g(w,X[i],z[i]) for i in range(nSamples)])
  
 def armijo_rule(f, g, x, s, beta=.5, gamma= 1e-2 ):
 	"""
@@ -75,7 +79,22 @@ def armijo_rule(f, g, x, s, beta=.5, gamma= 1e-2 ):
 		s:= x_k search direction
 		beta, gamma: parameters of rule
 	"""
-	candidate = 1
-	while f(x+candidate*s) - f(x) > candidate * gamma * g(x).T * s:
-		candidate/= beta
+	candidate = 10
+	#print "armijo"
+	#print f(x + np.multiply(candidate, s)) 
+	#print "fa", f(x)
+	#print candidate * gamma * np.dot( g(x).T, s)
+	#print s
+	#print "---"
+	while f(x + np.multiply(candidate, s)) < 1e4 and f(x + np.multiply(candidate, s)) - f(x) > candidate * gamma * np.dot( g(x).T, s) :
+	#	print "armijo"
+	#	print f(x + np.multiply(candidate, s)) - f(x)
+	#	print candidate * gamma * np.dot( g(x).T, s)
+		
+		candidate *= beta
 	return candidate
+
+
+
+
+

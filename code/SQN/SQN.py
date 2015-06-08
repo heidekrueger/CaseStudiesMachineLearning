@@ -9,7 +9,7 @@ import scipy.optimize
 from stochastic_tools import sample_batch as chooseSample
 from stochastic_tools import stochastic_gradient as calculateStochasticGradient
 
-def hasTerminated(f, y, w, k, max_iter = 1e4):
+def hasTerminated(f, grad, w, k, max_iter = 1e4):
 	"""
 	Checks whether the algorithm has terminated
 
@@ -23,7 +23,7 @@ def hasTerminated(f, y, w, k, max_iter = 1e4):
 	eps = 1e-6
 	if k > max_iter:
 		return True
-	elif len(y) > 0 and np.linalg.norm(y[-1]) < eps:
+	elif len(grad) > 0 and np.linalg.norm(grad) < eps:
 		return True
 	else:
 		return False
@@ -56,11 +56,13 @@ def correctionPairs(g, w, wPrevious, X, z):
 	returns correction pairs s,y
 
 	"""
+	print w, wPrevious
 	s = w - wPrevious
 	#TODO: replace explicit stochastic gradient
 	sg = lambda x: calculateStochasticGradient(g, x, X, z)
-	y = ( sg(w) - sg(wPrevious) ) #/ ( np.linalg.norm(s) + 1)
-		
+	y = ( sg(w) - sg(wPrevious) )[:,np.newaxis] #/ ( np.linalg.norm(s) + 1)
+	print s.shape, y.shape
+	print "corr pair", s, y
 	## 
 	## Perlmutters Trick:
 	## https://justindomke.wordpress.com/2009/01/17/hessian-vector-products/
@@ -93,13 +95,12 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batc
 	## dimensions
 	(nSamples, nFeatures) = np.shape(X)
 	
-	if w1 == None:  w1 = np.zeros(dim)
+	if w1 == None:  w1 = np.zeros(dim)[:,np.newaxis]
 	w = w1
 	
 	#Set wbar = wPrevious = 0
-	wbar = np.zeros(w1.shape)
-	gbar = np.zeros(w1.shape)
-	wPrevious = np.zeros(w1.shape)
+	wbar = w1#np.zeros(w1.shape)
+	wPrevious = w
 	
 	# step sizes alpha_k
 	alpha_k = beta
@@ -112,42 +113,59 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batc
 	adp = 0
 	
 	for k in itertools.count():
-		
+		if debug: print "Iteration", k
 		##
 		## Check Termination Condition
 		##
-		if hasTerminated(f ,y ,w ,k, max_iter = max_iter):
+		if hasTerminated(f , g(w, X, z) ,w ,k, max_iter = max_iter):
 			iterations = k
 			break
 		
 		##
 		## Draw mini batch
 		##		
-		X_S, z_S, adp = chooseSample(nSamples, X, z, b = batch_size, adp=adp)
+		X_S, z_S, adp = chooseSample(X, z, b = batch_size, adp=adp)
 		
 		## 
 		## Determine search direction
 		##
-		grad = calculateStochasticGradient(g, w, X_S, z_S)
-		search_direction = -grad if k <= 2*L else -getH(s,y).dot(grad)
-		
+		grad = calculateStochasticGradient(g, w, X_S, z_S)[:,np.newaxis]
+		if k <= 2*L:
+		    search_direction = -grad 
+		else:
+		    search_direction = -(getH(s,y).dot(grad))
+		#search_direction = np.multiply( 1/np.linalg.norm(search_direction) , search_direction)
+		if debug: print "Direction:", search_direction.T
 		##
 		## Compute step size alpha
 		##
-		f_S = lambda x: f(x, X_S) if z == None else lambda x: f(x, X_S, z_S)
-		g_S = lambda x: g(x, X_S) if z == None else lambda x: g(x, X_S, z_S)
-		#alpha_k = scipy.optimize.line_search(f_S, g_S, w, search_direction)[0]
-		alpha_k = alpha(k) if alpha_k == None else alpha_k
+		#f_S = lambda x: f(x, X_S) if z == None else lambda x: f(x, X_S, z_S)
+		#g_S = lambda x: g(x, X_S) if z == None else lambda x: g(x, X_S, z_S)
+		
+		f_S = lambda x: f(x, X, z)
+		g_S = lambda x: calculateStochasticGradient(g, x, X_S, z_S)
+		#if debug: print "f\n", f_S(w)
+		#print "Linesearch", g_S(w), search_direction, np.dot(g_S(w), search_direction)
+		alpha_k = scipy.optimize.line_search(f_S, g_S, w, search_direction)[0]
+		if alpha_k == None:
+		    print "None"
+		    #alpha_k = alpha(k) 
+		#alpha_k = alpha(k)#0.01#alpha(k) 
+		if alpha_k == 0 or alpha_k == None: alpha_k = alpha(k)#0.01
 		if debug: print "alpha", alpha_k
 		
 		##
 		## Perform update
 		##
 		wPrevious = w
-		w = w + alpha_k*search_direction
+		#print "LOL?!"
+		#print w
+		#print search_direction
+		#print alpha_k
+		w = w + np.multiply(alpha_k, search_direction)
 		wbar += w
 		
-		if debug: print "w: ", w
+		#if debug: print "w: ", w
 		
 		##
 		## compute Correction pairs every L iterations
@@ -159,9 +177,10 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batc
 			
 			if t>0:
 				#choose a Sample S_H \subset [nSamples] to define Hbar
-				X_SH, y_SH, adp = chooseSample(nSamples, X, z, b = batch_size_H, adp = adp)
+				X_SH, y_SH, adp = chooseSample(X, z, b = batch_size_H, adp = adp)
 				
 				(s_t, y_t) = correctionPairs(g, w, wPrevious, X_SH, y_SH)
+				print "correction shapes", s_t, y_t
 				s.append(s_t)
 				y.append(y_t)
 				if len(s) > M:

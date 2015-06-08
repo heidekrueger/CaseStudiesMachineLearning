@@ -18,15 +18,20 @@ class LogisticRegression():
 		"""
 		Loss functions as column vector
 		"""
+		#print "X",  X
+		#print "w", w
 		if np.isscalar(y):
 			y = np.array([y])
 		hyp = self.h(w, X)
+		#print "f shape", np.shape(hyp), np.shape(X), np.shape(w)
+		#print "hyp", hyp
 		return -y*np.log(hyp)- (1-y)*(np.log(1-hyp))
 
 	def F(self, w, X, y):
 		"""
 		Overall objective function
 		"""
+		#print "Shape", np.shape(self.f(w, X, y))
 		return self.f(w, X, y).sum()/float(X.shape[0])
 
 	def g(self, w, X, y):
@@ -34,7 +39,11 @@ class LogisticRegression():
 		Gradient of F
 		"""
 		hyp = self.h(w, X)
-		return np.dot(X.T, hyp-y)/X.shape[0]
+		if len(hyp) == 1:
+		    return np.multiply((hyp - y)/X.shape[0], X)
+		else:
+		    #print X.shape, hyp.shape, (y[:,np.newaxis]).shape
+		    return np.dot( X.T, (hyp-y[:,np.newaxis]) )/X.shape[0]
 
 class LogisticRegressionTest(LogisticRegression):
 	def __init__(self):

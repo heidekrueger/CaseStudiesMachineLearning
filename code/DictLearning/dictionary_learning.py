@@ -6,13 +6,13 @@
     - algorithm1
     - structure of algorithm2
     - mini batch
+    - add a stopping criterion for while loop in algorithm2
+    - test convergence criterion (cf renormalisation)
 
 
     TODO :
-    - add a stopping criterion for while loop in algorithm2
-    - test convergence criterion (cf renormalisation)
     - initial dictionary in early steps of algo1
-    - get m and k directly inside algo1
+    - get m and k directly inside algo1 and algo2
 """
 
 
@@ -25,7 +25,7 @@ from time import time
 m = 49  # dimension of data vector
 k = 20  # number of basis vectors
 l = 0.001  # penalty coefficient
-eta = 20
+eta = 40
 
 # could take as a matrix.
 d0 = np.random.rand(m, k)  # initial dictionary
@@ -86,6 +86,7 @@ def algorithm1(x, l, D, n_iter, eta=20):
     # 1: initialization : => think about another way to initialize
     # - identity matrix or Epsilon * Identity
     # - random matrix
+    # => maybe not necessary while we are considering minibatch !
     # A : (k, k) zero matrix
     # B : (m, k) zero matrix
     A = np.zeros((k, k))
@@ -135,7 +136,7 @@ def algorithm1(x, l, D, n_iter, eta=20):
         B = beta * B + b
 
         # Compute new dictionary update
-        # D = algorithm2(D, A, B)
+        D = algorithm2(D, A, B)
 
     # 9 : Return learned dictionary
     # return D
@@ -154,34 +155,50 @@ def algorithm2(D, A, B):
     - D, updated dictionary
     '''
 
-    # counter to simulation a stopping criterion
-    # take the gradient of the lagragian : eq 10 similar to it
-    c = 0
-    c_max = 10
-    eps = 0.0001
+    c = 0  # counter
+    c_max = 15  # max iterations
+    eps = 0.001  # stopping criterion
+    cv = False  # convergence or stop indicator
 
-    # Loop until convergence => What kind of cv ?
-    converged = False
-    while not converged or c < c_max:
-        c = c + 1
-        converged = True
+    # 2: loop to update each column
+    while cv is not True:
+
+        # keep a trace of previous dictionary
+        D_old = np.zeros((m, k))
+        for i in range(0, m):
+            for j in range(0, k):
+                D_old[i, j] = D[i, j]
+
         for j in range(0, k):
 
             # 3: Update the j-th column of d
             u = (1 / A[j, j]) * (B[:, j] - D.dot(A[:, j]))
             u = u + np.asmatrix(D[:, j]).T
+
             # renormalisation
             renorm = max(np.linalg.norm(u), 1)
             u = np.divide(u, renorm)
 
-            # Convergence test
-            norm = np.linalg.norm(u - np.asmatrix(D[:, j]).T)
-            if norm > eps:
-                converged = False
-
             for p in range(0, m):
                 D[p, j] = u[p]
 
+        # counter update
+        c = c + 1
+
+        # compute differences between two updates
+        grad = D - D_old
+        crit = np.linalg.norm(grad)
+
+        # check convergence
+        if crit < eps:
+            cv = True
+        if c > c_max:
+            cv = True
+
+    # print c
+    # print crit
+
+    # 6: Return updated dictionary
     return D
 
 

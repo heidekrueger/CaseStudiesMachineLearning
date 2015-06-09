@@ -8,28 +8,18 @@
     - mini batch
     - add a stopping criterion for while loop in algorithm2
     - test convergence criterion (cf renormalisation)
-
+    - initial dictionary in early steps of algo1
 
     TODO :
-    - initial dictionary in early steps of algo1
-    - warning for algo2
+    - add a verbose function
+    - selection of best regularization parameter l
+    - Implementation with a .fit method = class ?
 """
 
 
 import numpy as np
 import math
 from time import time
-
-
-# Global variables
-m = 49  # dimension of data vector
-k = 20  # number of basis vectors
-l = 0.01  # penalty coefficient
-eta = 40
-
-# could take as a matrix.
-d0 = np.random.rand(m, k)  # initial dictionary
-n_iter = 30  # number of iterations
 
 
 def load_data():
@@ -69,16 +59,17 @@ def load_data():
     return data
 
 
-def algorithm1(x, l, D, n_iter, eta=20):
+def algorithm1(x, l=0.001, n_components=50, n_iter=30, eta=40, verbose=0):
     '''
     Online dictionary learning algorithm
 
     INPUTS:
     - x : (n_samples, m) array like, data
     - l, regularization parameter
-    - d0, (m, k) initial dictionary
+    - n_components, number of components of dictionary
     - n_iter, int, number of iterations
     - eta, int, mini batch size
+    - verbose, int, control verbosity of algorithm
 
     OUTPUTS:
     - D : (m, k) array like, learned dictionary
@@ -86,9 +77,11 @@ def algorithm1(x, l, D, n_iter, eta=20):
 
     n_s = len(x[:, 0])  # number of samples in x
 
+    D = np.random.rand(len(x[0, :]), n_components)  # initial dictionary
+    print D.shape
+
     # Dimensions of dicitonary
-    m = len(D[:, 0])
-    k = len(D[0, :])
+    [m, k] = D.shape
 
     # 1: initialization
     A = np.zeros((k, k))
@@ -124,8 +117,6 @@ def algorithm1(x, l, D, n_iter, eta=20):
             a = a + (alpha[:, i]).dot(alpha[:, i].T)
         A = beta * A + a
 
-        # A = A + (alpha).dot(alpha.T)
-
         # 6: Update B
         b = np.zeros((m, k))
         for i in range(0, eta):
@@ -136,10 +127,10 @@ def algorithm1(x, l, D, n_iter, eta=20):
         D = algorithm2(D, A, B)
 
     # 9 : Return learned dictionary
-    # return D
+    return D
 
 
-def algorithm2(D, A, B, c_max=15, eps=0.001):
+def algorithm2(D, A, B, c_max=15, eps=0.00001):
     '''
     Dictionary update
 
@@ -195,6 +186,10 @@ def algorithm2(D, A, B, c_max=15, eps=0.001):
         if c > c_max:
             cv = True
 
+    if c == c_max:
+        print "Dictionary Updating Algo reached max number of iterations"
+        print "Consider higher max number of interations"
+
     # 6: Return updated dictionary
     return D
 
@@ -202,4 +197,4 @@ def algorithm2(D, A, B, c_max=15, eps=0.001):
 if __name__ == "__main__":
     x = load_data()
 
-    algorithm1(x, l, d0, n_iter, eta)
+    algorithm1(x)

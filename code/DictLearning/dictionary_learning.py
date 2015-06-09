@@ -12,7 +12,7 @@
 
     TODO :
     - initial dictionary in early steps of algo1
-    - get m and k directly inside algo1 and algo2
+    - warning for algo2
 """
 
 
@@ -24,7 +24,7 @@ from time import time
 # Global variables
 m = 49  # dimension of data vector
 k = 20  # number of basis vectors
-l = 0.001  # penalty coefficient
+l = 0.01  # penalty coefficient
 eta = 40
 
 # could take as a matrix.
@@ -79,24 +79,24 @@ def algorithm1(x, l, D, n_iter, eta=20):
     - d0, (m, k) initial dictionary
     - n_iter, int, number of iterations
     - eta, int, mini batch size
+
+    OUTPUTS:
+    - D : (m, k) array like, learned dictionary
     '''
 
-    n_s = len(x[:, 0])
+    n_s = len(x[:, 0])  # number of samples in x
 
-    # 1: initialization : => think about another way to initialize
-    # - identity matrix or Epsilon * Identity
-    # - random matrix
-    # => maybe not necessary while we are considering minibatch !
-    # A : (k, k) zero matrix
-    # B : (m, k) zero matrix
+    # Dimensions of dicitonary
+    m = len(D[:, 0])
+    k = len(D[0, :])
+
+    # 1: initialization
     A = np.zeros((k, k))
     B = np.zeros((m, k))
-    print A.shape
-    print B.shape
 
     # 2: Loop
     for t in range(1, n_iter + 1):
-        print t
+
         # 3: Draw xj from x
         j = np.random.randint(0, n_s, eta)
         xt = x[j, :]
@@ -117,11 +117,8 @@ def algorithm1(x, l, D, n_iter, eta=20):
             theta = math.pow(eta, 2) + t - eta
 
         beta = (theta + 1 - eta) / (theta + 1)
-        # print "theta :", theta
-        # print "beta  :", beta
 
-        # # 5: Update A
-        print alpha.shape
+        # 5: Update A
         a = np.zeros((k, k))
         for i in range(0, eta):
             a = a + (alpha[:, i]).dot(alpha[:, i].T)
@@ -142,7 +139,7 @@ def algorithm1(x, l, D, n_iter, eta=20):
     # return D
 
 
-def algorithm2(D, A, B):
+def algorithm2(D, A, B, c_max=15, eps=0.001):
     '''
     Dictionary update
 
@@ -150,14 +147,17 @@ def algorithm2(D, A, B):
     - D, (m, k), input dictionary
     - A, (k, k)
     - B, (m, k)
+    - c_max, int, max number of iterations
+    - eps, float, stopping criterion
 
     OUTPUT:
     - D, updated dictionary
     '''
 
+    m = len(D[:, 0])
+    k = len(D[0, :])
+
     c = 0  # counter
-    c_max = 15  # max iterations
-    eps = 0.001  # stopping criterion
     cv = False  # convergence or stop indicator
 
     # 2: loop to update each column
@@ -194,9 +194,6 @@ def algorithm2(D, A, B):
             cv = True
         if c > c_max:
             cv = True
-
-    # print c
-    # print crit
 
     # 6: Return updated dictionary
     return D

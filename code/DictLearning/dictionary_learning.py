@@ -5,25 +5,31 @@
     DONE :
     - algorithm1
     - structure of algorithm2
+    - mini batch
+
 
     TODO :
     - add a stopping criterion for while loop in algorithm2
     - test convergence criterion (cf renormalisation)
-    - mini batch
+    - initial dictionary in early steps of algo1
+    - get m and k directly inside algo1
 """
 
 
 import numpy as np
+import math
 from time import time
 
 
 # Global variables
-m = 49
-k = 20
-l = 0.00001
+m = 49  # dimension of data vector
+k = 20  # number of basis vectors
+l = 0.001  # penalty coefficient
+eta = 20
+
 # could take as a matrix.
-d0 = np.random.rand(m, k)
-t = 3
+d0 = np.random.rand(m, k)  # initial dictionary
+n_iter = 30  # number of iterations
 
 
 def load_data():
@@ -63,7 +69,7 @@ def load_data():
     return data
 
 
-def algorithm1(x, l, D, t):
+def algorithm1(x, l, D, n_iter, eta=20):
     '''
     Online dictionary learning algorithm
 
@@ -71,8 +77,10 @@ def algorithm1(x, l, D, t):
     - x : (n_samples, m) array like, data
     - l, regularization parameter
     - d0, (m, k) initial dictionary
-    - t, int, number of iterations
+    - n_iter, int, number of iterations
+    - eta, int, mini batch size
     '''
+
     n_s = len(x[:, 0])
 
     # 1: initialization : => think about another way to initialize
@@ -86,30 +94,51 @@ def algorithm1(x, l, D, t):
     print B.shape
 
     # 2: Loop
-    for i in range(1, t):
+    for t in range(1, n_iter + 1):
+        print t
         # 3: Draw xj from x
-        j = np.random.randint(0, n_s)
-        xj = x[j, :]
+        j = np.random.randint(0, n_s, eta)
+        xt = x[j, :]
+        xt = np.asmatrix(xt).T
 
         # 4: Sparse coding with LARS
         from sklearn.linear_model import LassoLars
         lars = LassoLars(alpha=l)
 
-        lars.fit(D, xj)
+        lars.fit(D, xt)
         alpha = lars.coef_
         alpha = (np.asmatrix(alpha)).T
 
-        # 5: Update A
-        A = A + (alpha).dot(alpha.T)
+        # computing coefficient beta for step 5/6
+        if t < eta:
+            theta = float(t * eta)
+        else:
+            theta = math.pow(eta, 2) + t - eta
+
+        beta = (theta + 1 - eta) / (theta + 1)
+        # print "theta :", theta
+        # print "beta  :", beta
+
+        # # 5: Update A
+        print alpha.shape
+        a = np.zeros((k, k))
+        for i in range(0, eta):
+            a = a + (alpha[:, i]).dot(alpha[:, i].T)
+        A = beta * A + a
+
+        # A = A + (alpha).dot(alpha.T)
 
         # 6: Update B
-        xj = (np.asmatrix(xj)).T
-        B = B + xj.dot(alpha.T)
+        b = np.zeros((m, k))
+        for i in range(0, eta):
+            b = b + xt[:, i].dot(alpha[:, i].T)
+        B = beta * B + b
 
-        D = algorithm2(D, A, B)
+        # Compute new dictionary update
+        # D = algorithm2(D, A, B)
 
     # 9 : Return learned dictionary
-    return D
+    # return D
 
 
 def algorithm2(D, A, B):
@@ -159,4 +188,4 @@ def algorithm2(D, A, B):
 if __name__ == "__main__":
     x = load_data()
 
-    algorithm1(x, l, d0, t)
+    algorithm1(x, l, d0, n_iter, eta)

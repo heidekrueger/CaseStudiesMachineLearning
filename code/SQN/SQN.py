@@ -134,7 +134,7 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batc
 		##
 		grad = calculateStochasticGradient(g, w, X_S, z_S)
 		
-		if True or k <= 2*L:
+		if k <= 2*L:
 		    search_direction = -grad 
 		else:
 		    search_direction = -(getH(s,y).dot(grad))

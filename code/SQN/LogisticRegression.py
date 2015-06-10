@@ -91,15 +91,21 @@ class LogisticRegression_1D():
 		
 	"""
 
+
+
 	def __init__(self, lam = 0.):
 		'''
 		
-		lam = L2 regularization parameter
+		:lam = L2 regularization parameter
+
 		    
 		'''
 		# hypothesis function
 		self.expapprox = 30
 		self.lam = lam
+		self.fevals = 0
+		self.gevals = 0
+		self.adp = 0
 	# sigmoid function
 		
 	def sigmoid(self, z):
@@ -121,6 +127,7 @@ class LogisticRegression_1D():
 		#print "X",  X
 		#print "w", w
 		hyp = self.h(w, X)
+		self.fevals += 1
 		return -y* np.log(hyp)- (1-y)*(np.log(1-hyp))
 	    
 	def F(self, w, X, y, lam = 0.0):
@@ -134,8 +141,67 @@ class LogisticRegression_1D():
 		Gradient of F
 		"""
 		hyp = self.h(w, X)
+		self.gevals += 1
 		return np.multiply((hyp - y)/float(len(y)), X) + np.multiply(self.lam/float(len(y)), w)
 		
+	def sample_batch(w, X, z = None, b = None, r = None, debug = False):
+	"""
+	returns a subset of [N] as a list?
+
+	Parameters:
+		N: Size of the original set
+		b: parameter for subsample size (e.g. b=.1)
+	"""
+	
+	assert b != None or r!= None, "Choose either absolute or relative sample size!"
+	assert (b != None) != (r!= None), "Choose only one: Absolute or relative sample size!"
+	N = len(X)
+	if b != None:
+	    nSamples = b
+	else:
+	    nSamples = r*N
+	if nSamples > N:
+	    if debug:
+		print "Batch size larger than N, using whole dataset"
+	    nSamples = N
+
+
+	##
+	## Find samples that are not matched
+	##
+
+	sampleList = []
+	searchList = np.random.permutation(N)
+	for i in searchList:
+		if self.f(w, X[i],y[i]) > .1:
+			sampleList.append(i)
+
+		if len(sampleList) == nSamples:
+			break
+
+	# if not enough samples are found, we simply return a smaller sample!
+	nSamples = len(sampleList)
+	 
+	X_S = np.asarray([X[i] for i in sampleList])
+	z_S = np.asarray([z[i] for i in sampleList]) if z != None else None
+	
+	##
+	## Count data points
+	##
+	
+	self.adp += nSamples
+	
+	if debug: print X_S, z_S
+		
+	   
+	if z == None or len(z) == 0:
+		return X_S, None
+	else: 
+		return X_S, z_S
+
+
+
+
 class LogisticRegressionTest(LogisticRegression):
 	def __init__(self):
 		LogisticRegression.__init__(self)

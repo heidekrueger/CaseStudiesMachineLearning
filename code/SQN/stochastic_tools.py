@@ -54,10 +54,13 @@ def stochastic_gradient(g, w, X=None, z=None):
 	"""
 	Calculates Stochastic gradient of F at w as per formula (1.4)
 	"""
-	nSamples = len(X)
-	nFeatures = len(X[0])
+	if X is not None:
+		nSamples = len(X)
+		nFeatures = len(X[0])
 	#print nSamples
 	#print X[0].shape, w.shape
+	if X is None:
+		return g(w)
 	if z is None:
 		return np.array(sum( [ g(w,X[i]) for i in range(nSamples) ] ))
 	else:
@@ -85,6 +88,7 @@ def armijo_rule(f, g, x, s, start = 1.0, beta=.5, gamma= 1e-2 ):
 	#print s
 	#print "---"
 	while f(x + np.multiply(candidate, s)) - f(x) > candidate * gamma * np.dot( g(x).T, s) :
+	
 	#	print "armijo"
 	#	print f(x + np.multiply(candidate, s)) - f(x)
 	#	print candidate * gamma * np.dot( g(x).T, s)

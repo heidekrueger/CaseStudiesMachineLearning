@@ -41,6 +41,7 @@ def getH(s, y, debug = False):
 	
 	assert s[0].shape == y[0].shape, "s and y must have same shape"
 	assert abs(y[-1]).sum() != 0, "latest y entry cannot be 0!"
+	assert 1/np.inner(y[-1], s[-1]) != 0, "!"
 	# H = (s_t^T y_t^T)/||y_t||^2 * I
 
 

@@ -5,7 +5,7 @@ from collections import deque
 import scipy.optimize
 
 
-from stochastic_tools import sample_batch as chooseSample
+import stochastic_tools 
 from stochastic_tools import stochastic_gradient as calculateStochasticGradient
 from stochastic_tools import armijo_rule
 import SQN
@@ -27,7 +27,8 @@ def getH(wbars, gbars):
     s, y = get_correction_pairs(wbars, gbars)
     return SQN.getH(s, y)
 		
-def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batch_size = 1, batch_size_H = 1, max_iter = 1e4, debug = False):
+		
+def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batch_size = 1, batch_size_H = 1, max_iter = 1e4, debug = False, sampleFunction = None):
 	"""
 	Parameters:
 		f:= f_i = f_i(omega, x, z[.]), loss function for one sample. The goal is to minimize
@@ -45,15 +46,19 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batc
 	assert M > 0, "Memory Parameter M must be a positive integer!"
 	assert w1 != None or dim != None, "Please privide either a starting point or the dimension of the optimization problem!"
 	
+	if sampleFunction != None:
+		chooseSample = sampleFunction
+	else:
+		chooseSample = stochastic_tools.sample_batch
+	
 	## dimensions
-	nSamples = len(z)
+	nSamples = len(X)
 	nFeatures = len(X[0])
 	
 	if w1 == None:  
-	    w1 = np.zeros(dim)[:,np.newaxis]
+	    w1 = np.zeros(dim)
 	w = w1
-	
-	#Set wbar = wPrevious = 0
+
 	wbar = w1
 	gbar = w1
 	wPrevious = w1
@@ -64,9 +69,6 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batc
 
 	wbars, gbars = deque(), deque()
 		
-	## accessed data points
-	adp = 0
-	
 	for k in itertools.count():
 		
 		##
@@ -79,37 +81,40 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batc
 		##
 		## Draw mini batch
 		##		
-		X_S, z_S, adp = chooseSample(X, z, b = batch_size, adp=adp)
+		X_S, z_S = chooseSample(w, X, z, b = batch_size)
 		
 		## 
 		## Determine search direction
 		##
 		grad = calculateStochasticGradient(g, w, X_S, z_S)
 		
-		
-		if True or k <= 2*L:
+		if k <= 2*L:
 		    search_direction = -grad 
 		else:
-		    search_direction = -(getH(s,y).dot(grad))
+		    search_direction = -(getH(wbars, gbars).dot(grad))
 		
-		
-		#search_direction = np.multiply( 1/np.linalg.norm(search_direction) , search_direction)
-		
+		#print np.linalg.norm(search_direction)
+		search_direction /= np.linalg.norm(search_direction)
+		#print np.linalg.norm(search_direction)
 		if debug: print "Direction:", search_direction.T
 		
 		##
 		## Compute step size alpha
 		##
-		#f_S = lambda x: f(x, X_S) if z == None else lambda x: f(x, X_S, z_S)
-		#g_S = lambda x: g(x, X_S) if z == None else lambda x: g(x, X_S, z_S)
+		if z is None:
+		    f_S = lambda x: f(x, X_S)
+		    g_S = lambda x: calculateStochasticGradient(g, x, X_S)
+		else:
+		    f_S = lambda x: f(x, X_S, z_S)
+		    g_S = lambda x: calculateStochasticGradient(g, x, X_S, z_S)
+
+		alpha_k = armijo_rule(f_S, g_S, w, s=search_direction, start = 5, beta=.5, gamma= 1e-2 )
 		
-		f_S = lambda x: f(x, X_S, z_S)
-		if debug: print "f", f_S(w)
-		g_S = lambda x: calculateStochasticGradient(g, x, X_S, z_S)
+		if alpha_k < 1e-12:
+		    alpha_k = 1e-12
 		
-		#alpha_k = scipy.optimize.line_search(f_S, g_S, w, search_direction)[0]
-		alpha_k = armijo_rule(f_S, g_S, w, search_direction, start = beta, beta=.5, gamma= 1e-2 )
-		#alpha_k = 0.01   
+		if debug: print "f\n", f_S(w)
+		if debug: print "w\n", w
 		if debug: print "alpha", alpha_k
 		
 		##
@@ -120,7 +125,6 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batc
 		w = w + np.multiply(alpha_k, search_direction)
 		gbar += grad
 		
-		if debug: print "w: ", w
 				
 		##
 		## compute Correction pairs every L iterations
@@ -133,12 +137,12 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batc
 			if len(wbars) > M + 1:
 			    wbars.popleft()
 			    gbars.popleft() 
-			wbar = np.multiply(wbar, 0) 
-			gbar = np.multiply(gbar, 0) 
-	
+			wbar = np.zeros(dim)
+			gbar = np.zeros(dim)
+
 	if iterations < max_iter:
 	    print "Terminated successfully!" 
 	print "Iterations:\t\t", iterations
-	print "Accessed Data Points:\t", adp
+				
 	return w
 

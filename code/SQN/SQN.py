@@ -96,11 +96,13 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batc
 	
 
 	## dimensions
-	nSamples = len(z)
+	nSamples = len(X)
 	nFeatures = len(X[0])
 	
 	if w1 == None:  
-	    w1 = np.zeros(dim)[:,np.newaxis]
+	    w1 = np.zeros(dim)
+	#    w1[0] = 3
+	#    w1[0] = 4
 	w = w1
 
 	if sampleFunction != None:
@@ -112,7 +114,7 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batc
 	if debug: print w.shape
 	# step sizes alpha_k
 	alpha_k = beta
-	alpha = lambda k: beta/(k + 1)
+	#alpha = lambda k: beta/(k + 1)
 
 	s, y = deque(), deque()
 	
@@ -150,9 +152,17 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batc
 		##
 		## Compute step size alpha
 		##
-		f_S = lambda x: f(x, X_S, z_S)
-		g_S = lambda x: calculateStochasticGradient(g, x, X_S, z_S)
+		if z is None:
+		    f_S = lambda x: f(x, X_S)
+		    g_S = lambda x: calculateStochasticGradient(g, x, X_S)
+		else:
+		    f_S = lambda x: f(x, X_S, z_S)
+		    g_S = lambda x: calculateStochasticGradient(g, x, X_S, z_S)
+
 		alpha_k = armijo_rule(f_S, g_S, w, search_direction, start = beta, beta=.5, gamma= 1e-2 )
+		if alpha_k < 1e-5:
+		    alpha_k = 1e-5
+		    
 		if debug: print "f\n", f_S(w)
 		if debug: print "w\n", w
 		if debug: print "alpha", alpha_k
@@ -184,8 +194,7 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batc
 					s.popleft()
 					y.popleft() 
 					
-			wbar = np.multiply(0, wbar) 
-			
+			wbar = np.zeros(dim)
 
 	if iterations < max_iter:
 	    print "Terminated successfully!" 

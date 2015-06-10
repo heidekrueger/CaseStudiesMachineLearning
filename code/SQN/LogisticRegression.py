@@ -142,7 +142,7 @@ class LogisticRegression_1D():
 		"""
 		hyp = self.h(w, X)
 		self.gevals += 1
-		return np.multiply((hyp - y)/float(len(y)), X) + np.multiply(self.lam/float(len(y)), w)
+		return ((hyp - y)/float(len(y)))* X + (self.lam/float(len(y)))* w
 		
 	def sample_batch(w, X, z = None, b = None, r = None, debug = False):
 		"""

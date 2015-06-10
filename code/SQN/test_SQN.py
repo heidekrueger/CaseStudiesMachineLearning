@@ -16,7 +16,7 @@ Usually a = 1 and b = 100.
 Source: https://en.wikipedia.org/wiki/Rosenbrock_function
 '''
 
-def test_rosenbrock(sqn_method):
+def test_rosenbrock(sqn_method, X, z):
 
 	X = np.asarray([ np.zeros(4) for i in range(4) ])
 	
@@ -39,21 +39,23 @@ def test_Logistic_Regression(sqn_method, X, z):
 	func = lambda w, X, z: logreg.F(w, X, z)
 	grad = lambda w, X, z: logreg.g(w, X, z)
 	
-	w = sqn_method(func, grad, X=X, z=z, w1 = None, dim = 3, M=10, L=2, beta=0.1, batch_size = 10, batch_size_H = 10, max_iter=500, debug = False)
+	w = sqn_method(func, grad, X=X, z=z, w1 = None, dim = 3, M=10, L=2, beta=0.1, batch_size = 10, batch_size_H = 10, max_iter=1500, debug = False)
 	print w
 	print func(w, X, z)
     
 if __name__ == "__main__":
-	#print "\nSQN:"
-	#test_rosenbrock(SQN.solveSQN)
-	#print "\nLazy SQN:"
-	#test_rosenbrock(SQN_LAZY.solveSQN)
 	
 	X, z = datasets.load_data1()
+	
+	print "\nSQN:"
+	#test_rosenbrock(SQN.solveSQN, X, z)
+	#print "\nLazy SQN:"
+	#test_rosenbrock(SQN_LAZY.solveSQN, X, z)
+	
 	
 	print "Logistic Regression: SQN"
 	test_Logistic_Regression(SQN.solveSQN, X, z)
 	
-	print "Logistic Regression: Lazy SQN"
-	test_Logistic_Regression(SQN_LAZY.solveSQN, X, z)
+	#print "Logistic Regression: Lazy SQN"
+	#test_Logistic_Regression(SQN_LAZY.solveSQN, X, z)
 	

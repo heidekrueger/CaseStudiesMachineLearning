@@ -43,6 +43,8 @@ def getH(s, y, debug = False):
 	assert abs(y[-1]).sum() != 0, "latest y entry cannot be 0!"
 	# H = (s_t^T y_t^T)/||y_t||^2 * I
 
+
+	# For now: Standard L-BFGS update
 	# TODO: Two-Loop Recursion
 	# TODO: Hardcode I each time to save memory. (Or sparse???)
 	I= np.identity(len(s[0]))
@@ -74,7 +76,7 @@ def correctionPairs(g, w, wPrevious, X, z):
 	return (s, y)
 
 
-def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batch_size = 1, batch_size_H = 1, max_iter = 1e4, debug = False):
+def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batch_size = 1, batch_size_H = 1, max_iter = 1e4, debug = False, sampleFunction = None):
 	"""
 	Parameters:
 		f:= f_i = f_i(omega, x, z[.]), loss function for one sample. The goal is to minimize
@@ -92,6 +94,7 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batc
 	assert M > 0, "Memory Parameter M must be a positive integer!"
 	assert w1 != None or dim != None, "Please privide either a starting point or the dimension of the optimization problem!"
 	
+
 	## dimensions
 	nSamples = len(X)
 	nFeatures = len(X[0])
@@ -101,6 +104,9 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batc
 	#    w1[0] = 3
 	#    w1[0] = 4
 	w = w1
+
+	if sampleFunction != None:
+		chooseSample = sampleFunction
 	
 	#Set wbar = wPrevious = 0
 	wbar = w1
@@ -129,7 +135,7 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batc
 		##
 		## Draw mini batch
 		##		
-		X_S, z_S, adp = chooseSample(X, z, b = batch_size, adp=adp)
+		X_S, z_S, adp = chooseSample(w, X, z, b = batch_size, adp=adp)
 		
 		## 
 		## Determine search direction
@@ -177,7 +183,7 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batc
 			wbar /= float(L) 
 			if t>0:
 				#choose a Sample S_H \subset [nSamples] to define Hbar
-				X_SH, y_SH, adp = chooseSample(X, z, b = batch_size_H, adp = adp)
+				X_SH, y_SH, adp = chooseSample(w, X, z, b = batch_size_H, adp = adp)
 				
 				(s_t, y_t) = correctionPairs(g, w, wPrevious, X_SH, y_SH)
 				

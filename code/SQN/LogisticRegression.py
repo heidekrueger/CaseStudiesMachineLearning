@@ -154,7 +154,8 @@ class LogisticRegression_1D():
 			b: parameter for desired max. subsample size (e.g. b=10)
 			r: desired relative max. subsample size (e.g. r=.1)
 		"""
-	
+		if debug:
+			print "debug: ", b
 		assert b != None or r!= None, "Choose either absolute or relative sample size!"
 		assert (b != None) != (r!= None), "Choose only one: Absolute or relative sample size!"
 		N = len(X)
@@ -171,6 +172,8 @@ class LogisticRegression_1D():
 		##
 		## Find samples that are not classified correctly
 		##
+
+		#TODO: 
 
 		sampleList = []
 		searchList = np.random.permutation(N)

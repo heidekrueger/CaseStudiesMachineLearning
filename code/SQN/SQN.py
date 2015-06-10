@@ -109,7 +109,7 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batc
 		chooseSample = sampleFunction
 	else:
 		chooseSample = stochastic_tools.sample_batch
-		
+
 	#Set wbar = wPrevious = 0
 	wbar = w1
 	wPrevious = w
@@ -136,7 +136,9 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batc
 		##
 		## Draw mini batch
 		##		
-		X_S, z_S = chooseSample(w, X, z, b = batch_size)
+		if debug:
+			print "debug sample function:", chooseSample
+		X_S, z_S= chooseSample(w=w, X=X, z=z, b = batch_size)
 		
 		## 
 		## Determine search direction

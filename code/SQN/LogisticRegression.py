@@ -144,7 +144,7 @@ class LogisticRegression_1D():
 		self.gevals += 1
 		return ((hyp - y)/float(len(y)))* X + (self.lam/float(len(y)))* w
 		
-	def sample_batch(w, X, z = None, b = None, r = None, debug = False):
+	def sample_batch(self, w, X, z = None, b = None, r = None, debug = False):
 		"""
 		returns a subsample X_S, y_S of the data, choosing only datapoints
 		that are currently misclassified
@@ -154,7 +154,8 @@ class LogisticRegression_1D():
 			b: parameter for desired max. subsample size (e.g. b=10)
 			r: desired relative max. subsample size (e.g. r=.1)
 		"""
-	
+		if debug:
+			print "debug: ", b
 		assert b != None or r!= None, "Choose either absolute or relative sample size!"
 		assert (b != None) != (r!= None), "Choose only one: Absolute or relative sample size!"
 		N = len(X)
@@ -172,10 +173,12 @@ class LogisticRegression_1D():
 		## Find samples that are not classified correctly
 		##
 
+		#TODO: 
+
 		sampleList = []
 		searchList = np.random.permutation(N)
 		for i in searchList:
-			if self.f(w, X[i],y[i]) > .1:
+			if self.f(w, X[i],z[i]) > .1:
 				sampleList.append(i)
 
 			if len(sampleList) == nSamples: #found enough samples

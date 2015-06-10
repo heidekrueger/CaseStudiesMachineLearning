@@ -9,7 +9,7 @@ import random as rd
 import math
 
 
-def sample_batch(X, z = None, b = None, r = None, debug = False, adp = None):
+def sample_batch(w, X, z = None, b = None, r = None, debug = False, adp = None):
 	"""
 	returns a subset of [N] as a list?
 

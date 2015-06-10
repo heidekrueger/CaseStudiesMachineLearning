@@ -6,7 +6,7 @@ import math
 from collections import deque
 import scipy.optimize
 
-from stochastic_tools import sample_batch as st_sample_batch
+import stochastic_tools
 from stochastic_tools import stochastic_gradient as calculateStochasticGradient
 from stochastic_tools import armijo_rule
 
@@ -108,8 +108,8 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batc
 	if sampleFunction != None:
 		chooseSample = sampleFunction
 	else:
-		chooseSample = st_sample_batch
-	
+		chooseSample = stochastic_tools.sample_batch
+
 	#Set wbar = wPrevious = 0
 	wbar = w1
 	wPrevious = w
@@ -122,7 +122,6 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batc
 	
 	## accessed data points
 	t = -1
-	adp = 0
 	
 	for k in itertools.count():
 		
@@ -201,8 +200,6 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batc
 			wbar = np.zeros(dim)
 
 	if iterations < max_iter:
-	    print "Terminated successfully!" 
-	print "Iterations:\t\t", iterations
-	# print "Accessed Data Points:\t", adp
+		print "Terminated successfully!" 
+	# print "Iterations:\t\t", iterations
 	return w
-

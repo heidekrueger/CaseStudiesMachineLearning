@@ -42,6 +42,7 @@ def test_Logistic_Regression(sqn_method, X, z):
 	w = sqn_method(func, grad, X=X, z=z, w1 = None, dim = 3, M=10, L=2, beta=0.1, batch_size = 10, batch_size_H = 10, max_iter=1500, debug = False, sampleFunction = logreg.sample_batch)
 	print w
 	print func(w, X, z)
+	return func(w, X, z)
     
 if __name__ == "__main__":
 	
@@ -59,3 +60,8 @@ if __name__ == "__main__":
 	#print "Logistic Regression: Lazy SQN"
 	#test_Logistic_Regression(SQN_LAZY.solveSQN, X, z)
 	
+	results = []
+	N = 100.0
+	for i in range(int(N)):
+		results.append(test_Logistic_Regression(SQN.solveSQN, X, z))
+	print sum(results)/N

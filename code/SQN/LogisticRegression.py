@@ -144,7 +144,7 @@ class LogisticRegression_1D():
 		self.gevals += 1
 		return ((hyp - y)/float(len(y)))* X + (self.lam/float(len(y)))* w
 		
-	def sample_batch(w, X, z = None, b = None, r = None, debug = False):
+	def sample_batch(self, w, X, z = None, b = None, r = None, debug = False):
 		"""
 		returns a subsample X_S, y_S of the data, choosing only datapoints
 		that are currently misclassified
@@ -175,7 +175,7 @@ class LogisticRegression_1D():
 		sampleList = []
 		searchList = np.random.permutation(N)
 		for i in searchList:
-			if self.f(w, X[i],y[i]) > .1:
+			if self.f(w, X[i],z[i]) > .1:
 				sampleList.append(i)
 
 			if len(sampleList) == nSamples: #found enough samples

@@ -6,7 +6,7 @@ import math
 from collections import deque
 import scipy.optimize
 
-from stochastic_tools import sample_batch as chooseSample
+import stochastic_tools
 from stochastic_tools import stochastic_gradient as calculateStochasticGradient
 from stochastic_tools import armijo_rule
 
@@ -107,7 +107,9 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batc
 
 	if sampleFunction != None:
 		chooseSample = sampleFunction
-	
+	else:
+		chooseSample = stochastic_tools.sample_batch
+		
 	#Set wbar = wPrevious = 0
 	wbar = w1
 	wPrevious = w
@@ -120,7 +122,6 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batc
 	
 	## accessed data points
 	t = -1
-	adp = 0
 	
 	for k in itertools.count():
 		
@@ -135,7 +136,7 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batc
 		##
 		## Draw mini batch
 		##		
-		X_S, z_S, adp = chooseSample(w, X, z, b = batch_size, adp=adp)
+		X_S, z_S = chooseSample(w, X, z, b = batch_size)
 		
 		## 
 		## Determine search direction
@@ -183,7 +184,7 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batc
 			wbar /= float(L) 
 			if t>0:
 				#choose a Sample S_H \subset [nSamples] to define Hbar
-				X_SH, y_SH, adp = chooseSample(w, X, z, b = batch_size_H, adp = adp)
+				X_SH, y_SH = chooseSample(w, X, z, b = batch_size_H)
 				
 				(s_t, y_t) = correctionPairs(g, w, wPrevious, X_SH, y_SH)
 				
@@ -199,6 +200,5 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batc
 	if iterations < max_iter:
 	    print "Terminated successfully!" 
 	print "Iterations:\t\t", iterations
-	print "Accessed Data Points:\t", adp
 	return w
 

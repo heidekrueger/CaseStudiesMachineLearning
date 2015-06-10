@@ -1,6 +1,7 @@
 
 import SQN, SQN_LAZY
 import numpy as np
+import timeit
 
 '''
 The Rosenbrock function:
@@ -33,15 +34,38 @@ def test_rosenbrock(sqn_method, X, z):
 
 from LogisticRegression import LogisticRegression_1D
 import datasets
-def test_Logistic_Regression(sqn_method, X, z):
+def test_Logistic_Regression(sqn_method, X, z, w1 = None, dim = 3, M=10, L=5, beta=0.1, batch_size = 5, batch_size_H = 10, max_iter=500, sampleFunction = "logreg", debug = False):
 	logreg = LogisticRegression_1D()
-	
 	func = lambda w, X, z: logreg.F(w, X, z)
 	grad = lambda w, X, z: logreg.g(w, X, z)
-	
-	w = sqn_method(func, grad, X=X, z=z, w1 = None, dim = 3, M=10, L=2, beta=0.1, batch_size = 10, batch_size_H = 10, max_iter=1500, sampleFunction = logreg.sample_batch, debug = False)
-	print w
-	print func(w, X, z)
+
+	print "M:", M
+	print "L:", L
+	print "batch_size", batch_size
+	print "batch_size_H", batch_size_H
+	print "max_iter", max_iter
+	print "sampleFunction", sampleFunction
+
+	print
+
+	if sampleFunction=="logreg":
+		sampleFunction = logreg.sample_batch
+	else:
+		sampleFunction = None
+
+	results = []
+	N = 10
+
+	t = timeit.default_timer()
+	for i in range(N):
+		print i, "th iteration"
+		w = sqn_method(func, grad, X=X, z=z, w1 = w1, dim = dim, M=M, L=L, beta=beta, batch_size = batch_size, batch_size_H = batch_size_H, max_iter=max_iter, sampleFunction = sampleFunction, debug = False)
+		results.append(func(w, X, z))
+		print results[-1]
+
+	print "time: ", (timeit.default_timer()-t)
+	print "avg objective:", sum(results)/N
+
     
 if __name__ == "__main__":
 	
@@ -54,7 +78,7 @@ if __name__ == "__main__":
 	
 	
 	print "Logistic Regression: SQN"
-	test_Logistic_Regression(SQN.solveSQN, X, z)
+	test_Logistic_Regression(SQN.solveSQN, X, z )
 	
 	#print "Logistic Regression: Lazy SQN"
 	#test_Logistic_Regression(SQN_LAZY.solveSQN, X, z)

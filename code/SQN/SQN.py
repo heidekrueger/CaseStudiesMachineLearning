@@ -203,6 +203,6 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batc
 	if iterations < max_iter:
 	    print "Terminated successfully!" 
 	print "Iterations:\t\t", iterations
-	print "Accessed Data Points:\t", adp
+	# print "Accessed Data Points:\t", adp
 	return w
 

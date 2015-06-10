@@ -145,61 +145,61 @@ class LogisticRegression_1D():
 		return np.multiply((hyp - y)/float(len(y)), X) + np.multiply(self.lam/float(len(y)), w)
 		
 	def sample_batch(w, X, z = None, b = None, r = None, debug = False):
-	"""
-	returns a subsample X_S, y_S of the data, choosing only datapoints
-	that are currently misclassified
+		"""
+		returns a subsample X_S, y_S of the data, choosing only datapoints
+		that are currently misclassified
 
-	Parameters:
-		N: Size of the original set
-		b: parameter for desired max. subsample size (e.g. b=10)
-		r: desired relative max. subsample size (e.g. r=.1)
-	"""
+		Parameters:
+			N: Size of the original set
+			b: parameter for desired max. subsample size (e.g. b=10)
+			r: desired relative max. subsample size (e.g. r=.1)
+		"""
 	
-	assert b != None or r!= None, "Choose either absolute or relative sample size!"
-	assert (b != None) != (r!= None), "Choose only one: Absolute or relative sample size!"
-	N = len(X)
-	if b != None:
-	    nSamples = b
-	else:
-	    nSamples = r*N
-	if nSamples > N:
-	    if debug:
-		print "Batch size larger than N, using whole dataset"
-	    nSamples = N
+		assert b != None or r!= None, "Choose either absolute or relative sample size!"
+		assert (b != None) != (r!= None), "Choose only one: Absolute or relative sample size!"
+		N = len(X)
+		if b != None:
+		    nSamples = b
+		else:
+		    nSamples = r*N
+		if nSamples > N:
+		    if debug:
+			print "Batch size larger than N, using whole dataset"
+		    nSamples = N
 
 
-	##
-	## Find samples that are not classified correctly
-	##
+		##
+		## Find samples that are not classified correctly
+		##
 
-	sampleList = []
-	searchList = np.random.permutation(N)
-	for i in searchList:
-		if self.f(w, X[i],y[i]) > .1:
-			sampleList.append(i)
+		sampleList = []
+		searchList = np.random.permutation(N)
+		for i in searchList:
+			if self.f(w, X[i],y[i]) > .1:
+				sampleList.append(i)
 
-		if len(sampleList) == nSamples: #found enough samples
-			break
+			if len(sampleList) == nSamples: #found enough samples
+				break
 
-	# if not enough samples are found, we simply return a smaller sample!
-	nSamples = len(sampleList)
-	 
-	X_S = np.asarray([X[i] for i in sampleList])
-	z_S = np.asarray([z[i] for i in sampleList]) if z != None else None
-	
-	##
-	## Count accessed data points
-	##
-	
-	self.adp += nSamples
-	
-	if debug: print X_S, z_S
+		# if not enough samples are found, we simply return a smaller sample!
+		nSamples = len(sampleList)
+		 
+		X_S = np.asarray([X[i] for i in sampleList])
+		z_S = np.asarray([z[i] for i in sampleList]) if z != None else None
 		
-	   
-	if z == None or len(z) == 0:
-		return X_S, None
-	else: 
-		return X_S, z_S
+		##
+		## Count accessed data points
+		##
+		
+		self.adp += nSamples
+		
+		if debug: print X_S, z_S
+			
+		   
+		if z == None or len(z) == 0:
+			return X_S, None
+		else: 
+			return X_S, z_S
 
 
 

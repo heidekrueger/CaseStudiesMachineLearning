@@ -146,11 +146,13 @@ class LogisticRegression_1D():
 		
 	def sample_batch(w, X, z = None, b = None, r = None, debug = False):
 	"""
-	returns a subset of [N] as a list?
+	returns a subsample X_S, y_S of the data, choosing only datapoints
+	that are currently misclassified
 
 	Parameters:
 		N: Size of the original set
-		b: parameter for subsample size (e.g. b=.1)
+		b: parameter for desired max. subsample size (e.g. b=10)
+		r: desired relative max. subsample size (e.g. r=.1)
 	"""
 	
 	assert b != None or r!= None, "Choose either absolute or relative sample size!"
@@ -167,7 +169,7 @@ class LogisticRegression_1D():
 
 
 	##
-	## Find samples that are not matched
+	## Find samples that are not classified correctly
 	##
 
 	sampleList = []
@@ -176,7 +178,7 @@ class LogisticRegression_1D():
 		if self.f(w, X[i],y[i]) > .1:
 			sampleList.append(i)
 
-		if len(sampleList) == nSamples:
+		if len(sampleList) == nSamples: #found enough samples
 			break
 
 	# if not enough samples are found, we simply return a smaller sample!
@@ -186,7 +188,7 @@ class LogisticRegression_1D():
 	z_S = np.asarray([z[i] for i in sampleList]) if z != None else None
 	
 	##
-	## Count data points
+	## Count accessed data points
 	##
 	
 	self.adp += nSamples

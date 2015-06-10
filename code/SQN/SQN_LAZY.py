@@ -108,7 +108,7 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batc
 		    f_S = lambda x: f(x, X_S, z_S)
 		    g_S = lambda x: calculateStochasticGradient(g, x, X_S, z_S)
 
-		alpha_k = armijo_rule(f_S, g_S, w, s=search_direction, start = 5, beta=.5, gamma= 1e-2 )
+		alpha_k = armijo_rule(f_S, g_S, w, s=search_direction, start = beta, beta=.5, gamma= 1e-2 )
 		
 		if alpha_k < 1e-12:
 		    alpha_k = 1e-12

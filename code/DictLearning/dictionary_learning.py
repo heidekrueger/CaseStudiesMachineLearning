@@ -9,17 +9,70 @@
     - add a stopping criterion for while loop in algorithm2
     - test convergence criterion (cf renormalisation)
     - initial dictionary in early steps of algo1
+    - Implementation with a .fit method = class ?
+
 
     TODO :
+    - test it on scikit learn ex.
+    - test it on WNVP
     - add a verbose function
     - selection of best regularization parameter l
-    - Implementation with a .fit method = class ?
+    - select option : SQN or normal where would be the access point ?
+    - write test dictionary learning script
 """
 
 
 import numpy as np
 import math
 from time import time
+
+
+class StochasticDictionaryLearning:
+    '''
+    This class implements dictionary learning
+
+    Attributes:
+    - n_components
+    - l, regularization parameter
+    - n_iter, int, number of iterations
+    - eta, int, mini batch size
+    - verbose, int, control verbosity of algorithm
+
+
+    Methods:
+    __init__ :
+    fit :
+    set_params :
+    get_params :
+
+    '''
+
+    def __init__(self, n_components=50, l=0.01, n_iter=30, eta=40, verbose=0):
+        self.n_components = 50
+        self.l = l
+        self.n_iter = n_iter
+        self.eta = eta
+        self.verbose = verbose
+
+    def fit(self, X):
+        '''
+        This methods runs dictionary learning algorithms on data X
+
+        INPUTS:
+        - self
+        - X : (n_samples, m) array like, data
+
+        OUTPUTS:
+        - D : (m, k) array like, learned dictionary
+        '''
+
+        D = algorithm1(X,
+                       self.n_components,
+                       self.l,
+                       self.n_iter,
+                       self.eta,
+                       self.verbose)
+        return D
 
 
 def load_data():
@@ -59,7 +112,7 @@ def load_data():
     return data
 
 
-def algorithm1(x, l=0.001, n_components=50, n_iter=30, eta=40, verbose=0):
+def algorithm1(x, n_components=50, l=0.001, n_iter=30, eta=40, verbose=0):
     '''
     Online dictionary learning algorithm
 
@@ -195,6 +248,9 @@ def algorithm2(D, A, B, c_max=15, eps=0.00001):
 
 
 if __name__ == "__main__":
-    x = load_data()
+    sdl = StochasticDictionaryLearning()
+    X = load_data()
 
-    algorithm1(x)
+    sdl.fit(X)
+
+    # algorithm1(x)

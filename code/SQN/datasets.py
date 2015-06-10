@@ -20,8 +20,7 @@ def load_data1():
     X = np.concatenate( (np.ones( (len(z), 1)), X), axis=1)
     X_new = []
     for i in range(len(z)):
-	x = np.array(list(X[i,:]))
-	x.shape = (len(x), 1)
+	x = np.array(list(X[i,:].flatten()))
 	X_new.append(x)
     return X_new, list(z)
 
@@ -35,8 +34,7 @@ def load_data2():
     X = np.concatenate( (np.ones( (len(z), 1)), X), axis=1)
     X_new = []
     for i in range(len(z)):
-	x = np.array(list(X[i,:]))
-	x.shape = (len(x), 1)
+	x = np.array(list(X[i,:].flatten()))
 	X_new.append(x)
     return X_new, list(z)
 

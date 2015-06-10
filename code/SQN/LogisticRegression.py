@@ -134,7 +134,7 @@ class LogisticRegression_1D():
 		Gradient of F
 		"""
 		hyp = self.h(w, X)
-		return np.multiply((hyp - y)/float(len(y)), X) + np.multiply(self.lam/float(len(y)), w)
+		return ((hyp - y)/float(len(y)))* X + (self.lam/float(len(y)))* w
 		
 class LogisticRegressionTest(LogisticRegression):
 	def __init__(self):

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Implementation of Zero-memory Symmetric Rank 1 algorithm to solve min f + h
+where f is smooth and h non-smooth
 """
 
 import numpy as np
@@ -24,6 +25,8 @@ def compute_0sr1(f, grad_f, x0, **options):
     options.setdefault('tau', 2)
     options.setdefault('tau_min', 1e-8)
     options.setdefault('tau_max', 1e4)
+    options.setdefault('lower_b', None)
+    options.setdefault('upper_b', None)
 
     n = len(x0)
     s = np.empty(n,)
@@ -101,13 +104,13 @@ def compute_sr1_update(s, y, k, **options):
 
 def compute_proximal(B, H, u, d, grad_f, x, **options):
     """
-    Calls function-specif subroutines and subsquently computes proximal
+    Calls function-specific subroutines and subsquently computes proximal
     step (s. Corollary 9 and Prop. 10 in paper)
     """
+    step = x - H.dot(grad_f(x))
+    alpha = compute_root(step, u, d, **options)
     
-    alpha = compute_root(x - H.dot(grad_f(x)), u, d, **options)
-    
-    return prox(x - alpha * u / d, d, **options)
+    return prox(step - alpha * u / d, d, **options)
 
 
 
@@ -117,7 +120,7 @@ def compute_root(x, u, d, **options):
     """
     
     # root computation for separable case
-    if options['algo'] == 1:
+    if options['algo'] in [1, 2, 3]:
         t = get_transition_points(x, **options)
         trans_points_sorted = sort_transition_points(x, u, d, t)
         alpha = binary_search(trans_points_sorted, x, u, d, **options)
@@ -137,14 +140,18 @@ def get_transition_points(x, **options):
     
     n = len(x)
     
-    # transition points for h = l1-norm
-    if options['algo'] == 1:
+    # transition points for h = l1-norm and l_inf-ball
+    if options['algo'] in [1, 3]:
         t = np.tile([-1, 1], (n, 1))
-    # add others here...
+    # transition points for h = box constraint or positivity constraint
+    elif options['algo'] == 2:
+        t = np.array([options['lower_b'], options['upper_b']]).T
     else:
         pass
     
     return t
+
+
 
 def sort_transition_points(x, u, d, t):
     """
@@ -185,7 +192,12 @@ def prox(x, d, **options):
     # h = l1-norm
     if options['algo'] == 1:
         prox = l1norm_prox(x, d)
-    # add other proximal operators here (hopefully)...
+    # h = box constraint or positivity constraint
+    elif options['algo'] == 2:
+        prox = box_constraint_prox(x, **options)
+    # h = l_inf-ball
+    elif options['algo'] == 3:
+        prox = linfball_prox(x)
     else:
         pass
     
@@ -202,6 +214,26 @@ def l1norm_prox(x, d):
 
 
 
+def box_constraint_prox(x, **options):
+    """
+    computes proximal operator for box constraint and positivity constraint
+    """
+        
+    return np.median([options['lower_b'], x, options['upper_b']], axis = 0)
+
+
+
+def linfball_prox(x):
+    """
+    computes proximal operator for l_inf-ball
+    """
+    
+    n = len(x)
+    
+    return np.median([-np.ones(n), x, np.ones(n)], axis = 0)
+    
+
+
 def binary_search(trans_points, x, u, d, **options):
     """
     performs binary search on sorted transition points to obtain root of p
@@ -210,9 +242,7 @@ def binary_search(trans_points, x, u, d, **options):
     
     # no transitions points just a straight line
     if len(trans_points) == 0:
-        p_left = p(0, x, u, d, **options)
-        p_right = p(1, x, u, d, **options)
-        alpha = - p_left / (p_right - p_left)
+        alpha = 0
     else:
         p_left = p(trans_points[0], x, u, d, **options)
         p_right = p(trans_points[-1], x, u, d, **options)
@@ -244,6 +274,8 @@ def binary_search(trans_points, x, u, d, **options):
                     trans_points[l - 1]) / (p_right - p_left)
             
     return alpha
+
+
     
 if __name__ == "__main__":
     
@@ -252,9 +284,17 @@ if __name__ == "__main__":
     rosenbrock = lambda x: (a - (x[0]+1))**2 + b*(x[1]+1 - (x[0]+1)**2)**2
     rosengrad = lambda x: np.asarray([2*(a-x[0]-1)*(-1) + 2*(x[1]-(x[0]+1)**2)
                                         *(-2*(x[1]+1)), 2*(x[1]-(x[0]+1)**2)])
-    x0 = np.array([2,3])
     
-    x, k = compute_0sr1(rosenbrock, rosengrad, x0)
-
+    def f(x):
+        return x**2
+    def grad_f(x):
+        return 2*x
+        
+    x0 = np.array([-1444,324.5])
+    
+    # x, k = compute_0sr1(f, grad_f, x0, algo=2, lower_b=np.array([0,0]), upper_b=np.array([100,400]))
+    
+    x, k = compute_0sr1(f, grad_f, x0)
+    
     print(x)
     print(k)

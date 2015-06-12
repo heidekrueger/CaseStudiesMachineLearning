@@ -93,9 +93,6 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batc
 		else:
 		    search_direction = -(getH(wbars, gbars).dot(grad))
 		
-		#print np.linalg.norm(search_direction)
-		search_direction /= np.linalg.norm(search_direction)
-		#print np.linalg.norm(search_direction)
 		if debug: print "Direction:", search_direction.T
 		
 		##
@@ -110,6 +107,7 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batc
 
 		alpha_k = armijo_rule(f_S, g_S, w, s=search_direction, start = beta, beta=.5, gamma= 1e-2 )
 		
+		alpha_k = alpha(k)
 		if alpha_k < 1e-12:
 		    alpha_k = 1e-12
 		

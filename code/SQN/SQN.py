@@ -7,7 +7,7 @@ from collections import deque
 import scipy.optimize
 
 import stochastic_tools
-from stochastic_tools import stochastic_gradient as calculateStochasticGradient
+from stochastic_tools import stochastic_gradient
 from stochastic_tools import armijo_rule
 
 def hasTerminated(f, grad, w, k, max_iter = 1e4):
@@ -64,15 +64,15 @@ def correctionPairs(g, w, wPrevious, X, z):
 	"""
 	s = w - wPrevious
 	#TODO: replace explicit stochastic gradient
-	sg = lambda x: calculateStochasticGradient(g, x, X, z)
+	sg = lambda x: stochastic_gradient(g, x, X, z)
 	y = ( sg(w) - sg(wPrevious) ) #/ ( np.linalg.norm(s) + 1)
-	## 
-	## Perlmutters Trick:
-	## https://justindomke.wordpress.com/2009/01/17/hessian-vector-products/
-	## H(x) v \approx \frac{g(x+r v) - g(x-r v)} {2r}
-	## TODO: Not working??
-	##r = 1e-2
-	##y = ( sg(w + r*s) - sg(w - r*s) ) / 2*r
+	# 
+	# Perlmutters Trick:
+	# https://justindomke.wordpress.com/2009/01/17/hessian-vector-products/
+	# H(x) v \approx \frac{g(x+r v) - g(x-r v)} {2r}
+	# TODO: Not working??
+	#r = 1e-2
+	#y = ( sg(w + r*s) - sg(w - r*s) ) / 2*r
 	
 	return (s, y)
 
@@ -96,7 +96,7 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batc
 	assert w1 != None or dim != None, "Please privide either a starting point or the dimension of the optimization problem!"
 	
 
-	## dimensions
+	# dimensions
 	nSamples = len(X)
 	nFeatures = len(X[0])
 	
@@ -121,68 +121,44 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batc
 
 	s, y = deque(), deque()
 	
-	## accessed data points
+	# accessed data points
 	t = -1
-	
+	H = None
 	for k in itertools.count():
 		
+		# Draw mini batch
+		X_S, z_S= chooseSample(w=w, X=X, z=z, b = batch_size)
+		if debug: print "sample:", chooseSample
+		if len(X_S) == 0:
+			X_S, z_S= chooseSample(w=w, X=X, z=z, b = batch_size)
+		# Check Termination Condition
 		if debug: print "Iteration", k
-		##
-		## Check Termination Condition
-		##
-		if hasTerminated(f , calculateStochasticGradient(g, w, X, z) ,w ,k, max_iter = max_iter):
+		if len(X_S) == 0 or hasTerminated(f , stochastic_gradient(g, w, X_S, z_S) ,w ,k, max_iter = max_iter):
 			iterations = k
 			break
 		
-		##
-		## Draw mini batch
-		##		
-		if debug:
-			print "debug sample function:", chooseSample
-		X_S, z_S= chooseSample(w=w, X=X, z=z, b = batch_size)
-		
-		## 
-		## Determine search direction
-		##
-		grad = calculateStochasticGradient(g, w, X_S, z_S)
-		
-		if k <= 2*L:
-		    search_direction = -grad 
-		else:
-		    search_direction = -(getH(s,y).dot(grad))
-		
-		if debug: print "Direction:", search_direction.T
+		# Determine search direction
+		if k <= 2*L:  	search_direction = -stochastic_gradient(g, w, X_S, z_S)
+		else:	   	search_direction = -H.dot(stochastic_gradient(g, w, X_S, z_S))
+		if debug: 		print "Direction:", search_direction.T
 	
-		##
-		## Compute step size alpha
-		##
-		if z is None:
-		    f_S = lambda x: f(x, X_S)
-		    g_S = lambda x: calculateStochasticGradient(g, x, X_S)
-		else:
-		    f_S = lambda x: f(x, X_S, z_S)
-		    g_S = lambda x: calculateStochasticGradient(g, x, X_S, z_S)
-
+		# Compute step size alpha
+		f_S = lambda x: f(x, X_S, z_S) if z is not None else f(x, X_S)
+		g_S = lambda x: stochastic_gradient(g, x, X_S, z_S)
 		alpha_k = armijo_rule(f_S, g_S, w, search_direction, start = beta, beta=.5, gamma= 1e-2 )
-		if alpha_k < 1e-5:
-		    alpha_k = 1e-5
+		alpha_k = max([alpha_k, 1e-5])
 		    
 		if debug: print "f\n", f_S(w)
 		if debug: print "w\n", w
 		if debug: print "alpha", alpha_k
 		
-		##
-		## Perform update
-		##
+		# Perform update
 		wPrevious = w
 		w = w + np.multiply(alpha_k, search_direction)
 		wbar += w
 		
-		##
-		## compute Correction pairs every L iterations
-		##
+		# compute Correction pairs every L iterations
 		if k%L == 0:
-		    
 			t += 1
 			wbar /= float(L) 
 			if t>0:
@@ -196,11 +172,13 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batc
 				y.append(y_t)
 				if len(s) > M:
 					s.popleft()
-					y.popleft() 
+					y.popleft()
 					
+				H = getH(s, y)
+				
 			wbar = np.zeros(dim)
 
 	if iterations < max_iter:
 		print "Terminated successfully!" 
-	# print "Iterations:\t\t", iterations
+	print "Iterations:\t\t", iterations
 	return w

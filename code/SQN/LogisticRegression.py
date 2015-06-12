@@ -1,148 +1,97 @@
 import numpy as np
 import math
-from sklearn import datasets
 import sklearn as sk
+
+import SQN
 
 class LogisticRegression():
 	"""
-		Class representing LogisticRegression
-		
+		Class representing LogisticRegression		
+		Accepts LISTS of np.arrays ONLY!!!
 	"""
 
-	def __init__(self, lam = 0.):
+	def __init__(self, lam_1 = 0., lam_2 = 0):
 		'''
-		
-		lam = L2 regularization parameter
-		    
+		:lam_1 = L1 regularization parameter    
+		:lam_2 = L2 regularization parameter
 		'''
 		# hypothesis function
 		self.expapprox = 30
-		self.lam = lam
-	# sigmoid function
+		self.lam_1 = lam_1
+		self.lam_2 = lam_2
 		
-	def sigmoid(self, z):
-	    #print "sigmoid\n", z
-	    for i in range(len(z)):
-		if z[i] > self.expapprox:
-		    z[i] = self.expapprox
-		elif z[i] < -self.expapprox:
-		    z[i] = -self.expapprox
-	    return 1/(1.0+np.exp(-z))
-	
-	def h(self, w, X): 
-	    if len(X.shape)==1:
-		#X.shape = (1, X.shape[0])
-	        X = np.atleast_2d(X)
-	        #print 'X' , X
-	    return self.sigmoid(np.dot(X,w))
-		
-	def f(self, w, X, y):
-		"""
-		Loss functions as column vector
-		"""
-		#print "X",  X
-		#print "w", w
-		if np.isscalar(y):
-			y = np.array([y])
-		hyp = self.h(w, X)
-		#print "f shape", np.shape(hyp), np.shape(X), np.shape(w)
-		#print "hyp", hyp
-		return -y*np.log(hyp)- (1-y)*(np.log(1-hyp))
-
-	def F(self, w, X, y, lam = 1):
-		"""
-		Overall objective function
-		"""
-		#return sum([self.f(w,X[i,:],y[i]) for i in range(X.shape[0])]) /float(X.shape[0]) + 0.5 * self.lam * ( np.inner(w[1:], w[1:]) )/X.shape[0] 
-		return self.f(w, X, y).sum()/float(X.shape[0]) + 0.5 * self.lam * ( np.inner(w[1:], w[1:]) )/X.shape[0]
-
-	def g(self, w, X, y, lam = 1):
-		"""
-		Gradient of F
-		"""
-		hyp = self.h(w, X)
-		#print "HYP", hyp.shape
-		if len(hyp) == 1:
-		    hyp = hyp[0,0]
-		    y = y[0]
-		    return np.multiply((hyp - y)/X.shape[0], X) + np.multiply(self.lam/X.shape[0], w).T
-		else:
-		    print (np.dot( X.T, (hyp-y[:,np.newaxis]) )/X.shape[0]).shape
-		    print (np.multiply( self.lam/float(X.shape[0]), w)).shape
-		    return np.dot( X.T, (hyp-y[:,np.newaxis]) )/X.shape[0] + np.multiply( self.lam/float(X.shape[0]), w)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-class LogisticRegression_1D():
-	"""
-		Class representing LogisticRegression
-		
-	"""
-
-
-
-	def __init__(self, lam = 0.):
-		'''
-		
-		:lam = L2 regularization parameter
-
-		    
-		'''
-		# hypothesis function
-		self.expapprox = 30
-		self.lam = lam
+		self.w = None
+		# performance analysis
 		self.fevals = 0
 		self.gevals = 0
 		self.adp = 0
-	# sigmoid function
 		
+	# sigmoid function
 	def sigmoid(self, z):
-	    #print "sigmoid\n", z
-	    if z > self.expapprox:
-		z = self.expapprox
-	    elif z < -self.expapprox:
-		z = -self.expapprox
+	    if math.isnan(z):
+		    z = 0
+	    else:
+		    
+		    z = np.sign(z) * max([np.abs(z), self.expapprox])
 	    return 1/(1.0+np.exp(-z))
 	
 	def h(self, w, X): 
-	    #print w.shape, X.shape, np.dot(X,w).shape
 	    return self.sigmoid(np.multiply(w, X).sum())
 	    
 	def f(self, w, X, y):
 		"""
 		Loss functions as column vector
 		"""
-		#print "X",  X
-		#print "w", w
 		hyp = self.h(w, X)
 		self.fevals += 1
 		return -y* np.log(hyp)- (1-y)*(np.log(1-hyp))
+	    
+	def L_2(self, w):
+		return  0.5 * self.lam_2 * (np.linalg.norm(w[1:])**2)
 	    
 	def F(self, w, X, y, lam = 0.0):
 		"""
 		Overall objective function
 		"""
-		return sum([self.f(w,X[i],y[i]) for i in range(len(y))]) /float(len(y)) + 0.5 * self.lam * ( np.linalg.norm(w[1:])**2 ) /float(len(y))
-		
+		#return sum(map(lambda t: self.f(w, t[0], t[1]), zip(X, y)))/len(X) +  self.L_2(w) 
+		return sum([self.f(w,X[i],y[i]) for i in range(len(y))]) /float(len(y)) + self.L_2(w) 
+
 	def g(self, w, X, y, lam = 0.0):
 		"""
 		Gradient of F
 		"""
 		hyp = self.h(w, X)
 		self.gevals += 1
-		return ((hyp - y)/float(len(y)))* X + (self.lam/float(len(y)))* w
+		return (hyp - y)* X + self.lam_2* w
+	
+	def train(self, X, y, method='SQN'):
+		'''
+		Determine the regression variable w
+		'''
+		assert len(X) > 0, "ERROR: Need at least one sample!"
+		assert len(X) == len(y), "ERROR: Sample and label list need to have same length!"
+		
+		
+		if method == 'SQN':
+			M = 10
+			L = 10
+			beta = 1.0
+			batch_size = 10
+			batch_size_H = 10
+			max_iter = 1600
+			self.w = SQN.solveSQN(self.F, self.g, X=X, z=y, w1 = None, dim = len(X[0]), M=M, L=L, beta=beta, batch_size = batch_size, batch_size_H = batch_size_H, max_iter=max_iter, sampleFunction = self.sample_batch)
+			
+		else:
+			raise NotImplementedError("ERROR: Method %s not implemented!" %method)
+	
+	def predict(self, X):
+		"""
+		calculate the classification probability of samples
+		:X A list of samples
+		"""
+		if len(np.shape(X)) < 2:
+			X = [X]
+		return map( lambda x: self.h(self.w, x), X)
 		
 	def sample_batch(self, w, X, z = None, b = None, r = None, debug = False):
 		"""
@@ -150,28 +99,27 @@ class LogisticRegression_1D():
 		that are currently misclassified
 
 		Parameters:
-			N: Size of the original set
+			w: Regression variable
+			X: training data
+			z: Label
 			b: parameter for desired max. subsample size (e.g. b=10)
 			r: desired relative max. subsample size (e.g. r=.1)
 		"""
-		if debug:
-			print "debug: ", b
+		if debug: print "debug: ", b
 		assert b != None or r!= None, "Choose either absolute or relative sample size!"
 		assert (b != None) != (r!= None), "Choose only one: Absolute or relative sample size!"
+		
+		# determine factual batch size
 		N = len(X)
 		if b != None:
 		    nSamples = b
 		else:
 		    nSamples = r*N
 		if nSamples > N:
-		    if debug:
-			print "Batch size larger than N, using whole dataset"
+		    if debug: print "Batch size larger than N, using whole dataset"
 		    nSamples = N
 
-
-		##
-		## Find samples that are not classified correctly
-		##
+		# Find samples that are not classified correctly
 
 		#TODO: 
 
@@ -188,40 +136,14 @@ class LogisticRegression_1D():
 		nSamples = len(sampleList)
 		 
 		X_S = np.asarray([X[i] for i in sampleList])
-		z_S = np.asarray([z[i] for i in sampleList]) if z != None else None
-		
-		##
-		## Count accessed data points
-		##
-		
+		z_S = None if z is None else np.array([z[i] for i in sampleList])
+		# Count accessed data points
 		self.adp += nSamples
 		
 		if debug: print X_S, z_S
-			
 		   
 		if z == None or len(z) == 0:
 			return X_S, None
 		else: 
 			return X_S, z_S
-
-
-
-
-class LogisticRegressionTest(LogisticRegression):
-	def __init__(self):
-		LogisticRegression.__init__(self)
-
-	def testF(self):
-		iris = datasets.load_iris()
-		X, y = iris.data[:5,:], iris.target[:5,np.newaxis]
-		w= np.zeros([X.shape[1],1])
-
-		print "f complete"
-		print self.f(w, X, y)
-		print "f for first entry"
-		print self.f(w, X[0,:], y[0])
-		print "F"
-		print self.F(w,X,y)
-		print "g "
-		print self.g(w, X, y)
 

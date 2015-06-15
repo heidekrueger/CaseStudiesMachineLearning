@@ -97,6 +97,14 @@ def armijo_rule(f, g, x, s, start = 1.0, beta=.5, gamma= 1e-2 ):
 	return candidate
 
 
-
+'''
+    general tools
+'''
+def iter_to_array(iterator):
+	return np.array([i for i in w1])
+    
+def set_iter_values(w):
+	for i in range(len(self.w)):
+		w1[i] = self.w[i]
 
 

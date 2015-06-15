@@ -77,7 +77,7 @@ def correctionPairs(g, w, wPrevious, X, z):
 	return (s, y)
 
 
-def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batch_size = 1, batch_size_H = 1, max_iter = 1e4, debug = False, sampleFunction = None):
+def solveSQN(f, g, X, z = None, w1 = None, dim = None, iterator = None, M=10, L=1.0, beta=1, batch_size = 1, batch_size_H = 1, max_iter = 1e4, debug = False, sampleFunction = None):
 	"""
 	Parameters:
 		f:= f_i = f_i(omega, x, z[.]), loss function for one sample. The goal is to minimize
@@ -93,14 +93,18 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batc
 		M: Memory-Parameter
 	"""
 	assert M > 0, "Memory Parameter M must be a positive integer!"
-	assert w1 != None or dim != None, "Please privide either a starting point or the dimension of the optimization problem!"
+	assert w1 != None or dim != None or iterator != None, "Please privide either a starting point or the dimension of the optimization problem!"
 	
 
 	# dimensions
 	nSamples = len(X)
 	nFeatures = len(X[0])
 	
-	if w1 == None:  
+	input_iterator = False
+	if w1 is None and dim is None:  
+	    input_iterator = True
+	    w1 = stochastic_tools.iter_to_array(iterator)
+	elif w1 is None:
 	    w1 = np.zeros(dim)
 	#    w1[0] = 3
 	#    w1[0] = 4
@@ -181,4 +185,10 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, M=10, L=1.0, beta=1, batc
 	if iterations < max_iter:
 		print "Terminated successfully!" 
 	print "Iterations:\t\t", iterations
-	return w
+	
+	if input_iterator:  
+		stochastic_tools.set_iter_values(w)
+		return iterator
+	else:
+		return w
+		

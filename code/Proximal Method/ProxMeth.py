@@ -8,7 +8,7 @@ import numpy as np
 import scipy as sp
 
 
-def compute_0sr1(f, grad_f, x0, **options):
+def compute_0sr1(f, grad_f, h, x0, **options):
     """
     Main function for Zero-memory Symmetric Rank 1 algorithm
     Input-Arguments:
@@ -27,6 +27,9 @@ def compute_0sr1(f, grad_f, x0, **options):
     options.setdefault('tau_max', 1e4)
     options.setdefault('lower_b', None)
     options.setdefault('upper_b', None)
+    options.setdefault('ls', 1)
+    options.setdefault('beta', 0.5)
+    options.setdefault('alpha', 1)
 
     n = len(x0)
     s = np.empty(n,)
@@ -39,11 +42,13 @@ def compute_0sr1(f, grad_f, x0, **options):
         temp_x_new = compute_proximal(B, H, u, d, grad_f, x_new, **options)
         
         x_old = x_new
-        x_new = temp_x_new
-        s = x_new - x_old
+        s = temp_x_new - x_old
         
         if np.linalg.norm(s) < options['epsilon']: # termination criterion
             break
+        
+        t = line_search(f, h, s, y, temp_x_new, x_old, **options)
+        x_new = x_old + t * temp_x_new
         
         y = grad_f(x_new) - grad_f(x_old)
     
@@ -260,9 +265,9 @@ def binary_search(trans_points, x, u, d, **options):
             l, r = 1, len(trans_points)
             while r-l != 1:
                 m = np.floor(1 / 2 * (l + r))
-                p_middle = p(trans_points[m-1], x, u, d, **options)
+                p_middle = p(trans_points[m - 1], x, u, d, **options)
                 if p_middle == 0:
-                    alpha = trans_points[m-1]
+                    alpha = trans_points[m - 1]
                     break
                 elif p_middle < 0:
                     l = m
@@ -270,13 +275,66 @@ def binary_search(trans_points, x, u, d, **options):
                 else:
                     r = m
                     p_right = p_middle
-            alpha = trans_points[l-1] - p_left * (trans_points[r - 1] - 
+            alpha = trans_points[l - 1] - p_left * (trans_points[r - 1] - 
                     trans_points[l - 1]) / (p_right - p_left)
             
     return alpha
 
 
+
+def line_search(f, h, s, y, x_old, x_new, **options):
+    """
+    Computes line search factor dependent on chosen line search method
+    """
     
+    # step length always equals one
+    if options['ls'] == 1:
+        t = 1
+    # Armijo-type rule
+    elif options['ls'] == 2:
+        t = compute_armijo_ls(f, h, x_old, x_new, **options)
+    # Barzilai-Borwein step size
+    elif options['ls'] == 3:
+        t = compute_bb_ls(s, y)
+    else: # maybe nonmonotone line search as in Zhang and Hager
+        pass
+        
+    return t
+
+
+
+def compute_armijo_ls(f, h, x_new, x_old, **options):
+    """
+    Armijo-type rule as in paper of Fukushima and Mine
+    """
+    
+    d = x_new - x_old
+    d_squared = np.dot(d,d)
+    F_old = f(x_old) + h(x_old)
+    beta = 1
+    
+    while f(x_old + beta * d) + h(x_old + beta * d) > (F_old - options['alpha']
+            * beta * d_squared):
+        beta = beta * options['beta']
+            
+    return beta
+
+
+
+def compute_bb_ls(s, y):
+    """
+    Barzilai-Borwein step size
+    """
+    if len(s) == 0:
+        t = 1
+    else:
+        t = np.dot(s, y) / np.dot(y, y)
+        
+    return t
+
+
+
+
 if __name__ == "__main__":
     
     a = 1

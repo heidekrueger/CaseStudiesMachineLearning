@@ -47,8 +47,8 @@ class StochasticDictionaryLearning:
 
     '''
 
-    def __init__(self, n_components=50, l=0.01, n_iter=30, eta=40, verbose=0):
-        self.n_components = 50
+    def __init__(self, n_components=100, l=0.001, n_iter=30, eta=100, verbose=0):
+        self.n_components = n_components
         self.l = l
         self.n_iter = n_iter
         self.eta = eta
@@ -67,11 +67,11 @@ class StochasticDictionaryLearning:
         '''
 
         D = algorithm1(X,
-                       self.n_components,
-                       self.l,
-                       self.n_iter,
-                       self.eta,
-                       self.verbose)
+                       n_components=self.n_components,
+                       l=self.l,
+                       n_iter=self.n_iter,
+                       eta=self.eta,
+                       verbose=self.verbose)
         return D
 
 
@@ -112,7 +112,7 @@ def load_data():
     return data
 
 
-def algorithm1(x, n_components=50, l=0.001, n_iter=30, eta=40, verbose=0):
+def algorithm1(x, n_components=100, l=0.01, n_iter=30, eta=40, verbose=0):
     '''
     Online dictionary learning algorithm
 

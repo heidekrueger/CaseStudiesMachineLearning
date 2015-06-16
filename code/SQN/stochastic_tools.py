@@ -9,14 +9,17 @@ import random as rd
 import math
 
 
-def sample_batch(w, X, z = None, b = None, r = None, debug = False, adp = None):
+def sample_batch(w, X, z = None, b = None, r = None, debug = False):
 	"""
+
+	#TODO: Documentation Outdated!!!
 	returns a subset of [N] as a list?
 
 	Parameters:
 		N: Size of the original set
 		b: parameter for subsample size (e.g. b=.1)
 	"""
+
 	
 	assert b != None or r!= None, "Choose either absolute or relative sample size!"
 	assert (b != None) != (r!= None), "Choose only one: Absolute or relative sample size!"
@@ -38,30 +41,28 @@ def sample_batch(w, X, z = None, b = None, r = None, debug = False, adp = None):
 	X_S = np.asarray([X[i] for i in random_indices])
 	z_S = np.asarray([z[i] for i in random_indices]) if z != None else None
 	
-	##
-	## Count data points
-	##
-	if adp != None and type(adp) == type(1):
-	    adp += nSamples
 	
-	if debug: print X_S, z_S, adp
+	if debug: print X_S, z_S
 		
 	   
 	if z == None or len(z) == 0:
-		return X_S, None, adp
+		return X_S, None
 	else: 
-		return X_S, z_S, adp
+		return X_S, z_S
 
 def stochastic_gradient(g, w, X=None, z=None):
 	"""
 	Calculates Stochastic gradient of F at w as per formula (1.4)
 	"""
-	nSamples = len(z)
-	nFeatures = len(X[0])
+	if X is not None:
+		nSamples = len(X)
+		nFeatures = len(X[0])
 	#print nSamples
 	#print X[0].shape, w.shape
+	if X is None:
+		return g(w)
 	if z is None:
-		return np.matrix(sum( [ g(w,X[i]) for i in range(nSamples) ] ))
+		return np.array(sum( [ g(w,X[i]) for i in range(nSamples) ] ))
 	else:
 		assert len(X)==len(z), "Error: Dimensions must match" 
 		#print " one gradient:" , g(w,X[0],z[0])
@@ -86,7 +87,8 @@ def armijo_rule(f, g, x, s, start = 1.0, beta=.5, gamma= 1e-2 ):
 	#print candidate * gamma * np.dot( g(x).T, s)
 	#print s
 	#print "---"
-	while f(x + np.multiply(candidate, s)) < 1e4 and f(x + np.multiply(candidate, s)) - f(x) > candidate * gamma * np.dot( g(x).T, s) :
+	while f(x + np.multiply(candidate, s)) - f(x) > candidate * gamma * np.dot( g(x).T, s) :
+	
 	#	print "armijo"
 	#	print f(x + np.multiply(candidate, s)) - f(x)
 	#	print candidate * gamma * np.dot( g(x).T, s)
@@ -95,6 +97,14 @@ def armijo_rule(f, g, x, s, start = 1.0, beta=.5, gamma= 1e-2 ):
 	return candidate
 
 
-
+'''
+    general tools
+'''
+def iter_to_array(iterator):
+	return np.array([i for i in w1])
+    
+def set_iter_values(w):
+	for i in range(len(self.w)):
+		w1[i] = self.w[i]
 
 

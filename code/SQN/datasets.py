@@ -1,5 +1,5 @@
 import numpy as np
-import sklearn as sk
+import sklearn.datasets
 
 def normalize(X):
     mu = X.mean(axis=0)
@@ -20,8 +20,7 @@ def load_data1():
     X = np.concatenate( (np.ones( (len(z), 1)), X), axis=1)
     X_new = []
     for i in range(len(z)):
-	x = np.array(list(X[i,:]))
-	x.shape = (len(x), 1)
+	x = np.array(list(X[i,:].flatten()))
 	X_new.append(x)
     return X_new, list(z)
 
@@ -35,8 +34,15 @@ def load_data2():
     X = np.concatenate( (np.ones( (len(z), 1)), X), axis=1)
     X_new = []
     for i in range(len(z)):
-	x = np.array(list(X[i,:]))
-	x.shape = (len(x), 1)
+	x = np.array(list(X[i,:].flatten()))
 	X_new.append(x)
     return X_new, list(z)
 
+def load_iris():
+	iris = sklearn.datasets.load_iris()
+	X, y = [], []
+	for i in range(len(iris.target)):
+		if iris.target[i] != 2:
+			X.append(np.array([1] + list(iris.data[i])))
+			y.append(iris.target[i])
+	return X, y

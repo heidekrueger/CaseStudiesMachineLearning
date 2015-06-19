@@ -250,7 +250,7 @@ def algorithm2(D, A, B, c_max=15, eps=0.00001):
 if __name__ == "__main__":
     sdl = StochasticDictionaryLearning()
     X = load_data()
-
+    print "Fitting dictionary..."
     sdl.fit(X)
-
+    print "done."
     # algorithm1(x)

@@ -33,7 +33,7 @@ class LogisticRegressionTest(LogisticRegression):
 """
 SQN
 """
-import SQN, SQN_LAZY
+import SQN
 import numpy as np
 import timeit
 
@@ -62,8 +62,8 @@ def test_rosenbrock(sqn_method, X, z):
 
 	rosengrad = lambda x, X: np.asarray([
 			2*(a-x[0])*(-1) + 2*(x[1]-x[0]**2)*(-2*x[1]), 
-			2*(x[1]-x[0]**2)
-									])
+			2*(x[1]-x[0]**2) ])
+									
 	print sqn_method(rosenbrock, rosengrad, X=X, z=None, w1 = None, dim = 2, M=10, L=1.0, beta=0.1)
 
 
@@ -134,7 +134,7 @@ import datasets
 import sys
 if __name__ == "__main__":
 	
-	testcase = 1
+	testcase = 4
 	
 	if len(sys.argv) > 1:
 		testcase = int(sys.argv[1])
@@ -144,19 +144,42 @@ if __name__ == "__main__":
 		X, z = datasets.load_data1()
 		print "\nSQN:"
 		test_rosenbrock(SQN.solveSQN, X, z)
-		print "\nLazy SQN:"
-		test_rosenbrock(SQN_LAZY.solveSQN, X, z)
+		#print "\nLazy SQN:"
+		#test_rosenbrock(SQN_LAZY.solveSQN, X, z)
 	elif testcase == 2:
 		X, z = datasets.load_data1()
 		print "Logistic Regression: SQN"
 		test_Logistic_Regression(SQN.solveSQN, X, z )
-		print "Logistic Regression: Lazy SQN"
-		test_Logistic_Regression(SQN_LAZY.solveSQN, X, z)
+		#print "Logistic Regression: Lazy SQN"
+		#test_Logistic_Regression(SQN_LAZY.solveSQN, X, z)
 	elif testcase == 3:
 		X, z = datasets.load_iris()
 		print "Logistic Regression using SQN"
 		logregtest = LogisticRegressionTest()
 		logregtest.test_classification(X, z)
+	elif testcase == 4:
+		X, z = datasets.load_data1()
+		z = None
+		a = 1
+		b = 100
+		rosenbrock = lambda x, X: (a - x[0])**2 + b*(x[1] - x[0]**2)**2
 
+		rosengrad = lambda x, X: np.asarray([
+				2*(a-x[0])*(-1) + 2*(x[1]-x[0]**2)*(-2*x[1]), 
+				2*(x[1]-x[0]**2) ])
+		print "\nSQN:"
+		sqn = SQN.SQN()
+		sqn.set_options({'dim':2, 'L': 5})
+		sqn.solve(rosenbrock, rosengrad, X, z)
+		
+	elif testcase == 5:
+		X, z = datasets.load_data1()
+		logreg = LogisticRegression()
+		func = lambda w, X, z: logreg.F(w, X, z)
+		grad = lambda w, X, z: logreg.g(w, X, z)
 
-
+		print "\nSQN:"
+		sqn = SQN.SQN()
+		sqn.set_options({'dim':3})
+		sqn.solve(func, grad, X, z)
+		

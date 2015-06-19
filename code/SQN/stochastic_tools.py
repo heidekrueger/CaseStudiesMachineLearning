@@ -101,10 +101,10 @@ def armijo_rule(f, g, x, s, start = 1.0, beta=.5, gamma= 1e-2 ):
     general tools
 '''
 def iter_to_array(iterator):
-	return np.array([i for i in w1])
+	return np.array([i for i in iterator])
     
-def set_iter_values(w):
-	for i in range(len(self.w)):
-		w1[i] = self.w[i]
+def set_iter_values(iterator, w):
+	for i in range(len(w)):
+		iterator[i] = w[i]
 
 

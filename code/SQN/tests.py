@@ -175,19 +175,12 @@ if __name__ == "__main__":
 	elif testcase == 5:
 		X, z = datasets.load_data1()
 		logreg = LogisticRegression()
-		func = lambda w, X, z: logreg.F(w, X, z)
-		grad = lambda w, X, z: logreg.g(w, X, z)
+		#func = lambda w, X, z: logreg.F(w, X, z)
+		#grad = lambda w, X, z: logreg.g(w, X, z)
 
 		print "\nSQN class:"
 		sqn = SQN.SQN()
 		sqn.debug = True
-		sqn.set_options({'dim':3, 'max_iter': 30e2, 'batch_size': 20, 'beta': 100, 'batch_size_H': 10, 'L': 3, 'sampleFunction':logreg.sample_batch})
-		sqn.solve(func, grad, X, z)
-	elif testcase == 6:
-		X, z = datasets.load_data1()
-		logreg = LogisticRegression()
-		func = lambda w, X, z: logreg.F(w, X, z)
-		grad = lambda w, X, z: logreg.g(w, X, z)
-
-		print "\nSQN func:"
-		w = SQN.solveSQN(func, grad, X=X, z=z, dim = 3, L=4, batch_size = 20, max_iter = 300, sampleFunction = logreg.sample_batch, debug = True)
+		sqn.set_options({'dim':len(X[0]), 'max_iter': 30e2, 'batch_size': 20, 'beta': 10, 'batch_size_H': 10, 'L': 3, 'sampleFunction':logreg.sample_batch})
+		sqn.solve(logreg.F, logreg.g, X, z)
+	

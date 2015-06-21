@@ -316,7 +316,7 @@ class SQN:
 		    r = 1e-2
 		    y = ( sg(w + r*s) - sg(w - r*s) ) / 2*r
 		    """
-		    r = 1.
+		    r = 0.01
 		    s_t = w - w_previous
 		    s_t = np.multiply(r, s_t)
 		    y_t = (g_S(w) - g_S(w - s_t)) / (r)

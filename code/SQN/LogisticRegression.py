@@ -36,7 +36,12 @@ class LogisticRegression():
 	    return 1/(1.0+np.exp(-z))
 	
 	def h(self, w, X): 
-	    return self.sigmoid(np.multiply(w, X).sum())
+		print type(X)
+		print type(X[0])
+		print w
+		print type(w)
+		print "debug:", np.multiply(w,X)
+		return self.sigmoid(np.multiply(w, X).sum())
 	    
 	def f(self, w, X, y):
 		"""

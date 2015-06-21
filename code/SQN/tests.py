@@ -183,4 +183,22 @@ if __name__ == "__main__":
 		sqn.debug = True
 		sqn.set_options({'dim':len(X[0]), 'max_iter': 30e2, 'batch_size': 20, 'beta': 10, 'batch_size_H': 10, 'L': 3, 'sampleFunction':logreg.sample_batch})
 		sqn.solve(logreg.F, logreg.g, X, z)
-	
+
+	elif testcase == 6:
+		"""Runs SQN-LogReg on the Higgs-Dataset, 
+		which is a 7.4GB csv file for binary classification
+		that can be obtained here:
+		https://archive.ics.uci.edu/ml/datasets/HIGGS
+		the file should be in <Git Project root directory>/datasets/
+		"""
+		rowlim = 100
+		X, z = datasets.load_higgs(rowlim)
+
+		logreg = LogisticRegression()
+		func = lambda w, X, z: logreg.F(w, X, z)
+		grad = lambda w, X, z: logreg.g(w, X, z)
+
+		print "\nSQN, Higgs-Dataset, #rows:", rowlim
+		sqn = SQN.SQN()
+		sqn.set_options({'dim':29})
+		sqn.solve(func, grad, X, z)

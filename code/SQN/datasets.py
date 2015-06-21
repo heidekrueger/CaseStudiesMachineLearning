@@ -1,5 +1,26 @@
 import numpy as np
 import sklearn.datasets
+import csv
+
+
+#### functions for reading from loooong file as stream
+
+def getstuff(filename, rowlim):
+    with open(filename, "rb") as csvfile:
+        datareader = csv.reader(csvfile)
+        count = 0
+        for row in datareader:
+            if count < rowlim:
+                yield row
+                count += 1
+            else:
+                return
+
+def getdata(filename, rowlim):
+    for row in getstuff(filename, rowlim):
+        yield row
+
+#####
 
 def normalize(X):
     mu = X.mean(axis=0)
@@ -46,3 +67,17 @@ def load_iris():
 			X.append(np.array([1] + list(iris.data[i])))
 			y.append(iris.target[i])
 	return X, y
+
+def load_higgs(rowlim=10000):
+    file_name = '../../datasets/HIGGS.csv'
+    X, y = [], []
+    for row in getdata(file_name, rowlim
+        #TODO: Fehler in dieser Zeile: X[0] wird ein array von STRINGs anstatt floats!
+        X.append(np.array([1.0] + row[1:]))
+        raise NotImplementedError
+        y.append(row[0])
+    print type(X[0])
+    print len(X[0])
+    print X[0][0]
+    print type(X[0][0])
+    return X, y

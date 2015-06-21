@@ -4,6 +4,7 @@ import sklearn as sk
 
 import SQN
 
+
 class LogisticRegression():
 	"""
 		Class representing LogisticRegression		
@@ -31,8 +32,7 @@ class LogisticRegression():
 	    if math.isnan(z):
 		    z = 0
 	    else:
-		    
-		    z = np.sign(z) * max([np.abs(z), self.expapprox])
+		    z = np.sign(z) * min([np.abs(z), self.expapprox])
 	    return 1/(1.0+np.exp(-z))
 	
 	def h(self, w, X): 
@@ -79,7 +79,18 @@ class LogisticRegression():
 			batch_size = 10
 			batch_size_H = 10
 			max_iter = 1600
-			self.w = SQN.solveSQN(self.F, self.g, X=X, z=y, w1 = None, dim = len(X[0]), M=M, L=L, beta=beta, batch_size = batch_size, batch_size_H = batch_size_H, max_iter=max_iter, sampleFunction = self.sample_batch)
+			sqn = SQN.SQN()
+			#sqn.debug = True
+			sqn.set_options({'dim':len(X[0]), 
+						    'max_iter': 500, 
+						    'batch_size': 10, 
+						    'beta': 1., 
+						    'M': 10,
+						    'batch_size_H': 10, 
+						    'L': 10, 
+						    'sampleFunction':self.sample_batch})
+			self.w = sqn.solve(self.F, self.g, X=X, z=y)
+			#self.w = SQN.solveSQN(self.F, self.g, X=X, z=y, w1 = None, dim = len(X[0]), M=M, L=L, beta=beta, batch_size = batch_size, batch_size_H = batch_size_H, max_iter=max_iter, sampleFunction = self.sample_batch)
 			
 		else:
 			raise NotImplementedError("ERROR: Method %s not implemented!" %method)

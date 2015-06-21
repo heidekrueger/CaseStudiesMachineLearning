@@ -19,7 +19,7 @@ TODO: Iterator support not yet tested! Try on Dictionary Learning Problem!
 
 
 
-def hasTerminated(f, grad, w, k, max_iter = 1e4):
+def hasTerminated(f, grad, w, k, max_iter = 1e4, debug=False):
 	"""
 	Checks whether the algorithm has terminated
 
@@ -30,11 +30,15 @@ def hasTerminated(f, grad, w, k, max_iter = 1e4):
 		k: current iteration
 
 	"""
+	if debug:
+		print "Check termination"
+		print "len grad:", np.linalg.norm(grad) 
+		#print "fun val", f(w)
 	eps = 1e-6
 	if k > max_iter:
 		return True
-	elif len(grad) > 0 and np.linalg.norm(grad) < eps:
-		return True
+	#elif len(grad) > 0 and np.linalg.norm(grad) < eps:
+	#	return True
 	else:
 		return False
 
@@ -146,7 +150,7 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, iterator = None, M=10, L=
 			X_S, z_S= chooseSample(w=w, X=X, z=z, b = batch_size)
 		# Check Termination Condition
 		if debug: print "Iteration", k
-		if len(X_S) == 0 or hasTerminated(f , stochastic_gradient(g, w, X_S, z_S) ,w ,k, max_iter = max_iter):
+		if len(X_S) == 0 or hasTerminated(f , stochastic_gradient(g, w, X_S, z_S) ,w ,k, max_iter = max_iter, debug=True):
 			iterations = k
 			break
 		
@@ -233,7 +237,13 @@ class SQN:
 		self.options['batch_size'] =  1
 		self.options['batch_size_H'] =  1
 		self.options['max_iter'] =  1e3
-		self.options['debug'] =  True
+		self.debug =  False
+		
+		self.s, self.y = deque(), deque()
+		self.w, self.w_previous = None, None
+		self.wbar = None
+		
+		self.termination_counter = 0
 		
 		
 	def set_options(self, options):
@@ -252,49 +262,82 @@ class SQN:
 			if key in self.options:
 				self.options[key] = options[key]
 				
+	def get_options(self):
+		return self.options
+	   
+	def print_options(self):
+		for key in self.options:
+			print key
+			print self.options[key]
 	
-	def gradient_step(self, f, g, X, z, w, H, k):
+	def gradient_step(self, f, g, X, z, w, k):
 		
 		# Draw mini batch
 		X_S, z_S= self.options['sampleFunction'](w=w, X=X, z=z, b = self.options['batch_size'])
-		if len(X_S) == 0:
-			X_S, z_S= chooseSample(w=w, X=X, z=z, b = self.options['batch_size'])
 		
 		# Stochastic functions
 		f_S = lambda x: f(x, X_S, z_S) if z is not None else f(x, X_S)
 		g_S = lambda x: stochastic_gradient(g, x, X_S, z_S)
 		
-		# Check Termination Condition
-		if self.options['debug']: print "Iteration", k
-		if len(X_S) == 0 or hasTerminated(f , g_S(w) , w ,k, max_iter = self.options['max_iter']):
-			return w, True
-			
 		# Determine search direction
-		if k <= 2*self.options['L']:  	search_direction = -stochastic_gradient(g, w, X_S, z_S)
-		else:	   				search_direction = -H.dot(stochastic_gradient(g, w, X_S, z_S))
-		if self.options['debug']: 		print "Direction:", search_direction.T
+		if k <= 2*self.options['L']: 
+			search_direction = -g_S(w)
+		else:
+			H = getH(self.s, self.y)
+			search_direction = -H.dot(g_S(w))
+		
+		if self.debug: print "Direction:", search_direction.T
 
 		# Compute step size alpha
 		alpha_k = armijo_rule(f_S, g_S, w, search_direction, start = self.options['beta'], beta=.5, gamma= 1e-2 )
 		alpha_k = max([alpha_k, 1e-5])
+		#alpha_k = min([alpha_k, 1/(1.+k)])
+		#alpha_k = max([alpha_k, 0.001])
+		if self.debug: print alpha_k
 		
+		# Check Termination Condition
+		if self.debug: print "Iteration", k
+		if len(X_S) == 0 or hasTerminated(lambda x: f(x, X, z) , g_S(w) , w ,k, max_iter = self.options['max_iter'], debug=self.debug):
+			self.termination_counter += 1
+			return w
+		    
 		# Update
 		w = w + np.multiply(alpha_k, search_direction)
-		return w, False
+		return w
 	    
-	def Hessian_step(self, g, X, z, w, w_previous, s, y):
-		#choose a Sample S_H \subset [nSamples] to define Hbar
-		X_SH, y_SH = self.options['sampleFunction'](w, X, z, b = self.options['batch_size_H'])
-		(s_t, y_t) = correctionPairs(g, w, w_previous, X_SH, y_SH)
-		
-		s.append(s_t)
-		y.append(y_t)
-		
-		if len(s) > self.options['M']:
-			s.popleft()
-			y.popleft()
+	def update_correction_pairs(self, g_S, w, w_previous):
+		    """
+		    returns correction pairs s,y
+		    TODO: replace explicit stochastic gradient
+		    
+		    Perlmutters Trick:
+		    https://justindomke.wordpress.com/2009/01/17/hessian-vector-products/
+		    H(x) v \approx \frac{g(x+r v) - g(x-r v)} {2r}
+		    r = 1e-2
+		    y = ( sg(w + r*s) - sg(w - r*s) ) / 2*r
+		    """
+		    r = 1.
+		    s_t = w - w_previous
+		    s_t = np.multiply(r, s_t)
+		    y_t = (g_S(w) - g_S(w - s_t)) / (r)
+		    
+		    if self.debug:
+			    print "correction:"
+			    print "s_t: ", s_t
+			    print "y_t: ", y_t
+			    
+		    if abs(y_t).sum() != 0:
+			self.s.append(s_t)
+			self.y.append(y_t)
+		    else:
+			print "PROBLEM!"
 			
-		if self.options['debug']: print len(s), len(y)
+		    if len(self.s) > self.options['M']:
+			    self.s.popleft()
+			    self.y.popleft()
+			    
+		    if self.debug: print "Length s, y:", len(self.s), len(self.y)
+		    return
 
 	def solve(self, f, g, X, z = None):
 		"""
@@ -310,10 +353,6 @@ class SQN:
 		
 		assert self.options['M'] > 0, "Memory Parameter M must be a positive integer!"
 		
-		# dimensions
-		nSamples = len(X)
-		nFeatures = len(X[0])
-		
 		# start point
 		assert self.options['w1'] != None or self.options['dim'] != None or self.options['iterator'] != None, \
 		    "Please privide either a starting point or the dimension of the optimization problem!"
@@ -327,42 +366,43 @@ class SQN:
 		self.options['dim'] = len(w1)
 		    
 		# init
-		w = w1
-		w_previous = w
-		wbar = np.zeros(w.shape)
-		s, y = deque(), deque()
-		alpha_k = self.options['beta']
-		H = None
+		self.w = w1
+		self.w_previous = self.w
+		self.wbar = np.zeros(self.w.shape)
+		self.s, self.y = deque(), deque()
 		
-		if self.options['debug']: print w.shape
+		if self.debug: print self.w.shape
 		
 		t = -1
 		for k in itertools.count():
-			
-		    w_previous = w
-		    w, terminated = self.gradient_step(f, g, X, z, w, H, k)
-		    if self.options['debug']: print w
+		    print self.w
+		    self.w_previous = self.w
+		    self.w = self.gradient_step(f, g, X, z, self.w, k)
+		    if self.debug: print self.w
 		    
-		    if terminated:
+		    if self.termination_counter > 4:
 			    iterations = k
 			    break
 		    
-		    wbar += w
+		    self.wbar += self.w
+		    
 		    if k % self.options['L'] == 0:
 			    t += 1
-			    wbar /= float(self.options['L']) 
+			    self.wbar /= float(self.options['L']) 
 			    if t>0:
-				    self.Hessian_step(g, X, z, w, w_previous, s, y)
-				    H = getH(s, y)
-			    wbar = np.zeros(self.options['dim'])
+				    X_SH, y_SH = self.options['sampleFunction'](self.w, X, z, b = self.options['batch_size_H'])
+				    g_SH = lambda x: stochastic_gradient(g, x, X_SH, y_SH)
+				    self.update_correction_pairs(g_SH, self.w, self.w_previous)
+				    
+			    self.wbar = np.zeros(self.options['dim'])
 		
 		if iterations < self.options['max_iter']:
 			print "Terminated successfully!" 
 		print "Iterations:\t\t", iterations
 		
 		if self.options['iterator'] is not None:  
-			stochastic_tools.set_iter_values(self.options['iterator'], w)
+			stochastic_tools.set_iter_values(self.options['iterator'], self.w)
 			return iterator
 		else:
-			return w
+			return self.w
 		    

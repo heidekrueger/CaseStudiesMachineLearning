@@ -23,9 +23,9 @@ class LogisticRegressionTest(LogisticRegression):
 		logreg = LogisticRegression(lam_2 = 0.5)
 		logreg.train(X, y)
 		print "predict", logreg.predict(X[0]) 
-		print sum( (np.array(logreg.predict(X)) -np.array( y) )**2)
-		print logreg.F(logreg.w, X, y)
-		print logreg.w
+		print "error:", sum( (np.array(logreg.predict(X)) -np.array( y) )**2)
+		print "F:", logreg.F(logreg.w, X, y)
+		print "w:", logreg.w
 		
 		print logreg.fevals, logreg.gevals, logreg.adp
 		
@@ -73,7 +73,7 @@ def test_Logistic_Regression(sqn_method, X, z, w1 = None, dim = 3, M=10, L=5, be
 	logreg = LogisticRegression()
 	func = lambda w, X, z: logreg.F(w, X, z)
 	grad = lambda w, X, z: logreg.g(w, X, z)
-
+	L = 1e4
 	print "M:", M
 	print "L:", L
 	print "batch_size", batch_size
@@ -134,7 +134,7 @@ import datasets
 import sys
 if __name__ == "__main__":
 	
-	testcase = 4
+	testcase = 5
 	
 	if len(sys.argv) > 1:
 		testcase = int(sys.argv[1])
@@ -178,8 +178,16 @@ if __name__ == "__main__":
 		func = lambda w, X, z: logreg.F(w, X, z)
 		grad = lambda w, X, z: logreg.g(w, X, z)
 
-		print "\nSQN:"
+		print "\nSQN class:"
 		sqn = SQN.SQN()
-		sqn.set_options({'dim':3})
+		sqn.debug = True
+		sqn.set_options({'dim':3, 'max_iter': 30e2, 'batch_size': 20, 'beta': 100, 'batch_size_H': 10, 'L': 3, 'sampleFunction':logreg.sample_batch})
 		sqn.solve(func, grad, X, z)
-		
+	elif testcase == 6:
+		X, z = datasets.load_data1()
+		logreg = LogisticRegression()
+		func = lambda w, X, z: logreg.F(w, X, z)
+		grad = lambda w, X, z: logreg.g(w, X, z)
+
+		print "\nSQN func:"
+		w = SQN.solveSQN(func, grad, X=X, z=z, dim = 3, L=4, batch_size = 20, max_iter = 300, sampleFunction = logreg.sample_batch, debug = True)

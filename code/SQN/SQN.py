@@ -106,6 +106,7 @@ class StochasticOptimizer:
 		self.options['sampleFunction'] =  stochastic_tools.sample_batch
 		self.options['M'] =  10
 		self.options['L'] =  1
+		self.options['N'] =  None
 		self.options['beta'] =  1
 		self.options['batch_size'] =  1
 		self.options['batch_size_H'] =  1
@@ -311,7 +312,7 @@ class SQN(StochasticOptimizer):
 		Draw sample from smaple function. Recurse if empty sample was drawn.
 		"""
 		if X is None:
-			X_S, z_S= self.options['sampleFunction'](w=self.w, b = batch)
+			X_S, z_S= self.options['sampleFunction'](w=self.w, N = self.options['N'], b = batch)
 		else: 
 			X_S, z_S= self.options['sampleFunction'](w=self.w, X=X, z=z, b = self.options['batch_size'])
 		

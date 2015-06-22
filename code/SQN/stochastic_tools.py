@@ -49,7 +49,7 @@ def sample_batch_SQL(w, X, z = None, b = None, r = None, debug = False):
 	else: 
 		return X_S, z_S
 
-def sample_batch_higgs(w, X, z = None, b = None, r = None, debug = False):
+def sample_batch_higgs(w, N, z = None, b = None, r = None, debug = False):
 	"""
 
 	#TODO: Documentation Outdated!!!

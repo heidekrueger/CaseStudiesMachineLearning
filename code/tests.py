@@ -177,7 +177,7 @@ if __name__ == "__main__":
 		sqn = SQN.SQN()
 		sqn.set_options({'dim':29})
 		sqn.solve(func, grad, X, z)
-	elif testcase == 6:
+	elif testcase == 7:
 		"""Runs SQN-LogReg on the Higgs-Dataset, 
 		which is a 7.4GB csv file for binary classification
 		that can be obtained here:
@@ -188,7 +188,7 @@ if __name__ == "__main__":
 		func = lambda w, X, z: logreg.F(w, X, z)
 		grad = lambda w, X, z: logreg.g(w, X, z)
 
-		print "\nSQN, Higgs-Dataset, #rows:", rowlim
+		print "\nSQN, Higgs-Dataset"
 		sqn = SQN.SQN()
 		sqn.set_options({'dim':29, 'sampleFunction': stochastic_tools.sample_batch_higgs, 'N':1e3})
 		sqn.solve(func, grad)

@@ -159,12 +159,11 @@ class SQN(StochasticOptimizer):
 		assert w1 is not None or dim is not None or iterator is not None, \
 		    "Please privide either a starting point or the dimension of the optimization problem!"
 
-		
 		if w1 is None and dim is None:  
 		    self.options['iterator'] = iterator
 		    w1 = stochastic_tools.iter_to_array(self.options['iterator'])
 		elif w1 is None:
-		    w1 = np.zeros(dim)
+		    w1 = np.ones(dim)
 		
 		self.options['dim'] = len(w1)
 		    
@@ -214,7 +213,7 @@ class SQN(StochasticOptimizer):
 		else:
 			return self.w
 		
-	def solve_one_step(self, f, g, X, z, k):
+	def solve_one_step(self, f, g, X=None, z=None, k=1):
 		"""
 		perform one update step
 		"""
@@ -229,6 +228,7 @@ class SQN(StochasticOptimizer):
 		if k % self.options['L'] == 0:
 			self.wbar /= float(self.options['L']) 
 			if self.wbar_previous is not None:
+				print "HESSE"
 				self._update_correction_pairs(g, X, z)
 			self.wbar_previous = self.wbar
 			self.wbar = np.zeros(self.options['dim'])
@@ -242,7 +242,7 @@ class SQN(StochasticOptimizer):
 		X_S, z_S = self._draw_sample(X, z, self.options['batch_size'])
 		
 		# Stochastic functions
-		f_S = lambda x: f(x, X_S, z_S) if z is not None else f(x, X_S)
+		f_S = lambda x: f(x, X_S, z_S) #if z is not None else f(x, X_S)
 		g_S = lambda x: stochastic_gradient(g, x, X_S, z_S)
 		
 		# Determine search direction

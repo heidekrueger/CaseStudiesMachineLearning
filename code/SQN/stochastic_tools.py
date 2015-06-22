@@ -49,6 +49,23 @@ def sample_batch_SQL(w, X, z = None, b = None, r = None, debug = False):
 	else: 
 		return X_S, z_S
 
+def load_HIGGS_feature(ID):
+	feature_file = open("../datasets/HIGGS/%d" %ID)
+	line = feature_file.readline()
+	entries = line.split(",")
+	y = int(float(entries[0]))
+	entries[0] = 1.
+	return np.array( [ float(e) for e in entries ] ), y
+
+def load_HIGGS_features(id_list):
+	X, z = [], []
+	for ID in id_list:
+		x, y = load_HIGGS_feature(ID+1)
+		X.append(x)
+		z.append(y)
+	return X, z
+    
+	
 def sample_batch_higgs(w, N, b = None, debug = False):
 
 	assert N != None, "N must be given!"
@@ -62,18 +79,12 @@ def sample_batch_higgs(w, N, b = None, debug = False):
 	##
 	## Draw from uniform distribution
 	##
-	random_indices = rd.sample( range(N), int(nSamples)) 
+	random_indices = rd.sample( range(int(N)), int(nSamples)) 
 	if debug: print "random indices", random_indices
 	 
-	X_S, z_S = datasets.load_HIGGS_features(random_indices)
-	
-	if debug: print X_S, z_S
-		
-	   
-	if z == None or len(z) == 0:
-		return X_S, None
-	else: 
-		return X_S, z_S
+	X_S, z_S = load_HIGGS_features(random_indices)
+
+	return X_S, z_S
 
 
 def sample_batch(w, X, z = None, b = None, r = None, debug = False):
@@ -87,7 +98,6 @@ def sample_batch(w, X, z = None, b = None, r = None, debug = False):
 		b: parameter for subsample size (e.g. b=.1)
 	"""
 
-	
 	assert b != None or r!= None, "Choose either absolute or relative sample size!"
 	assert (b != None) != (r!= None), "Choose only one: Absolute or relative sample size!"
 	N = len(X)
@@ -135,7 +145,7 @@ def stochastic_gradient(g, w, X=None, z=None):
 		#print " one gradient:" , g(w,X[0],z[0])
 		return sum([g(w,X[i],z[i]) for i in range(nSamples)])
  
-def armijo_rule(f, g, x, s, start = 1.0, beta=.5, gamma= 1e-2 ):
+def armijo_rule(f, g, x, s, start = 1.0, beta=.5, gamma= 1e-4 ):
 	"""
 	Determines the armijo-rule step size alpha for approximating 
 	line search min f(x+omega*s)
@@ -154,7 +164,7 @@ def armijo_rule(f, g, x, s, start = 1.0, beta=.5, gamma= 1e-2 ):
 	#print candidate * gamma * np.dot( g(x).T, s)
 	#print s
 	#print "---"
-	while f(x + np.multiply(candidate, s)) - f(x) > candidate * gamma * np.dot( g(x).T, s) :
+	while (f(x + np.multiply(candidate, s)) - f(x) > candidate * gamma * np.dot( g(x).T, s)) and candidate > 1e-4:
 	
 	#	print "armijo"
 	#	print f(x + np.multiply(candidate, s)) - f(x)

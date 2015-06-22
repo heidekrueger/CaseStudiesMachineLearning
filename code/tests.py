@@ -190,8 +190,24 @@ if __name__ == "__main__":
 
 		print "\nSQN, Higgs-Dataset"
 		sqn = SQN.SQN()
-		sqn.set_options({'dim':29, 'sampleFunction': stochastic_tools.sample_batch_higgs, 'N':1e3})
-		sqn.solve(func, grad)
+		#sqn.debug = True
+		sqn.set_options({'dim':29, 'sampleFunction': stochastic_tools.sample_batch_higgs, 'N':5e5, 'max_iter': 1e3, 'batch_size': 10, 'batch_size_H': 10, 'L':3, 'beta':10, 'M':100})
+		
+		sqn.set_start(dim=29)
+		X, z = stochastic_tools.sample_batch_higgs(None, N=5e5, b=5e5)
+		import itertools
+		for k in itertools.count():
+		    
+			w = sqn.solve_one_step(func, grad, k=k)
+			if k % 5 == 0:
+				sqn.options['batch_size'] += 10
+				sqn.options['batch_size_H'] += 10
+				print logreg.F(w, X, z)
+			if k > sqn.options['max_iter'] or sqn.termination_counter > 4:
+			    iterations = k
+			    break
+			
+		#w = sqn.solve(func, grad)
 		
 	elif testcase == 66:
 		from data.datasets import split_into_files

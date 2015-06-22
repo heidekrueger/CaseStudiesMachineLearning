@@ -78,27 +78,10 @@ def split_into_files(src, dest_folder):
 		with open(dest_folder + "/" + str(counter), "w+") as feature:
 			feature.write(line)
 		counter += 1
-		if counter > 1e4:
+		if counter > 1e6:
 			break
 	csvfile.close()
 
-def load_HIGGS_feature(ID):
-	feature_file = open("../datasets/HIGGS/%d.txt" %ID)
-	line = feature_file.readline()
-	entries = line.split(",")
-	y = int(entries[0])
-	entries[0] = 1.
-	return np.array( [ float(e) for e in entries ] ), y
-
-def load_HIGGS_features(id_list):
-	X, z = [], []
-	for ID in id_list:
-		x, y = load_HIGGS_feature(ID+1)
-		X.append(x)
-		z.append(y)
-	return X, z
-    
-	
 def load_higgs_into_mysql():
     
 	table_name = "TEST"

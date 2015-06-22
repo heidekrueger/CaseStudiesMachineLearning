@@ -1,7 +1,7 @@
 import numpy as np
 import sklearn.datasets
 import csv
-
+#import MySQLdb
 
 #### functions for reading from loooong file as stream
 
@@ -68,6 +68,58 @@ def load_iris():
 			y.append(iris.target[i])
 	return X, y
 
+
+def split_into_files(src, dest_folder):
+	counter = 1
+	csvfile = open(src, "rb")
+	line = csvfile.readline()
+	while line is not None:
+		line = csvfile.readline()
+		with open(dest_folder + "/" + str(counter), "w+") as feature:
+			feature.write(line)
+		counter += 1
+		if counter > 1e4:
+			break
+	csvfile.close()
+		
+	
+def load_higgs_into_mysql():
+    
+	table_name = "TEST"
+	dimensions = 6
+	
+	db = MySQLdb.connect(host="localhost", 
+			    user="casestudies",
+#			    passwd="megajonhy", # your password
+			    db="data") # name of the data base	
+	cur = db.cursor() 
+	
+	sql =   "create table if not exists " + table_name + "(ID INTEGER PRIMARY KEY"
+	for i in range(dimensions):
+		sql += "x_" + str(i) + " DOUBLE," 
+	sql += "DOUBLE, IS_SET INTEGER);"
+
+	cur.execute(sql)
+	
+	generic = "INSERT INTO " + table_name + " VALUES ("
+	
+	file_name = '../datasets/HIGGS.csv'
+	with open(filename, "rb") as csvfile:
+		
+		line = csvfile.readline()
+		entries = line.split(",")
+		insert_statement = generic 
+		for entry in entries:
+		    insert_statement += entry + ","
+		insert_statement = insert_statement[:-1]
+		insert_statement += ')' 
+		print insert_statement
+		cur.execute(insert_statement)
+	
+	db.close()
+	
+	
+	
 def load_higgs(rowlim=1000):
     file_name = '../datasets/HIGGS.csv'
     X, y = [], []

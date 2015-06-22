@@ -177,3 +177,6 @@ if __name__ == "__main__":
 		sqn = SQN.SQN()
 		sqn.set_options({'dim':29})
 		sqn.solve(func, grad, X, z)
+	elif testcase == 66:
+		from data.datasets import split_into_files
+		split_into_files('../datasets/HIGGS.csv', '../datasets/HIGGS/')

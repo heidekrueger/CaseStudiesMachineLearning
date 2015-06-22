@@ -3,41 +3,18 @@
 """
 Logistic Regression
 """
-from LogisticRegression import LogisticRegression
+from SQN.LogisticRegression import LogisticRegression
+from SQN.LogisticRegressionTest import LogisticRegressionTest
 
-class LogisticRegressionTest(LogisticRegression):
-	def __init__(self):
-		LogisticRegression.__init__(self)
-
-	def testF(self, X, y):
-		print "f complete"
-		print self.f(w, X, y)
-		print "f for first entry"
-		print self.f(w, X[0,:], y[0])
-		print "F"
-		print self.F(w,X,y)
-		print "g "
-		print self.g(w, X, y)
-	
-	def test_classification(self, X, y):
-		logreg = LogisticRegression(lam_2 = 0.5)
-		logreg.train(X, y)
-		print "predict", logreg.predict(X[0]) 
-		print sum( (np.array(logreg.predict(X)) -np.array( y) )**2)
-		print logreg.F(logreg.w, X, y)
-		print logreg.w
-		
-		print logreg.fevals, logreg.gevals, logreg.adp
-		
 
 """
 SQN
 """
-import SQN
+import SQN.SQN as SQN
 import numpy as np
 import timeit
 
-import stochastic_tools
+from SQN import stochastic_tools
 '''
 The Rosenbrock function:
 
@@ -67,13 +44,11 @@ def test_rosenbrock(sqn_method, X, z):
 	print sqn_method(rosenbrock, rosengrad, X=X, z=None, w1 = None, dim = 2, M=10, L=1.0, beta=0.1)
 
 
-from LogisticRegression import LogisticRegression
-
 def test_Logistic_Regression(sqn_method, X, z, w1 = None, dim = 3, M=10, L=5, beta=0.1, batch_size = 5, batch_size_H = 10, max_iter=300, sampleFunction = "logreg", debug = False):
 	logreg = LogisticRegression()
 	func = lambda w, X, z: logreg.F(w, X, z)
 	grad = lambda w, X, z: logreg.g(w, X, z)
-
+	L = 1e4
 	print "M:", M
 	print "L:", L
 	print "batch_size", batch_size
@@ -128,13 +103,13 @@ Proximal Methods
 """
 Main
 """
-import datasets
+import data.datasets as datasets
 
 
 import sys
 if __name__ == "__main__":
 	
-	testcase = 6
+	testcase = 5
 	
 	if len(sys.argv) > 1:
 		testcase = int(sys.argv[1])
@@ -175,13 +150,14 @@ if __name__ == "__main__":
 	elif testcase == 5:
 		X, z = datasets.load_data1()
 		logreg = LogisticRegression()
-		func = lambda w, X, z: logreg.F(w, X, z)
-		grad = lambda w, X, z: logreg.g(w, X, z)
+		#func = lambda w, X, z: logreg.F(w, X, z)
+		#grad = lambda w, X, z: logreg.g(w, X, z)
 
-		print "\nSQN:"
+		print "\nSQN class:"
 		sqn = SQN.SQN()
-		sqn.set_options({'dim':3})
-		sqn.solve(func, grad, X, z)
+		#sqn.debug = True
+		sqn.set_options({'dim':len(X[0]), 'max_iter': 1600, 'batch_size': 20, 'beta': 10, 'batch_size_H': 10, 'L': 3, 'sampleFunction':logreg.sample_batch})
+		sqn.solve(logreg.F, logreg.g, X, z)
 
 	elif testcase == 6:
 		"""Runs SQN-LogReg on the Higgs-Dataset, 
@@ -190,7 +166,7 @@ if __name__ == "__main__":
 		https://archive.ics.uci.edu/ml/datasets/HIGGS
 		the file should be in <Git Project root directory>/datasets/
 		"""
-		rowlim = 100
+		rowlim = 1000
 		X, z = datasets.load_higgs(rowlim)
 
 		logreg = LogisticRegression()
@@ -201,4 +177,3 @@ if __name__ == "__main__":
 		sqn = SQN.SQN()
 		sqn.set_options({'dim':29})
 		sqn.solve(func, grad, X, z)
-		

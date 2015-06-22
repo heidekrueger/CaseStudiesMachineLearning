@@ -32,9 +32,9 @@ def normalize(X):
     return X
 
 def load_data1():
-    dataset = np.genfromtxt(open('ex2data1.txt','r'), delimiter=',', dtype='f8')
+    dataset = np.genfromtxt(open('../datasets/ex2data1.txt','r'), delimiter=',', dtype='f8')
     X = dataset[:,:2]
-    z = dataset[:,2][:,np.newaxis]
+    z = dataset[:,2][:,np.newaxis] 
     
     X = normalize(X)
     
@@ -46,7 +46,7 @@ def load_data1():
     return X_new, list(z)
 
 def load_data2():
-    dataset = np.genfromtxt(open('ex2data2.txt','r'), delimiter=',', dtype='f8')
+    dataset = np.genfromtxt(open('../datasets/ex2data2.txt','r'), delimiter=',', dtype='f8')
     X = dataset[:,:2]
     z = dataset[:,2][:,np.newaxis]
     
@@ -68,13 +68,12 @@ def load_iris():
 			y.append(iris.target[i])
 	return X, y
 
-def load_higgs(rowlim=10000):
-    file_name = '../../datasets/HIGGS.csv'
+def load_higgs(rowlim=1000):
+    file_name = '../datasets/HIGGS.csv'
     X, y = [], []
-    for row in getdata(file_name, rowlim
-        #TODO: Fehler in dieser Zeile: X[0] wird ein array von STRINGs anstatt floats!
-        X.append(np.array([1.0] + [float(r) for r in row]))
-        y.append(row[0])
-    print type(X[0])
-    print X[0][0]
+    for row in getdata(file_name, rowlim):
+        X.append(np.array([1.0] + [float(r) for r in row[1:]]))
+        y.append(float(row[0])) 
+    # print type(X[0])
+    # print X[0][0]
     return X, y

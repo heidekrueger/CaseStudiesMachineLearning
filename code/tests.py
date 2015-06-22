@@ -155,7 +155,7 @@ if __name__ == "__main__":
 
 		print "\nSQN class:"
 		sqn = SQN.SQN()
-		sqn.debug = True
+		#sqn.debug = True
 		sqn.set_options({'dim':len(X[0]), 'max_iter': 1600, 'batch_size': 20, 'beta': 10, 'batch_size_H': 10, 'L': 3, 'sampleFunction':logreg.sample_batch})
 		sqn.solve(logreg.F, logreg.g, X, z)
 

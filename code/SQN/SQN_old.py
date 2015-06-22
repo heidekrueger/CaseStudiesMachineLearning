@@ -3,7 +3,33 @@ import stochastic_tools
 from stochastic_tools import stochastic_gradient
 from stochastic_tools import armijo_rule
 
-from SQN import getH, correctionPairs, hasTerminated
+from SQN import getH, correctionPairs
+
+
+def hasTerminated(f, grad, w, k, max_iter = 1e4, debug=False):
+	"""
+	Checks whether the algorithm has terminated
+
+	Parameters:
+		f: function for one sample
+		y: difference of gradients
+		w: current variable
+		k: current iteration
+
+	"""
+	if debug:
+		print "Check termination"
+		print "len grad:", np.linalg.norm(grad) 
+		#print "fun val", f(w)
+	eps = 1e-6
+	if k > max_iter:
+		return True
+	elif len(grad) > 0 and np.linalg.norm(grad) < eps:
+		return True
+	else:
+		return False
+
+
 
 def solveSQN_old(f, g, X, z = None, w1 = None, dim = None, iterator = None, M=10, L=1.0, beta=1, batch_size = 1, batch_size_H = 1, max_iter = 1e4, debug = False, sampleFunction = None):
 	"""

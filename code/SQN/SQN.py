@@ -17,30 +17,6 @@ TODO: Iterator support not yet tested! Try on Dictionary Learning Problem!
 
 """
 
-def hasTerminated(f, grad, w, k, max_iter = 1e4, debug=False):
-	"""
-	Checks whether the algorithm has terminated
-
-	Parameters:
-		f: function for one sample
-		y: difference of gradients
-		w: current variable
-		k: current iteration
-
-	"""
-	if debug:
-		print "Check termination"
-		print "len grad:", np.linalg.norm(grad) 
-		#print "fun val", f(w)
-	eps = 1e-6
-	if k > max_iter:
-		return True
-	#elif len(grad) > 0 and np.linalg.norm(grad) < eps:
-	#	return True
-	else:
-		return False
-
-
 
 def getH(s, y, debug = False):
 	"""
@@ -198,7 +174,7 @@ class SQN(StochasticOptimizer):
 		if self.debug: print self.w.shape
 		return
 	    
-	def solve(self, f, g, X, z = None):
+	def solve(self, f, g, X = None, z = None):
 		"""
 		Parameters:
 			f:= f_i = f_i(omega, x, z[.]), loss function for one sample. The goal is to minimize
@@ -209,6 +185,9 @@ class SQN(StochasticOptimizer):
 			X: list of nFeatures numpy column arrays of Data
 			z: list of nSamples integer labels
 		"""
+		
+		assert X is not None or self.options['sampleFunction'] is not None, \
+			"Please provide either a data set or a sampling function"
 		
 		self.set_start(w1=self.options['w1'], dim=self.options['dim'], iterator=self.options['iterator'])
 		
@@ -251,13 +230,13 @@ class SQN(StochasticOptimizer):
 			self.wbar_previous = self.wbar
 			self.wbar = np.zeros(self.options['dim'])
 		return self.w
-		
+	
 	def _perform_update(self, f, g, X, z):
 		"""
 		do the gradient updating rule
 		"""
 		# Draw sample batch
-		X_S, z_S= self.options['sampleFunction'](w=self.w, X=X, z=z, b = self.options['batch_size'])
+		X_S, z_S = self._draw_sample(X, z, self.options['batch_size'])
 		
 		# Stochastic functions
 		f_S = lambda x: f(x, X_S, z_S) if z is not None else f(x, X_S)
@@ -278,7 +257,7 @@ class SQN(StochasticOptimizer):
 		if self.debug: print "step size: ", alpha
 		
 		# Check Termination Condition
-		if len(X_S) == 0 or self.has_terminated(g_S(self.w) , self.w):
+		if len(X_S) == 0 or self._has_terminated(g_S(self.w) , self.w):
 			self.termination_counter += 1
 			return self.w
 		
@@ -299,7 +278,7 @@ class SQN(StochasticOptimizer):
 		"""
 		
 		# draw hessian sample and get the corresponding stochastic gradient
-		X_SH, y_SH = self.options['sampleFunction'](self.w, X, z, b = self.options['batch_size_H'])
+		X_SH, y_SH = self._draw_sample(X, z, self.options['batch_size_H'])
 		g_SH = lambda x: stochastic_gradient(g, x, X_SH, y_SH)
 			    
 		r = 0.01
@@ -324,8 +303,24 @@ class SQN(StochasticOptimizer):
 			
 		if self.debug: print "Length s, y:", len(self.s), len(self.y)
 		return
-
-	def has_terminated(self, grad, w):
+	
+	def _draw_sample(self, X, z, batch, recursion_depth = 1):
+		"""
+		Draw sample from smaple function. Recurse if empty sample was drawn.
+		"""
+		if X is None:
+			X_S, z_S= self.options['sampleFunction'](w=self.w, b = batch)
+		else: 
+			X_S, z_S= self.options['sampleFunction'](w=self.w, X=X, z=z, b = self.options['batch_size'])
+		
+		# if empty sample try one more time:
+		if len(X_S) == 0 and recursion_depth > 0:
+			X_S, z_S = self._draw_sample(X, z, batch, recursion_depth-1)
+		if self.debug:
+			print "sample length:", len(X_S), len(z_S)
+		return X_S, z_S
+		
+	def _has_terminated(self, grad, w):
 		"""
 		Checks whether the algorithm has terminated
 
@@ -333,8 +328,15 @@ class SQN(StochasticOptimizer):
 			grad: gradient
 			w: current variable
 		"""
-		return hasTerminated(id, grad, w, 0, debug=self.debug)
-		
+		if self.debug:
+			print "Check termination"
+			print "len grad:", np.linalg.norm(grad) 
+		eps = 1e-6
+		if len(grad) > 0 and np.linalg.norm(grad) < eps:
+			return True
+		else:
+			return False
+
 	def get_H(self, debug = False):
 		"""
 		returns H_t as defined in algorithm 2

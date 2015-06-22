@@ -32,7 +32,7 @@ def normalize(X):
     return X
 
 def load_data1():
-    dataset = np.genfromtxt(open('ex2data1.txt','r'), delimiter=',', dtype='f8')
+    dataset = np.genfromtxt(open('data/ex2data1.txt','r'), delimiter=',', dtype='f8')
     X = dataset[:,:2]
     z = dataset[:,2][:,np.newaxis]
     
@@ -46,7 +46,7 @@ def load_data1():
     return X_new, list(z)
 
 def load_data2():
-    dataset = np.genfromtxt(open('ex2data2.txt','r'), delimiter=',', dtype='f8')
+    dataset = np.genfromtxt(open('data/ex2data2.txt','r'), delimiter=',', dtype='f8')
     X = dataset[:,:2]
     z = dataset[:,2][:,np.newaxis]
     

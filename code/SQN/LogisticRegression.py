@@ -2,8 +2,7 @@ import numpy as np
 import math
 import sklearn as sk
 
-import SQN
-
+from SQN import SQN
 
 class LogisticRegression():
 	"""
@@ -84,7 +83,7 @@ class LogisticRegression():
 			batch_size = 10
 			batch_size_H = 10
 			max_iter = 1600
-			sqn = SQN.SQN()
+			sqn = SQN()
 			#sqn.debug = True
 			sqn.set_options({'dim':len(X[0]), 
 						    'max_iter': 45, 

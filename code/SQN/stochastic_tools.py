@@ -49,25 +49,12 @@ def sample_batch_SQL(w, X, z = None, b = None, r = None, debug = False):
 	else: 
 		return X_S, z_S
 
-def sample_batch_higgs(w, X, z = None, b = None, r = None, debug = False):
-	"""
+def sample_batch_higgs(w, N, b = None, debug = False):
 
-	#TODO: Documentation Outdated!!!
-	returns a subset of [N] as a list?
+	assert N != None, "N must be given!"
+	assert b != None , "Choose either absolute or relative sample size!"
+	nSamples = b
 
-	Parameters:
-		N: Size of the original set
-		b: parameter for subsample size (e.g. b=.1)
-	"""
-
-	
-	assert b != None or r!= None, "Choose either absolute or relative sample size!"
-	assert (b != None) != (r!= None), "Choose only one: Absolute or relative sample size!"
-	N = len(X)
-	if b != None:
-	    nSamples = b
-	else:
-	    nSamples = r*N
 	if nSamples > N:
 	    if debug:
 		print "Batch size larger than N, using whole dataset"

@@ -8,7 +8,7 @@ import numpy as np
 import scipy as sp
 
 
-def compute_0sr1(f, grad_f, h, x0, **options):
+def compute_0sr1(f, grad_f, x0, **options):
     """
     Main function for Zero-memory Symmetric Rank 1 algorithm
     Input-Arguments:
@@ -29,7 +29,7 @@ def compute_0sr1(f, grad_f, h, x0, **options):
     options.setdefault('upper_b', None)
     options.setdefault('ls', 1)
     options.setdefault('beta', 0.5)
-    options.setdefault('alpha', 1)
+    options.setdefault('eta', 1)
 
     n = len(x0)
     s = np.empty(n,)
@@ -47,8 +47,8 @@ def compute_0sr1(f, grad_f, h, x0, **options):
         if np.linalg.norm(s) < options['epsilon']: # termination criterion
             break
         
-        t = line_search(f, h, s, y, temp_x_new, x_old, **options)
-        x_new = x_old + t * temp_x_new
+        t = line_search(f, s, y, temp_x_new, x_old, **options)
+        x_new = x_old + t * s
         
         y = grad_f(x_new) - grad_f(x_old)
     
@@ -258,7 +258,7 @@ def binary_search(trans_points, x, u, d, **options):
             alpha = trans_points[-1] - p_right / (p_end - p_right)
         # p values of all transition points are above zero
         elif np.logical_and(p_left > 0, p_right > 0):
-            p(trans_points[0] - 1, x, u, d, **options)
+            p_end = p(trans_points[0] - 1, x, u, d, **options)
             alpha = trans_points[-1] - 1 - p_end / (p_left - p_end)
         # normal case
         else:
@@ -282,7 +282,7 @@ def binary_search(trans_points, x, u, d, **options):
 
 
 
-def line_search(f, h, s, y, x_old, x_new, **options):
+def line_search(f, s, y, x_old, x_new, **options):
     """
     Computes line search factor dependent on chosen line search method
     """
@@ -292,7 +292,7 @@ def line_search(f, h, s, y, x_old, x_new, **options):
         t = 1
     # Armijo-type rule
     elif options['ls'] == 2:
-        t = compute_armijo_ls(f, h, x_old, x_new, **options)
+        t = compute_armijo_ls(f, x_old, x_new, **options)
     # Barzilai-Borwein step size
     elif options['ls'] == 3:
         t = compute_bb_ls(s, y)
@@ -313,7 +313,7 @@ def compute_armijo_ls(f, h, x_new, x_old, **options):
     F_old = f(x_old) + h(x_old)
     beta = 1
     
-    while f(x_old + beta * d) + h(x_old + beta * d) > (F_old - options['alpha']
+    while f(x_old + beta * d) + h(x_old + beta * d) > (F_old - options['eta']
             * beta * d_squared):
         beta = beta * options['beta']
             
@@ -337,18 +337,18 @@ def compute_bb_ls(s, y):
 
 if __name__ == "__main__":
     
-    a = 1
-    b = 100
-    rosenbrock = lambda x: (a - (x[0]+1))**2 + b*(x[1]+1 - (x[0]+1)**2)**2
-    rosengrad = lambda x: np.asarray([2*(a-x[0]-1)*(-1) + 2*(x[1]-(x[0]+1)**2)
-                                        *(-2*(x[1]+1)), 2*(x[1]-(x[0]+1)**2)])
+    #a = 1
+    #b = 100
+    #rosenbrock = lambda x: (a - (x[0]+1))**2 + b*(x[1]+1 - (x[0]+1)**2)**2
+    #rosengrad = lambda x: np.asarray([2*(a-x[0]-1)*(-1) + 2*(x[1]-(x[0]+1)**2)
+    #                                    *(-2*(x[1]+1)), 2*(x[1]-(x[0]+1)**2)])
     
     def f(x):
         return x**2
     def grad_f(x):
         return 2*x
         
-    x0 = np.array([-1444,324.5])
+    x0 = np.array([13,4])
     
     # x, k = compute_0sr1(f, grad_f, x0, algo=2, lower_b=np.array([0,0]), upper_b=np.array([100,400]))
     

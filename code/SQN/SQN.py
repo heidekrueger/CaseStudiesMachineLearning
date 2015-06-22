@@ -109,7 +109,8 @@ def compute_0sr1(f, grad_f, h, x0, **options):
     """
     
     # set default values for parameters
-    
+   
+
 class StochasticOptimizer:
 	"""
 	for initialization: Provide one of w1, dim or flat iterator object
@@ -170,7 +171,7 @@ class SQN(StochasticOptimizer):
 		self.wbar_previous = None
 		StochasticOptimizer.__init__(self)
 		#super(SQN, self).__init__()
-
+	
 	def set_start(self, w1=None, dim=None, iterator=None):
 		"""
 		Set start point of the optimization using numpy array, dim or flat.iterator object.
@@ -197,23 +198,6 @@ class SQN(StochasticOptimizer):
 		if self.debug: print self.w.shape
 		return
 	    
-	def has_terminated(self, grad, w):
-		"""
-		Checks whether the algorithm has terminated
-
-		Parameters:
-			grad: gradient
-			w: current variable
-		"""
-		return hasTerminated(id, grad, w, 0, debug=self.debug)
-		
-	def get_H(self, debug = False):
-		"""
-		returns H_t as defined in algorithm 2
-		TODO: Two-Loop-Recursion
-		"""
-		return getH(self.s, self.y, debug)
-	    
 	def solve(self, f, g, X, z = None):
 		"""
 		Parameters:
@@ -232,7 +216,7 @@ class SQN(StochasticOptimizer):
 		    
 			if self.debug: print "Iteration", k
 			
-			self.w = self.solve_step(f, g, X, z, k)
+			self.w = self.solve_one_step(f, g, X, z, k)
 			
 			if k > self.options['max_iter'] or self.termination_counter > 4:
 			    self.iterations = k
@@ -248,86 +232,147 @@ class SQN(StochasticOptimizer):
 		else:
 			return self.w
 		
-	def solve_step(self, f, g, X, z, k):
+	def solve_one_step(self, f, g, X, z, k):
 		"""
 		perform one update step
 		"""
 		assert self.w is not None, "Error! weights not initialized!"
+		
 		# perform gradient update using armijo rule and hessian information
-		self.w = self.gradient_step(f, g, X, z)
+		self.w = self._perform_update(f, g, X, z)
 		if self.debug: print self.w
+		
 		# update wbar and get new correction pairs
 		self.wbar += self.w
 		if k % self.options['L'] == 0:
 			self.wbar /= float(self.options['L']) 
 			if self.wbar_previous is not None:
-				# draw hessian sample and get the corresponding stochastic gradient
-				X_SH, y_SH = self.options['sampleFunction'](self.w, X, z, b = self.options['batch_size_H'])
-				g_SH = lambda x: stochastic_gradient(g, x, X_SH, y_SH)
-				# do update
-				self.update_correction_pairs(g_SH, self.wbar, self.wbar_previous)
-			# save old mean location
+				self._update_correction_pairs(g, X, z)
 			self.wbar_previous = self.wbar
 			self.wbar = np.zeros(self.options['dim'])
 		return self.w
 		
-	def gradient_step(self, f, g, X, z):
+	def _perform_update(self, f, g, X, z):
 		"""
 		do the gradient updating rule
 		"""
-		# Draw mini batch
+		# Draw sample batch
 		X_S, z_S= self.options['sampleFunction'](w=self.w, X=X, z=z, b = self.options['batch_size'])
+		
 		# Stochastic functions
 		f_S = lambda x: f(x, X_S, z_S) if z is not None else f(x, X_S)
 		g_S = lambda x: stochastic_gradient(g, x, X_S, z_S)
+		
 		# Determine search direction
 		if len(self.y) < 2:
 			search_direction = -g_S(self.w)
 		else:
+			#search_direction = -self._two_loop_recursion(g_S)
 			H = self.get_H()
 			search_direction = -H.dot(g_S(self.w))
 		if self.debug: print "Direction:", search_direction.T
-		# Compute step size alpha
+		
+		# Line Search
 		alpha = armijo_rule(f_S, g_S, self.w, search_direction, start = self.options['beta'], beta=.5, gamma= 1e-2 )
 		alpha = max([alpha, 1e-5])
 		if self.debug: print "step size: ", alpha
+		
 		# Check Termination Condition
 		if len(X_S) == 0 or self.has_terminated(g_S(self.w) , self.w):
 			self.termination_counter += 1
 			return self.w
+		
 		# Update
 		self.w = self.w + np.multiply(alpha, search_direction)
 		return self.w
 	    
-	def update_correction_pairs(self, g_S, w, w_previous):
-		    """
-		    returns correction pairs s,y
-		    TODO: replace explicit stochastic gradient
-		    
-		    Perlmutters Trick:
-		    https://justindomke.wordpress.com/2009/01/17/hessian-vector-products/
-		    H(x) v \approx \frac{g(x+r v) - g(x-r v)} {2r}
-		    r = 1e-2
-		    y = ( sg(w + r*s) - sg(w - r*s) ) / 2*r
-		    """
-		    r = 0.01
-		    s_t = w - w_previous
-		    s_t = np.multiply(r, s_t)
-		    y_t = (g_S(w) - g_S(w - s_t)) / (r)
-		    if self.debug:
-			    print "correction:"
-			    print "s_t: ", s_t
-			    print "y_t: ", y_t
+	def _update_correction_pairs(self, g, X, z):
+		"""
+		returns correction pairs s,y
+		TODO: replace explicit stochastic gradient
+		
+		Perlmutters Trick:
+		https://justindomke.wordpress.com/2009/01/17/hessian-vector-products/
+		H(x) v \approx \frac{g(x+r v) - g(x-r v)} {2r}
+		r = 1e-2
+		y = ( sg(w + r*s) - sg(w - r*s) ) / 2*r
+		"""
+		
+		# draw hessian sample and get the corresponding stochastic gradient
+		X_SH, y_SH = self.options['sampleFunction'](self.w, X, z, b = self.options['batch_size_H'])
+		g_SH = lambda x: stochastic_gradient(g, x, X_SH, y_SH)
 			    
-		    if abs(y_t).sum() != 0:
-			self.s.append(s_t)
-			self.y.append(y_t)
-		    else:
-			print "PROBLEM! zero y"
+		r = 0.01
+		s_t = self.wbar - self.wbar_previous
+		s_t = np.multiply(r, s_t)
+		y_t = (g_SH(self.wbar) - g_SH(self.wbar - s_t)) / (r)
+		
+		if self.debug:
+			print "correction:"
+			print "s_t: ", s_t
+			print "y_t: ", y_t
 			
-		    if len(self.s) > self.options['M']:
-			    self.s.popleft()
-			    self.y.popleft()
-			    
-		    if self.debug: print "Length s, y:", len(self.s), len(self.y)
-		    return
+		if abs(y_t).sum() != 0:
+		    self.s.append(s_t)
+		    self.y.append(y_t)
+		else:
+		    print "PROBLEM! zero y"
+		    
+		if len(self.s) > self.options['M']:
+			self.s.popleft()
+			self.y.popleft()
+			
+		if self.debug: print "Length s, y:", len(self.s), len(self.y)
+		return
+
+	def has_terminated(self, grad, w):
+		"""
+		Checks whether the algorithm has terminated
+
+		Parameters:
+			grad: gradient
+			w: current variable
+		"""
+		return hasTerminated(id, grad, w, 0, debug=self.debug)
+		
+	def get_H(self, debug = False):
+		"""
+		returns H_t as defined in algorithm 2
+		TODO: Two-Loop-Recursion
+		"""
+		return getH(self.s, self.y, debug)
+	    
+	
+	
+	def _two_loop_recursion(self, g_S):
+		"""
+		TODO: Description two loop recursion and wikipedia link
+		TODO: Check and TEST!!
+		returns:
+		z = H_k g_k
+		"""
+	    
+		assert len(s)>0, "s cannot be empty."
+		assert len(s)==len(y), "s and y must have same length"
+		assert s[0].shape == y[0].shape, "s and y must have same shape"
+		assert abs(y[-1]).sum() != 0, "latest y entry cannot be 0!"
+		assert 1/np.inner(y[-1], s[-1]) != 0, "!"
+		# H = (s_t^T y_t^T)/||y_t||^2 * I
+
+		q = g_S(self.w)
+		rho = 1./ np.inner(y[-1], s[-1])
+		a = []
+		
+		for j in range(len(s)):
+			a.append( rho * np.inner(s[j], q))
+			q = q - np.multiply(a[-1], y[j])
+		
+		H_k = np.inner(y[-2], s[-2]) / np.inner(y[-2], y[-2])
+		z = np.multiply(H_k, q)
+
+		for j in reversed(range(len(s))):
+			b_j = rho * np.inner(y[j], z)
+			q = q - np.multiply( a[j] - b_j, s[j])
+		
+		return z
+		

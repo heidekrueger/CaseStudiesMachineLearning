@@ -263,6 +263,7 @@ class SQN:
 		# Stochastic functions
 		f_S = lambda x: f(x, X_S, z_S) if z is not None else f(x, X_S)
 		g_S = lambda x: stochastic_gradient(g, x, X_S, z_S)
+
 		
 		# Check Termination Condition
 		if self.options['debug']: print "Iteration", k

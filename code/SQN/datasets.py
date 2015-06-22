@@ -73,11 +73,8 @@ def load_higgs(rowlim=10000):
     X, y = [], []
     for row in getdata(file_name, rowlim
         #TODO: Fehler in dieser Zeile: X[0] wird ein array von STRINGs anstatt floats!
-        X.append(np.array([1.0] + row[1:]))
-        raise NotImplementedError
+        X.append(np.array([1.0] + [float(r) for r in row]))
         y.append(row[0])
     print type(X[0])
-    print len(X[0])
     print X[0][0]
-    print type(X[0][0])
     return X, y

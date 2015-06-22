@@ -89,7 +89,6 @@ def correctionPairs(g, w, w_previous, X, z):
 	
 	return (s, y)
 
-
 def solveSQN(f, g, X, z = None, w1 = None, dim = None, iterator = None, M=10, L=1.0, beta=1, batch_size = 1, batch_size_H = 1, max_iter = 1e4, debug = False, sampleFunction = None):
 	"""
 	Parameters:
@@ -220,12 +219,22 @@ def compute_0sr1(f, grad_f, h, x0, **options):
     # set default values for parameters
     
     
-    
-    
-    
 class SQN:
+	"""
+	TODO: Two-Loop-Recursion!
+	"""
 	
 	def __init__(self):
+		"""
+		for initialization: Provide one of w1, dim or flat iterator object
+		M: Memory-Parameter
+		L: Compute Hessian information every Lth step
+		beta: start configuration for line search
+		batch_size: number of samples to be drawn for gradient evaluation
+		batch_size: number of samples to be drawn for Hessian approximation
+		max_iter: Terminate after this many steps
+		debug: Print progress statements
+		"""
 		self.options = dict()
 		self.options['w1'] =  None
 		self.options['dim'] =  None
@@ -242,22 +251,13 @@ class SQN:
 		self.s, self.y = deque(), deque()
 		self.w, self.w_previous = None, None
 		self.wbar = None
+		self.wbar_previous = None
 		
 		self.termination_counter = 0
-		
+		self.iterations = 0
+		self.iterator = None
 		
 	def set_options(self, options):
-		"""
-			for initialization: Provide one of w1, dim or flat iterator object
-
-			M: Memory-Parameter
-			L: Compute Hessian information every Lth step
-			beta: start configuration for line search
-			batch_size: number of samples to be drawn for gradient evaluation
-			batch_size: number of samples to be drawn for Hessian approximation
-			max_iter: Terminate after this many steps
-			debug: Print progress statements
-		"""
 		for key in options:
 			if key in self.options:
 				self.options[key] = options[key]
@@ -270,40 +270,133 @@ class SQN:
 			print key
 			print self.options[key]
 	
-	def gradient_step(self, f, g, X, z, w, k):
+	def set_start(self, w1=None, dim=None, iterator=None):
+		"""
+		Set start point of the optimization using numpy array, dim or flat.iterator object.
+		"""
+		assert self.options['M'] > 0, "Memory Parameter M must be a positive integer!"
+		# start point
+		assert w1 is not None or dim is not None or iterator is not None, \
+		    "Please privide either a starting point or the dimension of the optimization problem!"
 		
+		if w1 is None and dim is None:  
+		    self.options['iterator'] = iterator
+		    w1 = stochastic_tools.iter_to_array(self.options['iterator'])
+		elif w1 is None:
+		    w1 = np.zeros(dim)
+		
+		self.options['dim'] = len(w1)
+		    
+		# init
+		self.w = w1
+		self.w_previous = self.w
+		self.wbar = np.zeros(self.w.shape)
+		self.wbar_previous = None
+		self.s, self.y = deque(), deque()
+		if self.debug: print self.w.shape
+		return
+	    
+	def has_terminated(self, grad, w):
+		"""
+		Checks whether the algorithm has terminated
+
+		Parameters:
+			grad: gradient
+			w: current variable
+		"""
+		return hasTerminated(id, grad, w, 0, debug=self.debug)
+		
+	def get_H(self, debug = False):
+		"""
+		returns H_t as defined in algorithm 2
+		TODO: Two-Loop-Recursion
+		"""
+		return getH(self.s, self.y, debug)
+	    
+	def solve(self, f, g, X, z = None):
+		"""
+		Parameters:
+			f:= f_i = f_i(omega, x, z[.]), loss function for one sample. The goal is to minimize
+				F(omega,X,z) = 1/nSamples*sum_i(f(omega,X[i,:],z[i]))
+				with respect to w
+			g:= g_i = g_i(omega, x, z), gradient of f
+
+			X: list of nFeatures numpy column arrays of Data
+			z: list of nSamples integer labels
+		"""
+		
+		self.set_start(w1=self.options['w1'], dim=self.options['dim'], iterator=self.options['iterator'])
+		
+		for k in itertools.count():
+		    
+			if self.debug: print "Iteration", k
+			
+			self.w = self.solve_step(f, g, X, z, k)
+			
+			if k > self.options['max_iter'] or self.termination_counter > 4:
+			    self.iterations = k
+			    break
+			
+		if self.iterations < self.options['max_iter']:
+			print "Terminated successfully!" 
+		print "Iterations:\t\t", self.iterations
+		
+		if self.options['iterator'] is not None:  
+			stochastic_tools.set_iter_values(self.options['iterator'], self.w)
+			return iterator
+		else:
+			return self.w
+		
+	def solve_step(self, f, g, X, z, k):
+		"""
+		perform one update step
+		"""
+		assert self.w is not None, "Error! weights not initialized!"
+		# perform gradient update using armijo rule and hessian information
+		self.w = self.gradient_step(f, g, X, z)
+		if self.debug: print self.w
+		# update wbar and get new correction pairs
+		self.wbar += self.w
+		if k % self.options['L'] == 0:
+			self.wbar /= float(self.options['L']) 
+			if self.wbar_previous is not None:
+				# draw hessian sample and get the corresponding stochastic gradient
+				X_SH, y_SH = self.options['sampleFunction'](self.w, X, z, b = self.options['batch_size_H'])
+				g_SH = lambda x: stochastic_gradient(g, x, X_SH, y_SH)
+				# do update
+				self.update_correction_pairs(g_SH, self.wbar, self.wbar_previous)
+			# save old mean location
+			self.wbar_previous = self.wbar
+			self.wbar = np.zeros(self.options['dim'])
+		return self.w
+		
+	def gradient_step(self, f, g, X, z):
+		"""
+		do the gradient updating rule
+		"""
 		# Draw mini batch
-		X_S, z_S= self.options['sampleFunction'](w=w, X=X, z=z, b = self.options['batch_size'])
-		
+		X_S, z_S= self.options['sampleFunction'](w=self.w, X=X, z=z, b = self.options['batch_size'])
 		# Stochastic functions
 		f_S = lambda x: f(x, X_S, z_S) if z is not None else f(x, X_S)
 		g_S = lambda x: stochastic_gradient(g, x, X_S, z_S)
-		
 		# Determine search direction
-		if k <= 2*self.options['L']: 
-			search_direction = -g_S(w)
+		if len(self.y) < 2:
+			search_direction = -g_S(self.w)
 		else:
-			H = getH(self.s, self.y)
-			search_direction = -H.dot(g_S(w))
-		
+			H = self.get_H()
+			search_direction = -H.dot(g_S(self.w))
 		if self.debug: print "Direction:", search_direction.T
-
 		# Compute step size alpha
-		alpha_k = armijo_rule(f_S, g_S, w, search_direction, start = self.options['beta'], beta=.5, gamma= 1e-2 )
-		alpha_k = max([alpha_k, 1e-5])
-		#alpha_k = min([alpha_k, 1/(1.+k)])
-		#alpha_k = max([alpha_k, 0.001])
-		if self.debug: print alpha_k
-		
+		alpha = armijo_rule(f_S, g_S, self.w, search_direction, start = self.options['beta'], beta=.5, gamma= 1e-2 )
+		alpha = max([alpha, 1e-5])
+		if self.debug: print "step size: ", alpha
 		# Check Termination Condition
-		if self.debug: print "Iteration", k
-		if len(X_S) == 0 or hasTerminated(lambda x: f(x, X, z) , g_S(w) , w ,k, max_iter = self.options['max_iter'], debug=self.debug):
+		if len(X_S) == 0 or self.has_terminated(g_S(self.w) , self.w):
 			self.termination_counter += 1
-			return w
-		    
+			return self.w
 		# Update
-		w = w + np.multiply(alpha_k, search_direction)
-		return w
+		self.w = self.w + np.multiply(alpha, search_direction)
+		return self.w
 	    
 	def update_correction_pairs(self, g_S, w, w_previous):
 		    """
@@ -320,7 +413,6 @@ class SQN:
 		    s_t = w - w_previous
 		    s_t = np.multiply(r, s_t)
 		    y_t = (g_S(w) - g_S(w - s_t)) / (r)
-		    
 		    if self.debug:
 			    print "correction:"
 			    print "s_t: ", s_t
@@ -330,7 +422,7 @@ class SQN:
 			self.s.append(s_t)
 			self.y.append(y_t)
 		    else:
-			print "PROBLEM!"
+			print "PROBLEM! zero y"
 			
 		    if len(self.s) > self.options['M']:
 			    self.s.popleft()
@@ -338,71 +430,3 @@ class SQN:
 			    
 		    if self.debug: print "Length s, y:", len(self.s), len(self.y)
 		    return
-
-	def solve(self, f, g, X, z = None):
-		"""
-		Parameters:
-			f:= f_i = f_i(omega, x, z[.]), loss function for one sample. The goal is to minimize
-				F(omega,X,z) = 1/nSamples*sum_i(f(omega,X[i,:],z[i]))
-				with respect to w
-			g:= g_i = g_i(omega, x, z), gradient of f
-
-			X: list of nFeatures numpy column arrays of Data
-			z: list of nSamples integer labels
-		"""
-		
-		assert self.options['M'] > 0, "Memory Parameter M must be a positive integer!"
-		
-		# start point
-		assert self.options['w1'] != None or self.options['dim'] != None or self.options['iterator'] != None, \
-		    "Please privide either a starting point or the dimension of the optimization problem!"
-		if self.options['w1'] is None and self.options['dim'] is None:  
-		    w1 = stochastic_tools.iter_to_array(self.options['iterator'])
-		elif self.options['w1'] is None:
-		    w1 = np.zeros(self.options['dim'])
-		else:
-		    w1 = self.options['w1']
-		
-		self.options['dim'] = len(w1)
-		    
-		# init
-		self.w = w1
-		self.w_previous = self.w
-		self.wbar = np.zeros(self.w.shape)
-		self.s, self.y = deque(), deque()
-		
-		if self.debug: print self.w.shape
-		
-		t = -1
-		for k in itertools.count():
-		    print self.w
-		    self.w_previous = self.w
-		    self.w = self.gradient_step(f, g, X, z, self.w, k)
-		    if self.debug: print self.w
-		    
-		    if self.termination_counter > 4:
-			    iterations = k
-			    break
-		    
-		    self.wbar += self.w
-		    
-		    if k % self.options['L'] == 0:
-			    t += 1
-			    self.wbar /= float(self.options['L']) 
-			    if t>0:
-				    X_SH, y_SH = self.options['sampleFunction'](self.w, X, z, b = self.options['batch_size_H'])
-				    g_SH = lambda x: stochastic_gradient(g, x, X_SH, y_SH)
-				    self.update_correction_pairs(g_SH, self.w, self.w_previous)
-				    
-			    self.wbar = np.zeros(self.options['dim'])
-		
-		if iterations < self.options['max_iter']:
-			print "Terminated successfully!" 
-		print "Iterations:\t\t", iterations
-		
-		if self.options['iterator'] is not None:  
-			stochastic_tools.set_iter_values(self.options['iterator'], self.w)
-			return iterator
-		else:
-			return self.w
-		    

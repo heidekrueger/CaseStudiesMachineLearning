@@ -71,11 +71,11 @@ def load_iris():
 def load_higgs(rowlim=10000):
     file_name = '../../datasets/HIGGS.csv'
     X, y = [], []
-    for row in getdata(file_name, rowlim
-        #TODO: Fehler in dieser Zeile: X[0] wird ein array von STRINGs anstatt floats!
-        X.append(np.array([1.0] + row[1:]))
-        raise NotImplementedError
-        y.append(row[0])
+    #TODO: Fehler in dieser Zeile: X[0] wird ein array von STRINGs anstatt floats!    
+    #for row in getdata(file_name, rowlim
+    #    X.append(np.array([1.0] + row[1:]))
+    raise NotImplementedError
+    #    y.append(row[0])
     print type(X[0])
     print len(X[0])
     print X[0][0]

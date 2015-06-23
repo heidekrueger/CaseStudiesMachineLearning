@@ -314,8 +314,10 @@ class SQN(StochasticOptimizer):
 		"""
 		Draw sample from smaple function. Recurse if empty sample was drawn.
 		"""
-		if X is None:
+		if X is None and self.options['N'] is None:
 			X_S, z_S= self.options['sampleFunction'](w=self.w, N = self.options['N'], b = batch)
+		elif X is None and self.options['N'] is not None:
+			X_S, z_S= self.options['sampleFunction'](w=self.w, X=X, b = batch)
 		else: 
 			X_S, z_S= self.options['sampleFunction'](w=self.w, X=X, z=z, b = self.options['batch_size'])
 		

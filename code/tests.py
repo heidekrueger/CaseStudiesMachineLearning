@@ -1,4 +1,7 @@
 
+import itertools
+		
+
 
 """
 Logistic Regression
@@ -159,24 +162,46 @@ if __name__ == "__main__":
 		sqn.set_options({'dim':len(X[0]), 'max_iter': 1600, 'batch_size': 20, 'beta': 10, 'batch_size_H': 10, 'L': 3, 'sampleFunction':logreg.sample_batch})
 		sqn.solve(logreg.F, logreg.g, X, z)
 
-	elif testcase == 'higgs':
-		"""Runs SQN-LogReg on the Higgs-Dataset, 
+	elif "higgs" in testcase:
+	    	"""Runs SQN-LogReg on the Higgs-Dataset, 
 		which is a 7.4GB csv file for binary classification
 		that can be obtained here:
 		https://archive.ics.uci.edu/ml/datasets/HIGGS
 		the file should be in <Git Project root directory>/datasets/
 		"""
-		rowlim = 1000
-		X, z = datasets.load_higgs(rowlim)
-
+		print "\nSQN, Higgs-Dataset", 
+		
 		logreg = LogisticRegression()
 		func = lambda w, X, z: logreg.F(w, X, z)
 		grad = lambda w, X, z: logreg.g(w, X, z)
-
-		print "\nSQN, Higgs-Dataset, #rows:", rowlim
+		
 		sqn = SQN.SQN()
 		sqn.set_options({'dim':29, 'N':5e5, 'max_iter': 1e3, 'batch_size': 10, 'batch_size_H': 10, 'L':3, 'beta':10, 'M':100})
-		sqn.solve(func, grad, X, z)
+		
+		rowlim = 1e6
+		
+		if testcase == "higgs2":
+			X, z = stochastic_tools.sample_batch_higgs(None, N=rowlim, b=rowlim)
+			sqn.set_options({'sampleFunction': stochastic_tools.sample_batch_higgs})
+		else:
+			X, z = datasets.load_higgs(rowlim)
+			
+		sqn.set_start(dim=29)
+		for k in itertools.count():
+		    
+			if testcase == "higgs2":
+				w = sqn.solve_one_step(func, grad, k=k)
+			else:
+				w = sqn.solve_one_step(func, grad, X = X, z = z, k=k)
+			if k % 5 == 0:
+				sqn.options['batch_size'] += 10
+				sqn.options['batch_size_H'] += 10
+				print logreg.F(w, X, z)
+			if k > sqn.options['max_iter'] or sqn.termination_counter > 4:
+			    iterations = k
+			    break
+		
+		
 		
 	elif testcase == 'higgs2':
 		"""Runs SQN-LogReg on the Higgs-Dataset, 
@@ -196,7 +221,6 @@ if __name__ == "__main__":
 		
 		sqn.set_start(dim=29)
 		X, z = stochastic_tools.sample_batch_higgs(None, N=5e5, b=5e5)
-		import itertools
 		for k in itertools.count():
 		    
 			w = sqn.solve_one_step(func, grad, k=k)
@@ -234,3 +258,5 @@ if __name__ == "__main__":
 	elif testcase == '66':
 		from data.datasets import split_into_files
 		split_into_files('../datasets/HIGGS.csv', '../datasets/HIGGS/')
+	else:
+		print "\nNo such testcase:", testcase, "\n"

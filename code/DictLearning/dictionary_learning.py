@@ -14,7 +14,6 @@
 
     TODO :
     - test it on scikit learn ex.
-    - test it on WNVP
     - add a verbose function
     - selection of best regularization parameter or inscrease batch size
     - select option : SQN or normal where would be the access point ?

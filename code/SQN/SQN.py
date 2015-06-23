@@ -12,11 +12,8 @@ from stochastic_tools import armijo_rule
 
 
 """
-
 TODO: Iterator support not yet tested! Try on Dictionary Learning Problem!
-
 """
-
 
 def getH(s, y, debug = False):
 	"""
@@ -234,6 +231,18 @@ class SQN(StochasticOptimizer):
 			self.wbar = np.zeros(self.options['dim'])
 		return self.w
 	
+	# Determine search direction
+	def _get_search_direction(self, g_S):
+		if len(self.y) < 2:
+			search_direction = -g_S(self.w)
+		else:
+			#search_direction = -self._two_loop_recursion(g_S)
+			H = self.get_H()
+			search_direction = -H.dot(g_S(self.w))
+		if self.debug: print "Direction:", search_direction.T
+		return search_direction
+	    
+	# Calculate gradient and perform update
 	def _perform_update(self, f, g, X, z):
 		"""
 		do the gradient updating rule
@@ -245,14 +254,8 @@ class SQN(StochasticOptimizer):
 		f_S = lambda x: f(x, X_S, z_S) #if z is not None else f(x, X_S)
 		g_S = lambda x: stochastic_gradient(g, x, X_S, z_S)
 		
-		# Determine search direction
-		if len(self.y) < 2:
-			search_direction = -g_S(self.w)
-		else:
-			#search_direction = -self._two_loop_recursion(g_S)
-			H = self.get_H()
-			search_direction = -H.dot(g_S(self.w))
-		if self.debug: print "Direction:", search_direction.T
+		# Get search direction
+		search_direction = self._get_search_direction(g_S)
 		
 		# Line Search
 		alpha = armijo_rule(f_S, g_S, self.w, search_direction, start = self.options['beta'], beta=.5, gamma= 1e-2 )
@@ -347,8 +350,6 @@ class SQN(StochasticOptimizer):
 		"""
 		return getH(self.s, self.y, debug)
 	    
-	
-	
 	def _two_loop_recursion(self, g_S):
 		"""
 		TODO: Description two loop recursion and wikipedia link

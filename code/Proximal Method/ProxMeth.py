@@ -51,7 +51,8 @@ def compute_0sr1(f, grad_f, x0, **options):
         x_new = x_old + t * s
         
         y = grad_f(x_new) - grad_f(x_old)
-    
+	s = x_new - x_old
+	
     return x_new, k
 
 

@@ -109,30 +109,30 @@ import data.datasets as datasets
 import sys
 if __name__ == "__main__":
 	
-	testcase = 5
+	testcase = 1
 	
 	if len(sys.argv) > 1:
-		testcase = int(sys.argv[1])
+		testcase = sys.argv[1]
 	
 	print "Using testcase", testcase
-	if testcase == 1:
+	if testcase == '1':
 		X, z = datasets.load_data1()
 		print "\nSQN:"
 		test_rosenbrock(SQN.solveSQN, X, z)
 		#print "\nLazy SQN:"
 		#test_rosenbrock(SQN_LAZY.solveSQN, X, z)
-	elif testcase == 2:
+	elif testcase == '2':
 		X, z = datasets.load_data1()
 		print "Logistic Regression: SQN"
 		test_Logistic_Regression(SQN.solveSQN, X, z )
 		#print "Logistic Regression: Lazy SQN"
 		#test_Logistic_Regression(SQN_LAZY.solveSQN, X, z)
-	elif testcase == 3:
+	elif testcase == '3':
 		X, z = datasets.load_iris()
 		print "Logistic Regression using SQN"
 		logregtest = LogisticRegressionTest()
 		logregtest.test_classification(X, z)
-	elif testcase == 4:
+	elif testcase == '4':
 		X, z = datasets.load_data1()
 		z = None
 		a = 1
@@ -147,7 +147,7 @@ if __name__ == "__main__":
 		sqn.set_options({'dim':2, 'L': 5})
 		sqn.solve(rosenbrock, rosengrad, X, z)
 		
-	elif testcase == 5:
+	elif testcase == '5':
 		X, z = datasets.load_data1()
 		logreg = LogisticRegression()
 		#func = lambda w, X, z: logreg.F(w, X, z)
@@ -159,7 +159,7 @@ if __name__ == "__main__":
 		sqn.set_options({'dim':len(X[0]), 'max_iter': 1600, 'batch_size': 20, 'beta': 10, 'batch_size_H': 10, 'L': 3, 'sampleFunction':logreg.sample_batch})
 		sqn.solve(logreg.F, logreg.g, X, z)
 
-	elif testcase == 6:
+	elif testcase == 'higgs':
 		"""Runs SQN-LogReg on the Higgs-Dataset, 
 		which is a 7.4GB csv file for binary classification
 		that can be obtained here:
@@ -175,9 +175,10 @@ if __name__ == "__main__":
 
 		print "\nSQN, Higgs-Dataset, #rows:", rowlim
 		sqn = SQN.SQN()
-		sqn.set_options({'dim':29})
+		sqn.set_options({'dim':29, 'N':5e5, 'max_iter': 1e3, 'batch_size': 10, 'batch_size_H': 10, 'L':3, 'beta':10, 'M':100})
 		sqn.solve(func, grad, X, z)
-	elif testcase == 7:
+		
+	elif testcase == 'higgs2':
 		"""Runs SQN-LogReg on the Higgs-Dataset, 
 		which is a 7.4GB csv file for binary classification
 		that can be obtained here:
@@ -209,6 +210,27 @@ if __name__ == "__main__":
 			
 		#w = sqn.solve(func, grad)
 		
-	elif testcase == 66:
+	elif testcase == 'prox':
+		#a = 1
+		#b = 100
+		#rosenbrock = lambda x: (a - (x[0]+1))**2 + b*(x[1]+1 - (x[0]+1)**2)**2
+		#rosengrad = lambda x: np.asarray([2*(a-x[0]-1)*(-1) + 2*(x[1]-(x[0]+1)**2)
+		#                                    *(-2*(x[1]+1)), 2*(x[1]-(x[0]+1)**2)])
+		
+		def f(x):
+		    return x**2
+		def grad_f(x):
+		    return 2*x
+		    
+		x0 = np.array([13,4])
+		
+		# x, k = compute_0sr1(f, grad_f, x0, algo=2, lower_b=np.array([0,0]), upper_b=np.array([100,400]))
+		
+		x, k = compute_0sr1(f, grad_f, x0)
+		
+		print(x)
+		print(k)
+		
+	elif testcase == '66':
 		from data.datasets import split_into_files
 		split_into_files('../datasets/HIGGS.csv', '../datasets/HIGGS/')

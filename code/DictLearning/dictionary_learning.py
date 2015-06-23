@@ -10,20 +10,20 @@
     - test convergence criterion (cf renormalisation)
     - initial dictionary in early steps of algo1
     - Implementation with a .fit method = class ?
+    - test it on scikit learn ex.
+    - write test dictionary learning script
 
 
     TODO :
-    - test it on scikit learn ex.
     - add a verbose function
     - selection of best regularization parameter or inscrease batch size
     - select option : SQN or normal where would be the access point ?
-    - write test dictionary learning script
+    - should I add a runtime attribute ? => maybe not yet, maybe not here
 """
 
 
 import numpy as np
 import math
-from time import time
 
 
 class StochasticDictionaryLearning:
@@ -44,6 +44,7 @@ class StochasticDictionaryLearning:
     fit :
     set_params :
     get_params :
+    print_attributes ?
 
     '''
 
@@ -75,43 +76,6 @@ class StochasticDictionaryLearning:
                        eta=self.eta,
                        verbose=self.verbose)
         return D
-
-
-def load_data():
-    '''
-    code from sklearn application of dictionary learning
-
-    RETURNS:
-    - data: n_patches, dim_patch array like. collection of patches
-    '''
-    from sklearn.feature_extraction.image import extract_patches_2d
-    from scipy.misc import lena
-
-    # Load Lena image and extract patches
-
-    lena = lena() / 256.0
-
-    # downsample for higher speed
-    lena = lena[::2, ::2] + lena[1::2, ::2] + lena[::2, 1::2] + lena[1::2, 1::2]
-    lena /= 4.0
-    height, width = lena.shape
-
-    # Distort the right half of the image
-    print('Distorting image...')
-    distorted = lena.copy()
-    distorted[:, height // 2:] += 0.075 * np.random.randn(width, height // 2)
-
-    # Extract all reference patches from the left half of the image
-    print('Extracting reference patches...')
-    t0 = time()
-    patch_size = (7, 7)
-    data = extract_patches_2d(distorted[:, :height // 2], patch_size)
-    data = data.reshape(data.shape[0], -1)
-    data -= np.mean(data, axis=0)
-    data /= np.std(data, axis=0)
-    print('done in %.2fs.' % (time() - t0))
-
-    return data
 
 
 def algorithm1(x, n_components=100, l=0.01, n_iter=30, eta=40, verbose=0):
@@ -265,8 +229,8 @@ def algorithm2(D, A, B, c_max=15, eps=0.00001):
 
 if __name__ == "__main__":
     sdl = StochasticDictionaryLearning()
-    X = load_data()
-    print "Fitting dictionary..."
-    sdl.fit(X)
-    print "done."
     # algorithm1(x)
+
+    '''
+    Testing is not here anymore
+    '''

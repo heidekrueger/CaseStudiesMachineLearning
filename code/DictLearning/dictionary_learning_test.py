@@ -2,6 +2,26 @@
     @Stan
     StochasticDictionaryLearningTest
 
+    This script is made for comparing our implementation of DictionaryLearning
+    algorithm and scikit learn's one.
+
+    TODO:
+    - think about class organisation
+    - fix coding/writting conventions problem
+    - create a function to run scikit's algo and store results
+    - create a function to run our algo and store results
+    - create a function to display results for both algorithm
+        => display pictures
+        => display running time, number of iterations...
+        => display performances (how to measure it ?)
+    - reproduce scikit's results with our implementation
+    - try to do better with incorporating SQN, and proximal methods
+
+    DONE:
+    - load data
+    - reconstruct data
+    - run algorithm
+
 """
 from dictionary_learning import StochasticDictionaryLearning
 from sklearn.feature_extraction.image import reconstruct_from_patches_2d
@@ -13,7 +33,23 @@ import matplotlib.pyplot as plt
 
 class StochasticDictionaryLearningTest(StochasticDictionaryLearning):
     '''
-    Class to test dictionary learning algorithm
+    Class to test dictionary learning algorithm and compare it to sklearn's one
+
+    Attributes:
+    - ours : our algorithm
+    - sklearn : sklearn algorithm
+    - n_components
+    - option, select SQN method or normal method
+    - l, regularization parameter
+    - n_iter, int, number of iterations
+    - eta, int, mini batch size
+    - verbose, int, control verbosity of algorithm
+
+    methods:
+    - __init__
+    - pipeline : sklearn's example of dictionary learning
+    - print_attributes
+    - plot_results
     '''
 
     def __init__(self):
@@ -133,6 +169,9 @@ def reconstruct_data(D, data, dist, center):
 
 
 if __name__ == '__main__':
+    '''
+    This stuffs should be embedded in a function or class method
+    '''
     sdl = StochasticDictionaryLearning()
 
     # Loading data

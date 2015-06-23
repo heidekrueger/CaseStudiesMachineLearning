@@ -16,7 +16,7 @@
     - test it on scikit learn ex.
     - test it on WNVP
     - add a verbose function
-    - selection of best regularization parameter l
+    - selection of best regularization parameter or inscrease batch size
     - select option : SQN or normal where would be the access point ?
     - write test dictionary learning script
 """
@@ -33,6 +33,7 @@ class StochasticDictionaryLearning:
 
     Attributes:
     - n_components
+    - option, select SQN method or normal method
     - l, regularization parameter
     - n_iter, int, number of iterations
     - eta, int, mini batch size
@@ -47,8 +48,10 @@ class StochasticDictionaryLearning:
 
     '''
 
-    def __init__(self, n_components=100, l=0.001, n_iter=30, eta=100, verbose=0):
+    def __init__(self, n_components=100, option=None,
+                 l=0.001, n_iter=30, eta=100, verbose=0):
         self.n_components = n_components
+        self.option = option  # select whether SQN method should be used
         self.l = l
         self.n_iter = n_iter
         self.eta = eta
@@ -139,6 +142,20 @@ def algorithm1(x, n_components=100, l=0.01, n_iter=30, eta=40, verbose=0):
     # 1: initialization
     A = np.zeros((k, k))
     B = np.zeros((m, k))
+
+    '''
+    First iteration in a while loop so that matrix A in not empty
+    - if empty => change l
+    - if empty => change batch size
+
+    So that we ensure that no problem occurs in algo2
+    '''
+
+    '''
+    Loop
+    for t in range(2, n_iter + 1):
+
+    '''
 
     # 2: Loop
     for t in range(1, n_iter + 1):

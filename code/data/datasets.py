@@ -82,6 +82,62 @@ def split_into_files(src, dest_folder):
 			break
 	csvfile.close()
 
+import redis
+def get_redis():
+    return redis.StrictRedis(host='localhost', port=6379, db=0)
+
+
+
+
+
+
+
+#########################
+### Redis
+#########################
+
+def load_higgs_to_redis()
+    r = get_redis()
+    line_count = 0
+    with open(filename, "rb") as csvfile:
+		line = csvfile.readline()
+		entries = line.split(",")
+		for index, entry in enumerate(entries):
+			redis_add_value(r, linecount, index, entry)
+		line_count += 1
+
+def redis_add_value(r, ID, index, entry):
+	r.set("HIGGS:%d:x%d" %(ID, index), entry)
+
+def redis_get_value(r, ID, index):
+	return(float(r.get("HIGGS:%d:x%d" %(ID, index))))
+
+def redis_get_data(r, ID, dim=0)
+	X = [1.]
+	y = int(redis_get_value(r, ID, 0))
+	for index in range(1, dim):
+		X.append(redis_get_value(r, ID, index))
+	return np.array(X), y
+
+def get_data(ID_list, dim=0):
+	r = get_redis()
+	X = []
+	y = []
+	for ID in ID_list:
+		X_tmp, y_tmp = redis_get_data(r, ID, dim)
+		X.append(X_tmp)
+		y.append(y_tmp)
+	return X, y
+    
+#############################
+#############################
+
+
+
+
+
+
+
 def load_higgs_into_mysql():
     
 	table_name = "TEST"

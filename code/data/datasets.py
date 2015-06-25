@@ -1,7 +1,7 @@
 import numpy as np
 import sklearn.datasets
 import csv
-#import MySQLdb
+import MySQLdb
 
 #### functions for reading from loooong file as stream
 
@@ -82,97 +82,111 @@ def split_into_files(src, dest_folder):
 			break
 	csvfile.close()
 
-import redis
-def get_redis():
-    return redis.StrictRedis(host='localhost', port=6379, db=0)
 
 
 
+"""
+	Before you can use MySQL as database, you first have to create a user 'casestudies' using the admin/root account.
+	Then you have to make sure that the database HIGGS is created and that the user has access to it.
+	mysql -u root -p
+	CREATE USER 'casestudies'@'localhost';
+	CREATE DATABASE HIGGS;
+	GRANT ALL PRIVILEGES ON HIGGS.* TO 'casestudies'@'localhost';
+"""
+	
+def get_mysql(): 	
+	db = MySQLdb.connect(
+			    user="casestudies",
+			    db="HIGGS"
+			    ) # name of the data base	
+	cur = db.cursor()
+	
+	table_name = "DATA"
+	dimensions = 29
+	
+	return db, cur, table_name, dimensions
 
 
-
-
-#########################
-### Redis
-#########################
-
-def load_higgs_to_redis()
-    r = get_redis()
-    line_count = 0
-    with open(filename, "rb") as csvfile:
-		line = csvfile.readline()
-		entries = line.split(",")
-		for index, entry in enumerate(entries):
-			redis_add_value(r, linecount, index, entry)
-		line_count += 1
-
-def redis_add_value(r, ID, index, entry):
-	r.set("HIGGS:%d:x%d" %(ID, index), entry)
-
-def redis_get_value(r, ID, index):
-	return(float(r.get("HIGGS:%d:x%d" %(ID, index))))
-
-def redis_get_data(r, ID, dim=0)
-	X = [1.]
-	y = int(redis_get_value(r, ID, 0))
-	for index in range(1, dim):
-		X.append(redis_get_value(r, ID, index))
-	return np.array(X), y
-
-def get_data(ID_list, dim=0):
-	r = get_redis()
-	X = []
-	y = []
-	for ID in ID_list:
-		X_tmp, y_tmp = redis_get_data(r, ID, dim)
-		X.append(X_tmp)
-		y.append(y_tmp)
-	return X, y
-    
-#############################
-#############################
-
-
-
-
-
-
+def create_higgs():
+	db, cur, table_name, dimensions = get_mysql() 
+	sql =   "CREATE TABLE IF NOT EXISTS " + table_name + " (ID INTEGER PRIMARY KEY, "
+	for i in range(dimensions):
+		sql += "x_" + str(i) + " DOUBLE, " 
+	sql = sql[:-2]
+	sql += ");"
+	
+	try:
+		cur.execute(sql)
+	except Warning, w:
+		print w
+	cur.close()
+	db.close()
+	
 
 def load_higgs_into_mysql():
-    
-	table_name = "TEST"
-	dimensions = 6
 	
-	db = MySQLdb.connect(host="localhost", 
-			    user="casestudies",
-#			    passwd="megajonhy", # your password
-			    db="data") # name of the data base	
-	cur = db.cursor() 
-	
-	sql =   "create table if not exists " + table_name + "(ID INTEGER PRIMARY KEY"
-	for i in range(dimensions):
-		sql += "x_" + str(i) + " DOUBLE," 
-	sql += "DOUBLE, IS_SET INTEGER);"
-
-	cur.execute(sql)
+	create_higgs()
+	db, cur, table_name, dimensions = get_mysql() 
 	
 	generic = "INSERT INTO " + table_name + " VALUES ("
 	
-	file_name = '../datasets/HIGGS.csv'
-	with open(filename, "rb") as csvfile:
-		
-		line = csvfile.readline()
+	file_name = '../../datasets/HIGGS.csv'
+	csvfile = open(file_name, "rb")
+	
+	for count, line in enumerate(iter(csvfile)):
 		entries = line.split(",")
 		insert_statement = generic 
-		for entry in entries:
+		insert_statement += str(count) + ","
+		for index, entry in enumerate(entries):
+		    if index >= dimensions:
+			    break
 		    insert_statement += entry + ","
+		    
 		insert_statement = insert_statement[:-1]
 		insert_statement += ')' 
-		print insert_statement
-		cur.execute(insert_statement)
+		print count
+		if count > 1e5:
+		    break
+		try:
+			cur.execute(insert_statement)
+		except:
+			continue
 	
+	csvfile.close()
+	
+	db.commit()
+	cur.close()
 	db.close()
+
+def get_higgs_mysql(ID_list):
+	create_higgs()
 	
+	db, cur, table_name, dimensions = get_mysql() 
+	
+	query = "SELECT * FROM " + table_name + " WHERE ID IN ("
+	for ID in ID_list:
+		query += "'" + str(ID) + "'" + ","
+	query = query[:-1]
+	query += ");"
+	#print query
+	cur.execute(query)
+	X, y = [], []
+	for c in cur:
+		X_tmp, y_tmp = [], None
+		for index in range(len(c)):
+			if index == 0: 
+				continue
+			elif index == 1:
+				y_tmp = c[index]
+				X_tmp.append(1.0)
+			else:
+				X_tmp.append(c[index])
+		X.append(np.array(X_tmp))
+		y.append(y_tmp)
+	cur.close()
+	#db.close()
+	
+	return X, y
 	
 	
 def load_higgs(rowlim=1000):
@@ -184,3 +198,10 @@ def load_higgs(rowlim=1000):
     # print type(X[0])
     # print X[0][0]
     return X, y
+
+
+
+if __name__ == "__main__":
+	load_higgs_into_mysql()
+	print get_higgs_mysql([1,2,5, 55, 332, 3456, 0])
+	

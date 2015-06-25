@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Implementation of Zero-memory Symmetric Rank 1 algorithm to solve min f + h
-where f is smooth and h non-smooth
+Created on Thu Jun 25 22:06:28 2015
+
+@author: Fin Bauer
 """
 
 import numpy as np
@@ -18,18 +19,11 @@ def compute_0sr1(f, grad_f, h, x0, **options):
     """
     
     # set default values for parameters
-    options.setdefault('algo', 1)
     options.setdefault('epsilon', 1e-8)
     options.setdefault('gamma', 0.8)
     options.setdefault('tau', 2)
     options.setdefault('tau_min', 1e-8)
     options.setdefault('tau_max', 1e4)
-    options.setdefault('lower_b', None)
-    options.setdefault('upper_b', None)
-    options.setdefault('ls', 1)
-    options.setdefault('beta', 0.5)
-    options.setdefault('eta', 1)
-    options.setdefault('lambd', 1)
 
     n = len(x0)
     x0 = x0.reshape((n, 1))
@@ -41,7 +35,7 @@ def compute_0sr1(f, grad_f, h, x0, **options):
     
     #f_x = np.zeros((39,1))
     
-    for k in range(1, 300): # make while or itercount later
+    for k in range(1, 100000): # make while or itercount later
         
         u_H, u_B, d_H, d_B = compute_sr1_update(s, y, k, **options)
         temp_x_new = compute_proximal(u_H, u_B, d_H, d_B, grad_f, x_new, **options)
@@ -53,17 +47,19 @@ def compute_0sr1(f, grad_f, h, x0, **options):
         if np.linalg.norm(p) < options['epsilon']: # termination criterion
             break
         
-        t = line_search(f, h, y, p, x_old, **options)
+        t = 1
+        #t = line_search(f, h, y, p, x_old, **options)
         x_new = x_old + t * p
         
         s = t * p
         y = grad_f(x_new) - grad_f(x_old)
         
-        print(k)
+        if k % 100 == 0:
+            print(k)
         #f_x[k-1]=f(x_new)
-        print(f(x_new))
+            print(f(x_new))
     
-    return x_new, k, f_x
+    return x_new, k
 
 
 
@@ -123,7 +119,7 @@ def compute_proximal(u_H, u_B, d_H, d_B, grad_f, x, **options):
     alpha = compute_root(step, u_H, d_H, **options)
     interm = alpha * u_H / d_H
     proxi = prox(step - interm, d_H, **options)
-    result = x - d_H * (grad_f - proxi) + u_H * np.dot(u_H.T, 
+    result = x - d_H * (grad_f - proxi) - u_H * np.dot(u_H.T, 
                 (grad_f - proxi))
     
     return result
@@ -135,14 +131,9 @@ def compute_root(x, u_H, d_H, **options):
     Computes the root of p as in paper
     """
     
-    # root computation for separable case
-    if options['algo'] in [1, 2, 3]:
-        t = get_transition_points(x, **options)
-        trans_points_sorted = sort_transition_points(x, u_H, d_H, t)
-        alpha = binary_search(trans_points_sorted, x, u_H, d_H, **options)
-    # root computation for non-separable
-    else:
-        pass 
+    t = get_transition_points(x, **options)
+    trans_points_sorted = sort_transition_points(x, u_H, d_H, t)
+    alpha = binary_search(trans_points_sorted, x, u_H, d_H, **options)
         
     return alpha
 
@@ -154,18 +145,7 @@ def get_transition_points(x, **options):
     i.e. prox_h(x) = ax + b for t_j <= x <= t_(j+1)
     """
     
-    n = len(x)
-    
-    # transition points for h = l1-norm and l_inf-ball
-    if options['algo'] in [1, 3]:
-        t = np.tile([-1, 1], (n, 1))
-    # transition points for h = box constraint or positivity constraint
-    elif options['algo'] == 2:
-        t = np.array([options['lower_b'], options['upper_b']]).T
-    else:
-        pass
-    
-    return t
+    return np.tile([-1, 1], (len(x), 1))
 
 
 
@@ -206,45 +186,12 @@ def p(alpha, u, x, d, **options):
 
 def prox(x, d, **options):
     """
-    computes proximal operators depending on chosen h
-    """
-    
-    # h = l1-norm
-    if options['algo'] == 1:
-        prox = l1norm_prox(x, d, **options)
-    else:
-        pass
-    
-    return prox
-
-
-
-def l1norm_prox(x, d, **options):
-    """
-    computes proximal operator of l1-norm
+    computes proximal operator for indicator of l_inf-ball
     """
     
     n = len(x)
     
     return np.median([-np.ones((n,1)), x, np.ones((n,1))], axis = 0)
-    
-def box_constraint_prox(x, **options):
-    """
-    computes proximal operator for box constraint and positivity constraint
-    """
-        
-    return np.median([options['lower_b'], x, options['upper_b']], axis = 0)
-
-
-
-def linfball_prox(x):
-    """
-    computes proximal operator for l_inf-ball
-    """
-    
-    n = len(x)
-    
-    return np.median([-np.ones(n), x, np.ones(n)], axis = 0)
     
 
 
@@ -288,97 +235,8 @@ def binary_search(trans_points, x, u, d, **options):
                     trans_points[l - 1]) / (p_right - p_left)
             
     return alpha
-
-
-
-def line_search(f, h, y, p, x_old, **options):
-    """
-    Computes line search factor dependent on chosen line search method
-    """
     
-    # step length always equals one
-    if options['ls'] == 1:
-        t = 1
-    # Armijo-type rule
-    elif options['ls'] == 2:
-        t = compute_armijo_ls(f, h, p, x_old, **options)
-    # Barzilai-Borwein step size
-    elif options['ls'] == 3:
-        t = compute_bb_ls(y, p)
-    # simple standard line search
-    elif options['ls'] == 4:
-        t = compute_simple_ls(f, h, p, x_old, **options)
-    else: # maybe nonmonotone line search as in Zhang and Hager
-        pass
-        
-    return t
-
-
-
-def compute_armijo_ls(f, h, p, x_old, **options):
-    """
-    Armijo-type rule as in paper of Fukushima and Mine
-    """
-    
-    p_squared = np.dot(p.T,p)
-    F_old = f(x_old) + h(x_old)
-    beta = 1
-    
-    while f(x_old + beta * p) + h(x_old + beta * p) > (F_old - options['eta']
-            * beta * p_squared):
-        beta = beta * options['beta']
-        if beta < 1e-8:
-            break
-            
-    return beta
-
-
-
-def compute_bb_ls(y, p):
-    """
-    Barzilai-Borwein step size
-    """
-    if np.any(y) == False:
-        t = 1
-    else:
-        t = np.dot(p.T, y) / np.dot(p.T, y)
-        
-    return t
-
-
-
-def compute_simple_ls(f, h, p, x_old, **options):
-    """
-    simple standard line search
-    """
-    
-    beta = 1
-    F_old = f(x_old) + h(x_old)
-    while f(x_old + beta * p) + h(x_old + beta * p) > F_old:
-        beta *= options['beta']
-        if beta < 1e-8:
-            print(beta)
-            break
-        
-    return beta
-        
-
-
-
 if __name__ == "__main__":
-    
-    import matplotlib.pyplot as plt
-    from sklearn.linear_model import Lasso
-    #a = 1
-    #b = 100
-    #rosenbrock = lambda x: (a - (x[0]+1))**2 + b*(x[1]+1 - (x[0]+1)**2)**2
-    #rosengrad = lambda x: np.asarray([2*(a-x[0]-1)*(-1) + 2*(x[1]-(x[0]+1)**2)
-    #                                    *(-2*(x[1]+1)), 2*(x[1]-(x[0]+1)**2)])
-    
-    #def f(x):
-    #    return x**2
-    #def grad_f(x):
-    #    return 2*x
         
     A = np.random.normal(size = (1500, 3000))
     b = np.random.normal(size = (1500, 1))
@@ -401,10 +259,4 @@ if __name__ == "__main__":
         
     x0 = np.ones((3000,1))
     
-    #lars = Lasso(alpha=0.001)
-    #lars.fit(A, b)
-    #x=lars.coef_
-    # x, k = compute_0sr1(f, grad_f, x0, algo=2, lower_b=np.array([0,0]), upper_b=np.array([100,400]))
-    
-    x, k, f_x = compute_0sr1(z, grad_z, h, x0, ls = 1, lambd = 1)
-    #plt.plot(range(1,40), f_x)
+    x, k = compute_0sr1(z, grad_z, h, x0, ls = 1, lambd = 1)

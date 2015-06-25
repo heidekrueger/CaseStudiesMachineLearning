@@ -107,8 +107,7 @@ Proximal Methods
 Main
 """
 import data.datasets as datasets
-
-
+		
 import sys
 if __name__ == "__main__":
 	
@@ -169,70 +168,37 @@ if __name__ == "__main__":
 		https://archive.ics.uci.edu/ml/datasets/HIGGS
 		the file should be in <Git Project root directory>/datasets/
 		"""
-		print "\nSQN, Higgs-Dataset", 
+		print "\nSQN, Higgs-Dataset\n", 
 		
 		logreg = LogisticRegression()
-		func = lambda w, X, z: logreg.F(w, X, z)
-		grad = lambda w, X, z: logreg.g(w, X, z)
+		logreg.get_sample = datasets.get_higgs_mysql
+
+		rowlim = 5e6
 		
 		sqn = SQN.SQN()
-		sqn.set_options({'dim':29, 'N':5e5, 'max_iter': 1e3, 'batch_size': 10, 'batch_size_H': 10, 'L':3, 'beta':10, 'M':100})
-		
-		rowlim = 1e6
+		sqn.set_options({'dim':29, 'N':rowlim , 'max_iter': 1e3, 'batch_size': 100, 'batch_size_H': 10, 'L':3, 'beta':10, 'M':100})
+		sqn.set_start(dim=29)
+		w = sqn.get_position()
 		
 		if testcase == "higgs2":
-			X, z = stochastic_tools.sample_batch_higgs(None, N=rowlim, b=rowlim)
-			sqn.set_options({'sampleFunction': stochastic_tools.sample_batch_higgs})
+			sqn.set_options({'sampleFunction': logreg.sample_batch})
 		else:
 			X, z = datasets.load_higgs(rowlim)
 			
-		sqn.set_start(dim=29)
+		
 		for k in itertools.count():
 		    
 			if testcase == "higgs2":
-				w = sqn.solve_one_step(func, grad, k=k)
+				w = sqn.solve_one_step(logreg.F, logreg.g, k=k)
 			else:
-				w = sqn.solve_one_step(func, grad, X = X, z = z, k=k)
-			if k % 5 == 0:
-				sqn.options['batch_size'] += 10
-				sqn.options['batch_size_H'] += 10
-				print logreg.F(w, X, z)
-			if k > sqn.options['max_iter'] or sqn.termination_counter > 4:
-			    iterations = k
-			    break
-		
-		
-		
-	elif testcase == 'higgs2':
-		"""Runs SQN-LogReg on the Higgs-Dataset, 
-		which is a 7.4GB csv file for binary classification
-		that can be obtained here:
-		https://archive.ics.uci.edu/ml/datasets/HIGGS
-		the file should be in <Git Project root directory>/datasets/
-		"""
-		logreg = LogisticRegression()
-		func = lambda w, X, z: logreg.F(w, X, z)
-		grad = lambda w, X, z: logreg.g(w, X, z)
-
-		print "\nSQN, Higgs-Dataset"
-		sqn = SQN.SQN()
-		#sqn.debug = True
-		sqn.set_options({'dim':29, 'sampleFunction': stochastic_tools.sample_batch_higgs, 'N':5e5, 'max_iter': 1e3, 'batch_size': 10, 'batch_size_H': 10, 'L':3, 'beta':10, 'M':100})
-		
-		sqn.set_start(dim=29)
-		X, z = stochastic_tools.sample_batch_higgs(None, N=5e5, b=5e5)
-		for k in itertools.count():
-		    
-			w = sqn.solve_one_step(func, grad, k=k)
-			if k % 5 == 0:
-				sqn.options['batch_size'] += 10
-				sqn.options['batch_size_H'] += 10
-				print logreg.F(w, X, z)
-			if k > sqn.options['max_iter'] or sqn.termination_counter > 4:
-			    iterations = k
-			    break
+				w = sqn.solve_one_step(logreg.F, logreg.g, X = X, z = z, k=k)
 			
-		#w = sqn.solve(func, grad)
+			print k, sqn.f_vals[-1]
+			
+			if k > sqn.options['max_iter'] or sqn.termination_counter > 4:
+			    iterations = k
+			    break
+		
 		
 	elif testcase == 'prox':
 		#a = 1

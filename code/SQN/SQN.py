@@ -144,6 +144,7 @@ class SQN(StochasticOptimizer):
 		self.w, self.w_previous = None, None
 		self.wbar = None
 		self.wbar_previous = None
+		self.f_vals = []
 		StochasticOptimizer.__init__(self)
 		#super(SQN, self).__init__()
 	
@@ -172,6 +173,9 @@ class SQN(StochasticOptimizer):
 		self.s, self.y = deque(), deque()
 		if self.debug: print self.w.shape
 		return
+	
+	def get_position(self):
+		return self.w
 	    
 	def solve(self, f, g, X = None, z = None):
 		"""
@@ -248,8 +252,10 @@ class SQN(StochasticOptimizer):
 		do the gradient updating rule
 		"""
 		# Draw sample batch
-		X_S, z_S = self._draw_sample(X, z, self.options['batch_size'])
-		
+		if X is None:
+			X_S, z_S = self._draw_sample(self.options['N'], b = self.options['batch_size'])
+		else:
+			X_S, z_S = self._draw_sample(X, z, b=self.options['batch_size'])
 		# Stochastic functions
 		f_S = lambda x: f(x, X_S, z_S) #if z is not None else f(x, X_S)
 		g_S = lambda x: stochastic_gradient(g, x, X_S, z_S)
@@ -269,6 +275,9 @@ class SQN(StochasticOptimizer):
 		
 		# Update
 		self.w = self.w + np.multiply(alpha, search_direction)
+		
+		self.f_vals.append( f_S(self.w) )
+
 		return self.w
 	    
 	def _update_correction_pairs(self, g, X, z):
@@ -284,7 +293,7 @@ class SQN(StochasticOptimizer):
 		"""
 		
 		# draw hessian sample and get the corresponding stochastic gradient
-		X_SH, y_SH = self._draw_sample(X, z, self.options['batch_size_H'])
+		X_SH, y_SH = self._draw_sample(X, z, b = self.options['batch_size_H'])
 		g_SH = lambda x: stochastic_gradient(g, x, X_SH, y_SH)
 			    
 		r = 0.01
@@ -310,20 +319,21 @@ class SQN(StochasticOptimizer):
 		if self.debug: print "Length s, y:", len(self.s), len(self.y)
 		return
 	
-	def _draw_sample(self, X, z, batch, recursion_depth = 1):
+	def _draw_sample(self, X, z=None, b=None, recursion_depth = 1):
 		"""
 		Draw sample from smaple function. Recurse if empty sample was drawn.
 		"""
+		if b is None: b = self.options['batch_size']
 		if X is None and self.options['N'] is None:
-			X_S, z_S= self.options['sampleFunction'](w=self.w, N = self.options['N'], b = batch)
+			X_S, z_S= self.options['sampleFunction'](self.w, self.options['N'], b = b)
 		elif X is None and self.options['N'] is not None:
-			X_S, z_S= self.options['sampleFunction'](w=self.w, X=X, b = batch)
+			X_S, z_S= self.options['sampleFunction'](self.w, self.options['N'], b = b)
 		else: 
-			X_S, z_S= self.options['sampleFunction'](w=self.w, X=X, z=z, b = self.options['batch_size'])
+			X_S, z_S= self.options['sampleFunction'](self.w, X, z=z, b =b )
 		
 		# if empty sample try one more time:
 		if len(X_S) == 0 and recursion_depth > 0:
-			X_S, z_S = self._draw_sample(X, z, batch, recursion_depth-1)
+			X_S, z_S = self._draw_sample(X, z=z, b=b, recursion_depth=recursion_depth-1)
 		if self.debug:
 			print "sample length:", len(X_S), len(z_S)
 		return X_S, z_S

@@ -107,6 +107,10 @@ class LogisticRegression():
 		if len(np.shape(X)) < 2:
 			X = [X]
 		return map( lambda x: self.h(self.w, x), X)
+	
+	def get_sample(self, sampleList):
+		z_S = None if z is None else [z[i] for i in sampleList]
+		return [X[i] for i in sampleList], z_S
 		
 	def sample_batch(self, w, X, z = None, b = None, r = None, debug = False):
 		"""
@@ -125,7 +129,12 @@ class LogisticRegression():
 		assert (b != None) != (r!= None), "Choose only one: Absolute or relative sample size!"
 		
 		# determine factual batch size
-		N = len(X)
+		if type(X) == type(list()):
+			N = len(X)
+		elif type(X) == type(int()) or type(X) == type(0.0):
+			N = int(X)
+		else:
+			raise Exception("X is in the wrong format!" + str(type(X)))
 		if b != None:
 		    nSamples = b
 		else:
@@ -139,26 +148,22 @@ class LogisticRegression():
 		#TODO: 
 
 		sampleList = []
-		searchList = np.random.permutation(N)
-		for i in searchList:
-			if self.f(w, X[i],z[i]) > .1:
-				sampleList.append(i)
-
-			if len(sampleList) == nSamples: #found enough samples
-				break
-
+		counter = 0
+		while len(sampleList) < nSamples and counter < 10*b:
+			random_index = np.random.randint(N)
+			X_S, z_S = self.get_sample([random_index])
+			if self.f(w, X_S[0],z_S[0]) > .1:
+				sampleList.append(random_index)
+			counter += 1
+			
 		# if not enough samples are found, we simply return a smaller sample!
 		nSamples = len(sampleList)
-		 
-		X_S = np.asarray([X[i] for i in sampleList])
-		z_S = None if z is None else np.array([z[i] for i in sampleList])
+		X_S, z_S = self.get_sample(sampleList)
+		
 		# Count accessed data points
 		self.adp += nSamples
 		
 		if debug: print X_S, z_S
 		   
-		if z == None or len(z) == 0:
-			return X_S, None
-		else: 
-			return X_S, z_S
+		return X_S, z_S
 

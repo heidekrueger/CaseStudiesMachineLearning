@@ -66,26 +66,6 @@ def load_HIGGS_features(id_list):
 	return X, z
     
 	
-def sample_batch_higgs(w, N, b = None, debug = False):
-
-	assert N != None, "N must be given!"
-	assert b != None , "Choose either absolute or relative sample size!"
-	nSamples = b
-
-	if nSamples > N:
-	    if debug:
-		print "Batch size larger than N, using whole dataset"
-	    nSamples = N
-	##
-	## Draw from uniform distribution
-	##
-	random_indices = rd.sample( range(int(N)), int(nSamples)) 
-	if debug: print "random indices", random_indices
-	 
-	X_S, z_S = load_HIGGS_features(random_indices)
-
-	return X_S, z_S
-
 
 def sample_batch(w, X, z = None, b = None, r = None, debug = False):
 	"""

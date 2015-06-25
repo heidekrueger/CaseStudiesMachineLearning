@@ -117,6 +117,7 @@ def create_higgs():
 	
 	try:
 		cur.execute(sql)
+		cur.execute("CREATE UNIQUE INDEX id_index ON DATA (ID) USING BTREE;")
 	except Warning, w:
 		print w
 	cur.close()
@@ -145,8 +146,8 @@ def load_higgs_into_mysql():
 		insert_statement = insert_statement[:-1]
 		insert_statement += ')' 
 		print count
-		if count > 1e5:
-		    break
+#		if count > 1e5:
+#		    break
 		try:
 			cur.execute(insert_statement)
 		except:
@@ -159,7 +160,6 @@ def load_higgs_into_mysql():
 	db.close()
 
 def get_higgs_mysql(ID_list):
-	create_higgs()
 	
 	db, cur, table_name, dimensions = get_mysql() 
 	

@@ -24,14 +24,9 @@ def solveSQN(f, g, X, z = None, w1 = None, dim = None, iterator = None, M=10, L=
 	sqn.set_options({'w1':w1, 'dim':dim, 'iterator':iterator, 'M':M, 'L':L, 'beta':beta, 'batch_size': batch_size, 'batch_size_H': batch_size_H, 'max_iter': max_iter, 'sampleFunction': sampleFunction})
 	return sqn.solve(f, g, X, z)
 
-class StochasticOptimizer:
+class Optimizer():
 	"""
 	for initialization: Provide one of w1, dim or flat iterator object
-	M: Memory-Parameter
-	L: Compute Hessian information every Lth step
-	beta: start configuration for line search
-	batch_size: number of samples to be drawn for gradient evaluation
-	batch_size: number of samples to be drawn for Hessian approximation
 	max_iter: Terminate after this many steps
 	debug: Print progress statements
 	"""
@@ -40,13 +35,6 @@ class StochasticOptimizer:
 		self.options['w1'] =  None
 		self.options['dim'] =  None
 		self.options['iterator'] =  None
-		self.options['sampleFunction'] =  stochastic_tools.sample_batch
-		self.options['M'] =  10
-		self.options['L'] =  1
-		self.options['N'] =  None
-		self.options['beta'] =  1
-		self.options['batch_size'] =  1
-		self.options['batch_size_H'] =  1
 		self.options['max_iter'] =  1e3
 		
 		self.debug =  False
@@ -54,6 +42,11 @@ class StochasticOptimizer:
 		self.termination_counter = 0
 		self.iterations = 0
 		self.iterator = None
+	
+		self.w, self.w_previous = None, None
+		self.f_vals = []
+		self.gradients = []
+	
 		
 	def set_options(self, options):
 		for key in options:
@@ -71,53 +64,30 @@ class StochasticOptimizer:
 		for key in self.options:
 			print key
 			print self.options[key]
-    
-    
-class SQN(StochasticOptimizer):
-	"""
-	TODO: Two-Loop-Recursion!
-	"""
-
-
-	def __init__(self):
-		self.s, self.y = deque(), deque()
-		self.w, self.w_previous = None, None
-		self.wbar = None
-		self.wbar_previous = None
-		self.f_vals = []
-		StochasticOptimizer.__init__(self)
-		#super(SQN, self).__init__()
+	
+	def get_position(self):
+		return self.w
 	
 	def set_start(self, w1=None, dim=None, iterator=None):
 		"""
 		Set start point of the optimization using numpy array, dim or flat.iterator object.
 		"""
-		print self.options
 		assert self.options['M'] > 0, "Memory Parameter M must be a positive integer!"
 		# start point
 		assert w1 is not None or dim is not None or iterator is not None, \
 		    "Please privide either a starting point or the dimension of the optimization problem!"
-		print dim
+
 		if w1 is None and dim is None:  
 		    self.options['iterator'] = iterator
 		    w1 = stochastic_tools.iter_to_array(self.options['iterator'])
 		elif w1 is None:
-		    
 		    w1 = np.ones(dim)
 		
 		self.options['dim'] = len(w1)
-		    
-		# init
+		
 		self.w = w1
-		self.w_previous = self.w
-		self.wbar = np.zeros(self.w.shape)
-		self.wbar_previous = None
-		self.s, self.y = deque(), deque()
-		if self.debug: print self.w.shape
 		return
 	
-	def get_position(self):
-		return self.w
 	    
 	def solve(self, f, g, X = None, z = None):
 		"""
@@ -156,6 +126,106 @@ class SQN(StochasticOptimizer):
 		else:
 			return self.w
 		
+	def solve_one_step(self, f, g, X=None, z=None, k=1):
+		"""
+		perform one update step
+		"""
+		assert self.w is not None, "Error! weights not initialized!"
+		raise NotImplementedError
+		# perform gradient update using armijo rule and hessian information
+		self.w = self._perform_update(f, g, X, z)
+		if self.debug: print self.w
+		
+		# update wbar and get new correction pairs
+		self.wbar += self.w
+		if k % self.options['L'] == 0:
+			self.wbar /= float(self.options['L']) 
+			if self.wbar_previous is not None:
+				if self.debug: print "HESSE"
+				self._update_correction_pairs(g, X, z)
+			self.wbar_previous = self.wbar
+			self.wbar = np.zeros(self.options['dim'])
+		return self.w
+	
+	# Determine search direction
+	def _get_search_direction(self, g_S):
+		raise NotImplementedError
+		return search_direction
+	    
+	# Calculate gradient and perform update
+	def _perform_update(self, f, g, X, z):
+		raise NotImplementedError
+		return self.w
+	
+	def _has_terminated(self, grad, w):
+		"""
+		Checks whether the algorithm has terminated
+		Parameters:
+			grad: gradient
+			w: current variable
+		"""
+		if self.debug:
+			print "Check termination"
+			print "len grad:", np.linalg.norm(grad) 
+		eps = 1e-6
+		if len(grad) > 0 and np.linalg.norm(grad) < eps:
+			return True
+		else:
+			return False
+
+class StochasticOptimizer(Optimizer):
+	"""
+	for initialization: Provide one of w1, dim or flat iterator object
+	M: Memory-Parameter
+	L: Compute Hessian information every Lth step
+	beta: start configuration for line search
+	batch_size: number of samples to be drawn for gradient evaluation
+	batch_size: number of samples to be drawn for Hessian approximation
+	"""
+	def __init__(self):
+		Optimizer.__init__(self)
+		self.options['sampleFunction'] =  stochastic_tools.sample_batch
+		self.options['M'] =  10
+		self.options['L'] =  1
+		self.options['N'] =  None
+		self.options['beta'] =  1
+		self.options['batch_size'] =  1
+		self.options['batch_size_H'] =  1
+		
+	def _draw_sample(self, X, z=None, b=None, recursion_depth = 1):
+		"""
+		Draw sample from smaple function. Recurse if empty sample was drawn.
+		"""
+		if b is None: b = self.options['batch_size']
+		if X is None and self.options['N'] is None:
+			X_S, z_S= self.options['sampleFunction'](self.w, self.options['N'], b = b)
+		elif X is None and self.options['N'] is not None:
+			X_S, z_S= self.options['sampleFunction'](self.w, self.options['N'], b = b)
+		else: 
+			X_S, z_S= self.options['sampleFunction'](self.w, X, z=z, b =b )
+		
+		# if empty sample try one more time:
+		if len(X_S) == 0 and recursion_depth > 0:
+			X_S, z_S = self._draw_sample(X, z=z, b=b, recursion_depth=recursion_depth-1)
+		if self.debug:
+			print "sample length:", len(X_S), len(z_S)
+		return X_S, z_S
+	    
+class SQN(StochasticOptimizer):
+	"""
+	TODO: Two-Loop-Recursion!
+	"""
+
+	def __init__(self):
+		self.s, self.y = deque(), deque()
+		self.w, self.w_previous = None, None
+		self.wbar = None
+		self.wbar_previous = None
+		self.f_vals = []
+		self.gradients = []
+		StochasticOptimizer.__init__(self)
+		#super(SQN, self).__init__()
+	    
 	def solve_one_step(self, f, g, X=None, z=None, k=1):
 		"""
 		perform one update step
@@ -219,6 +289,7 @@ class SQN(StochasticOptimizer):
 		self.w = self.w + np.multiply(alpha, search_direction)
 		
 		self.f_vals.append( f_S(self.w) )
+		self.gradients.append( g_S(self.w) )
 
 		return self.w
 	    
@@ -261,49 +332,13 @@ class SQN(StochasticOptimizer):
 		if self.debug: print "Length s, y:", len(self.s), len(self.y)
 		return
 	
-	def _draw_sample(self, X, z=None, b=None, recursion_depth = 1):
-		"""
-		Draw sample from smaple function. Recurse if empty sample was drawn.
-		"""
-		if b is None: b = self.options['batch_size']
-		if X is None and self.options['N'] is None:
-			X_S, z_S= self.options['sampleFunction'](self.w, self.options['N'], b = b)
-		elif X is None and self.options['N'] is not None:
-			X_S, z_S= self.options['sampleFunction'](self.w, self.options['N'], b = b)
-		else: 
-			X_S, z_S= self.options['sampleFunction'](self.w, X, z=z, b =b )
-		
-		# if empty sample try one more time:
-		if len(X_S) == 0 and recursion_depth > 0:
-			X_S, z_S = self._draw_sample(X, z=z, b=b, recursion_depth=recursion_depth-1)
-		if self.debug:
-			print "sample length:", len(X_S), len(z_S)
-		return X_S, z_S
-		
-	def _has_terminated(self, grad, w):
-		"""
-		Checks whether the algorithm has terminated
-
-		Parameters:
-			grad: gradient
-			w: current variable
-		"""
-		if self.debug:
-			print "Check termination"
-			print "len grad:", np.linalg.norm(grad) 
-		eps = 1e-6
-		if len(grad) > 0 and np.linalg.norm(grad) < eps:
-			return True
-		else:
-			return False
+	
 
 	def get_H(self, debug = False):
 		"""
 		returns H_t as defined in algorithm 2
 		TODO: Two-Loop-Recursion
 		"""
-			
-		
 		assert len(self.s)>0, "s cannot be empty."
 		assert len(self.s)==len(self.y), "s and y must have same length"
 		

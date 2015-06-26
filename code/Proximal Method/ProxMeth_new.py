@@ -24,6 +24,7 @@ def compute_0sr1(f, grad_f, h, x0, **options):
     options.setdefault('tau', 2)
     options.setdefault('tau_min', 1e-12)
     options.setdefault('tau_max', 1e4)
+    options.setdefault('l', 1)
     options.setdefault('ls', 1)
     options.setdefault('beta', 0.5)
 
@@ -35,9 +36,7 @@ def compute_0sr1(f, grad_f, h, x0, **options):
 
     p = np.empty((n, 1))
     
-    #f_x = np.zeros((39,1))
-    
-    for k in range(1, 1000): # make while or itercount later
+    for k in range(1, 100): # make while or itercount later
         
         u_H, u_B, d_H, d_B = compute_sr1_update(s, y, k, **options)
         temp_x_new = compute_proximal(u_H, u_B, d_H, d_B, grad_f, x_new, **options)
@@ -45,7 +44,6 @@ def compute_0sr1(f, grad_f, h, x0, **options):
         x_old = x_new
         p = temp_x_new - x_old
         
-        #print(np.sqrt(np.dot(p.T, p)))
         if np.linalg.norm(p) < options['epsilon']: # termination criterion
             break
         
@@ -55,11 +53,7 @@ def compute_0sr1(f, grad_f, h, x0, **options):
         y = grad_f(x_new) - grad_f(x_old)
         
         #if k % 50 == 0:
-            
-        print(k)
-        #f_x[k-1]=f(x_new)
         print(f(x_new) + h(x_new))
-        print(d_H)
     
     return x_new, k
 
@@ -135,7 +129,7 @@ def compute_root(x, u_H, d_H, **options):
     Computes the root of p as in paper
     """
     
-    t = get_transition_points(x, **options)
+    t = get_transition_points(x, d_H, **options)
     trans_points_sorted = sort_transition_points(x, u_H, d_H, t)
     alpha = binary_search(trans_points_sorted, x, u_H, d_H, **options)
         
@@ -143,13 +137,13 @@ def compute_root(x, u_H, d_H, **options):
 
 
 
-def get_transition_points(x, **options):
+def get_transition_points(x, d_H, **options):
     """
     returns the transition points t_j for separable h,
     i.e. prox_h(x) = ax + b for t_j <= x <= t_(j+1)
     """
     
-    return np.tile([-1, 1], (len(x), 1))
+    return 1 / d_H * options['l'] * np.tile([-1, 1], (len(x), 1))
 
 
 
@@ -188,14 +182,15 @@ def p(alpha, u, x, d, **options):
 
 
 
-def prox(x, d, **options):
+def prox(x, d_H, **options):
     """
     computes proximal operator for indicator of l_inf-ball
     """
     
     n = len(x)
     
-    return np.median([-np.ones((n,1)), x, np.ones((n,1))], axis = 0)
+    return np.median([-1 / d_H * options['l'] * np.ones((n,1)), x, 1 / d_H * options['l'] * 
+                    np.ones((n,1))], axis = 0)
     
 
 
@@ -267,7 +262,7 @@ def compute_simple_ls(f, h, p, x_old, **options):
     while f(x_old + beta * p) + h(x_old + beta * p) > F_old:
         beta *= options['beta']
         if beta < 1e-20:
-            print(beta)
+            print('break')
             break
         
     return beta
@@ -277,8 +272,8 @@ def compute_simple_ls(f, h, p, x_old, **options):
 
 if __name__ == "__main__":
         
-    A = np.random.normal(size = (1500, 3000))
-    b = np.random.normal(size = (1500, 1))
+    A = np.random.normal(size = (500, 1000))
+    b = np.random.normal(size = (500, 1))
     A_sq = np.dot(A.T, A)
     Ab = np.dot(A.T, b)
 
@@ -296,6 +291,6 @@ if __name__ == "__main__":
         
         return np.linalg.norm(x, ord = 1)
         
-    x0 = np.ones((3000,1))
+    x0 = np.ones((1000,1))
     
-    x, k = compute_0sr1(z, grad_z, h, x0, ls = 2)
+    x, k = compute_0sr1(z, grad_z, h, x0, l = 1, ls=1)

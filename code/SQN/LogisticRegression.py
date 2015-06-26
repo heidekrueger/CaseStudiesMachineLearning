@@ -10,7 +10,7 @@ class LogisticRegression():
 		Accepts LISTS of np.arrays ONLY!!!
 	"""
 
-	def __init__(self, lam_1 = 0., lam_2 = 0):
+	def __init__(self, lam_1 = 0., lam_2 = 0, sample_good_ones=True):
 		'''
 		:lam_1 = L1 regularization parameter    
 		:lam_2 = L2 regularization parameter
@@ -19,6 +19,7 @@ class LogisticRegression():
 		self.expapprox = 30
 		self.lam_1 = lam_1
 		self.lam_2 = lam_2
+		self.sample_good_ones = sample_good_ones
 		
 		self.w = None
 		# performance analysis
@@ -48,7 +49,7 @@ class LogisticRegression():
 		"""
 		hyp = self.h(w, X)
 		self.fevals += 1
-		return -y* np.log(hyp)- (1-y)*(np.log(1-hyp))
+		return -y * np.log(hyp) - (1-y) * (np.log(1-hyp))
 	    
 	def L_2(self, w):
 		return  0.5 * self.lam_2 * (np.linalg.norm(w[1:])**2)
@@ -152,7 +153,7 @@ class LogisticRegression():
 		while len(sampleList) < nSamples and counter < 10*b:
 			random_index = np.random.randint(N)
 			X_S, z_S = self.get_sample([random_index])
-			if self.f(w, X_S[0],z_S[0]) > .1:
+			if self.sample_good_ones or self.f(w, X_S[0],z_S[0]) > .1:
 				sampleList.append(random_index)
 			counter += 1
 			

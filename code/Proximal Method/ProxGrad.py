@@ -23,6 +23,9 @@ def proximal_gradient(f, grad_f, h, x0, t, **options):
         x_new = prox(x_old - t * grad_f(x_old), t, **options)
         s = x_new - x_old
         
+#        t = line_search(f, grad_f, s, x_old, **options)
+#        x_new = x_old + t * s
+        
         if np.linalg.norm(s) < 1e-8:
             break
         
@@ -39,8 +42,8 @@ def prox(x, t, **options):
 if __name__ == "__main__":
     from scipy.linalg import eigvals
     from time import time
-    A = np.random.normal(size = (1500, 3000))
-    b = np.random.normal(size = (1500, 1))
+    A = np.random.normal(size = (150, 300))
+    b = np.random.normal(size = (150, 1))
     A_sq = np.dot(A.T, A)
     Ab = np.dot(A.T, b)
 
@@ -58,7 +61,8 @@ if __name__ == "__main__":
         
         return np.linalg.norm(x, ord = 1)
         
-    x0 = np.ones((3000,1))
+    print "lol"
+    x0 = np.ones((300,1))
     L = eigvals(A_sq).real.max()
     
     t0 = time()

@@ -1,4 +1,5 @@
 
+from multiprocessing import Pool, Process
 import itertools
 		
 
@@ -80,6 +81,43 @@ def test_Logistic_Regression(sqn_method, X, z, w1 = None, dim = 3, M=10, L=5, be
 	print "avg objective:", sum(results)/N
 
 
+
+def print_f_vals(testcase, rowlim, options, folderpath, batch_size):
+
+	print "\nSQN, Higgs-Dataset\n"
+	rowlim = 5e6
+	options = {'dim':29, 'N':rowlim , 'max_iter': 1e3, 'batch_size': batch_size, 'batch_size_H': 10, 'L':3, 'beta':10, 'M':100}
+	folderpath = "../outputs/"
+		    
+	logreg = LogisticRegression()	
+	logreg.get_sample = datasets.get_higgs_mysql
+	sqn = SQN.SQN()
+	sqn.set_options(options)
+	sqn.set_start(dim=options['dim'])
+	w = sqn.get_position()
+	
+	if testcase == "higgs2":
+		sqn.set_options({'sampleFunction': logreg.sample_batch})
+		X, z = None, None
+	else:
+		X, z = datasets.load_higgs(rowlim)
+	
+	ffile = open(folderpath + "%d_%d.txt" %(batch_size, 1), "w+")
+	for k in itertools.count():
+	    
+		if testcase == "higgs2":
+			w = sqn.solve_one_step(logreg.F, logreg.g, k=k)
+		else:
+			w = sqn.solve_one_step(logreg.F, logreg.g, X = X, z = z, k=k)
+		
+		ffile.write(str(sqn.f_vals[-1]) + "\n")
+		
+		if k > sqn.options['max_iter'] or sqn.termination_counter > 4:
+		    iterations = k
+		    break
+	ffile.close()
+	
+	
 
 """ 
 Dictionary Learning
@@ -168,37 +206,20 @@ if __name__ == "__main__":
 		https://archive.ics.uci.edu/ml/datasets/HIGGS
 		the file should be in <Git Project root directory>/datasets/
 		"""
-		print "\nSQN, Higgs-Dataset\n", 
 		
-		logreg = LogisticRegression()
-		logreg.get_sample = datasets.get_higgs_mysql
-
-		rowlim = 5e6
-		
-		sqn = SQN.SQN()
-		sqn.set_options({'dim':29, 'N':rowlim , 'max_iter': 1e3, 'batch_size': 100, 'batch_size_H': 10, 'L':3, 'beta':10, 'M':100})
-		sqn.set_start(dim=29)
-		w = sqn.get_position()
-		
-		if testcase == "higgs2":
-			sqn.set_options({'sampleFunction': logreg.sample_batch})
-		else:
-			X, z = datasets.load_higgs(rowlim)
-			
-		
-		for k in itertools.count():
-		    
-			if testcase == "higgs2":
-				w = sqn.solve_one_step(logreg.F, logreg.g, k=k)
-			else:
-				w = sqn.solve_one_step(logreg.F, logreg.g, X = X, z = z, k=k)
-			
-			print k, sqn.f_vals[-1]
-			
-			if k > sqn.options['max_iter'] or sqn.termination_counter > 4:
-			    iterations = k
-			    break
-		
+		f = lambda b: print_f_vals(testcase, None, None, None, b)
+		p = Process(target=f, args=(100,))
+		p.start()
+		p = Process(target=f, args=(500,))
+		p.start()
+		p = Process(target=f, args=(1000,))
+		p.start()
+		p = Process(target=f, args=(10000,))
+		p.start()
+        
+#		pool = Pool(4)
+#		pool.map(f, [1, 20, 30])
+	    
 		
 	elif testcase == 'prox':
 		#a = 1

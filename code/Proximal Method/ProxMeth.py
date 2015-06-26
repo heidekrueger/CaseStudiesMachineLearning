@@ -406,5 +406,5 @@ if __name__ == "__main__":
     #x=lars.coef_
     # x, k = compute_0sr1(f, grad_f, x0, algo=2, lower_b=np.array([0,0]), upper_b=np.array([100,400]))
     
-    x, k, f_x = compute_0sr1(z, grad_z, h, x0, ls = 1, lambd = 1)
+    x, k, f_x = compute_0sr1(z, grad_z, h, x0, ls = 1, lambd = 10)
     #plt.plot(range(1,40), f_x)

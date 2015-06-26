@@ -69,8 +69,8 @@ class StochasticOptimizer:
 	   
 	def print_options(self):
 		for key in self.options:
-			print key
-			print self.options[key]
+			print(key)
+			print(self.options[key])
     
     
 class SQN(StochasticOptimizer):
@@ -92,12 +92,12 @@ class SQN(StochasticOptimizer):
 		"""
 		Set start point of the optimization using numpy array, dim or flat.iterator object.
 		"""
-		print self.options
+		print(self.options)
 		assert self.options['M'] > 0, "Memory Parameter M must be a positive integer!"
 		# start point
 		assert w1 is not None or dim is not None or iterator is not None, \
 		    "Please privide either a starting point or the dimension of the optimization problem!"
-		print dim
+		if self.debug: print(dim)
 		if w1 is None and dim is None:  
 		    self.options['iterator'] = iterator
 		    w1 = stochastic_tools.iter_to_array(self.options['iterator'])
@@ -113,7 +113,7 @@ class SQN(StochasticOptimizer):
 		self.wbar = np.zeros(self.w.shape)
 		self.wbar_previous = None
 		self.s, self.y = deque(), deque()
-		if self.debug: print self.w.shape
+		if self.debug: print(self.w.shape)
 		return
 	
 	def get_position(self):
@@ -138,7 +138,7 @@ class SQN(StochasticOptimizer):
 		
 		for k in itertools.count():
 		    
-			if self.debug: print "Iteration", k
+			if self.debug: print("Iteration %d" %k)
 			
 			self.w = self.solve_one_step(f, g, X, z, k)
 			
@@ -147,8 +147,8 @@ class SQN(StochasticOptimizer):
 			    break
 			
 		if self.iterations < self.options['max_iter']:
-			print "Terminated successfully!" 
-		print "Iterations:\t\t", self.iterations
+			print("Terminated successfully!" )
+		print("Iterations:\t\t%d" %self.iterations)
 		
 		if self.options['iterator'] is not None:  
 			stochastic_tools.set_iter_values(self.options['iterator'], self.w)
@@ -164,14 +164,14 @@ class SQN(StochasticOptimizer):
 		
 		# perform gradient update using armijo rule and hessian information
 		self.w = self._perform_update(f, g, X, z)
-		if self.debug: print self.w
+		if self.debug: print(self.w)
 		
 		# update wbar and get new correction pairs
 		self.wbar += self.w
 		if k % self.options['L'] == 0:
 			self.wbar /= float(self.options['L']) 
 			if self.wbar_previous is not None:
-				if self.debug: print "HESSE"
+				if self.debug: print("HESSE")
 				self._update_correction_pairs(g, X, z)
 			self.wbar_previous = self.wbar
 			self.wbar = np.zeros(self.options['dim'])
@@ -185,7 +185,9 @@ class SQN(StochasticOptimizer):
 			#search_direction = -self._two_loop_recursion(g_S)
 			H = self.get_H()
 			search_direction = -H.dot(g_S(self.w))
-		if self.debug: print "Direction:", search_direction.T
+		if self.debug: 
+			print("Direction:")
+			print(search_direction.T)
 		return search_direction
 	    
 	# Calculate gradient and perform update
@@ -208,7 +210,7 @@ class SQN(StochasticOptimizer):
 		# Line Search
 		alpha = armijo_rule(f_S, g_S, self.w, search_direction, start = self.options['beta'], beta=.5, gamma= 1e-2 )
 		alpha = max([alpha, 1e-5])
-		if self.debug: print "step size: ", alpha
+		if self.debug: print("step size: %f"% alpha)
 		
 		# Check Termination Condition
 		if len(X_S) == 0 or self._has_terminated(g_S(self.w) , self.w):
@@ -244,21 +246,20 @@ class SQN(StochasticOptimizer):
 		y_t = (g_SH(self.wbar) - g_SH(self.wbar - s_t)) / (r)
 		
 		if self.debug:
-			print "correction:"
-			print "s_t: ", s_t
-			print "y_t: ", y_t
+			print("correction:")
+			
 			
 		if abs(y_t).sum() != 0:
 		    self.s.append(s_t)
 		    self.y.append(y_t)
 		else:
-		    print "PROBLEM! zero y"
+		    print("PROBLEM! zero y")
 		    
 		if len(self.s) > self.options['M']:
 			self.s.popleft()
 			self.y.popleft()
 			
-		if self.debug: print "Length s, y:", len(self.s), len(self.y)
+		if self.debug: print("Length s, y: %d, %d" %(len(self.s), len(self.y)))
 		return
 	
 	def _draw_sample(self, X, z=None, b=None, recursion_depth = 1):
@@ -277,7 +278,7 @@ class SQN(StochasticOptimizer):
 		if len(X_S) == 0 and recursion_depth > 0:
 			X_S, z_S = self._draw_sample(X, z=z, b=b, recursion_depth=recursion_depth-1)
 		if self.debug:
-			print "sample length:", len(X_S), len(z_S)
+			print("sample length: %d, %d" %( len(X_S), len(z_S)))
 		return X_S, z_S
 		
 	def _has_terminated(self, grad, w):
@@ -289,8 +290,8 @@ class SQN(StochasticOptimizer):
 			w: current variable
 		"""
 		if self.debug:
-			print "Check termination"
-			print "len grad:", np.linalg.norm(grad) 
+			print("Check termination")
+			print("len grad: %f" %np.linalg.norm(grad) )
 		eps = 1e-6
 		if len(grad) > 0 and np.linalg.norm(grad) < eps:
 			return True
@@ -319,7 +320,6 @@ class SQN(StochasticOptimizer):
 		H = np.dot( (np.inner(self.s[-1], self.y[-1]) / np.inner(self.y[-1], self.y[-1])), I)
 		for (s_j, y_j) in itertools.izip(self.s, self.y):
 			rho = 1/np.inner(y_j, s_j)
-			if debug: print s_j, y_j
 			H = (I - rho* np.outer(s_j, y_j)).dot(H).dot(I - rho* np.outer(y_j, s_j))
 			H += rho * np.outer(s_j, s_j) 
 		return H

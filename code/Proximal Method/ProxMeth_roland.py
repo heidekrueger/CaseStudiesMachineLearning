@@ -46,32 +46,35 @@ def compute_0sr1(f, grad_f, h, x0, **options):
     x_old = x0.copy()
     t = 1/options['L']
     
-    for k in range(1, 100): # make while or itercount later
+    for k in range(int(options['max_iter'])):
         
-        u_H, u_B, d_H, d_B = compute_sr1_update(s, y, **options)
-        temp_x_new = compute_proximal(u_H, u_B, d_H, d_B, grad_f, x_new, **options)
-        
-        x_old = x_new
-        p = temp_x_new - x_old
-        
-        if np.linalg.norm(p) < options['epsilon']: # termination criterion
-            break
-        
-        t = line_search(f, h, p, x_old, **options)
-        x_new = x_old + t * p
-        s = t * p
-        y = grad_f(x_new) - grad_f(x_old)
-        
-        #if k % 50 == 0:
-        print(f(x_new) + h(x_new))
-    
+        if options['simple']:
+		x_new = prox_gradient(x_old - t * grad_f(x_old), t, **options)
+		s = x_new - x_old
+	else:
+		temp_x_new = compute_proximal(grad_f, x_new, s, y, **options)
+		p = temp_x_new - x_old
+	
+		t = line_search(f, h, p, x_old, **options)
+		x_new = x_old + t * p
+		
+		s = t * p
+		y = grad_f(x_new) - grad_f(x_old)
+	
+	if np.linalg.norm(s) < options['epsilon']: break
+	x_old = x_new.copy()
+	print(f(x_new) + h(x_new))
+	
     return x_new, k
 
-def compute_proximal(u_H, u_B, d_H, d_B, grad_f, x, **options):
+
+
+def compute_proximal(grad_f, x, s, y, **options):
     """
     Calls function-specific subroutines and subsquently computes proximal
     step (s. Corollary 9 and Prop. 10 in paper)
     """
+    u_H, u_B, d_H, d_B = compute_sr1_update(s, y, **options)
     # Test: Kein R1 Update -> Nur Gradient!
 #    u_H = 0.0*u_H
    # u_B = 0.0*u_B
@@ -85,6 +88,7 @@ def compute_proximal(u_H, u_B, d_H, d_B, grad_f, x, **options):
     proxi = prox(step - interm, d_H, **options)
     result = x - d_H * (grad_f - proxi) - u_H * np.dot(u_H.T, 
                 (grad_f - proxi))
+    
     return result
 
 
@@ -141,20 +145,20 @@ def compute_root(x, u_H, d_H, **options):
     Computes the root of p as in paper
     """
     
-    t = get_transition_points(x, d_H, **options)
+    t = get_transition_points(x, **options)
     trans_points_sorted = sort_transition_points(x, u_H, d_H, t)
     alpha = binary_search(trans_points_sorted, x, u_H, d_H, **options)
     return alpha
 
 
 
-def get_transition_points(x, d_H, **options):
+def get_transition_points(x, **options):
     """
     returns the transition points t_j for separable h,
     i.e. prox_h(x) = ax + b for t_j <= x <= t_(j+1)
     """
     
-    return 1 / d_H * options['l'] * np.tile([-1, 1], (len(x), 1))
+    return options['l'] * np.tile([-1, 1], (len(x), 1))
 
 
 
@@ -193,14 +197,14 @@ def p(alpha, u, x, d, **options):
 
 
 
-def prox(x, d_H, **options):
+def prox(x, d, **options):
     """
     computes proximal operator for indicator of l_inf-ball
     """
     
     n = len(x)
     
-    return np.median([-1 / d_H * options['l'] * np.ones((n,1)), x, 1 / d_H * options['l'] * 
+    return np.median([-options['l'] * np.ones((n,1)), x, options['l'] * 
                     np.ones((n,1))], axis = 0)
     
 
@@ -283,8 +287,8 @@ def compute_simple_ls(f, h, p, x_old, **options):
 
 if __name__ == "__main__":
         
-    A = np.random.normal(size = (500, 1000))
-    b = np.random.normal(size = (500, 1))
+    A = np.random.normal(size = (150, 300))
+    b = np.random.normal(size = (150, 1))
     A_sq = np.dot(A.T, A)
     Ab = np.dot(A.T, b)
 
@@ -302,6 +306,7 @@ if __name__ == "__main__":
         
         return np.linalg.norm(x, ord = 1)
         
-    x0 = np.ones((1000,1))
-    
-    x, k = compute_0sr1(z, grad_z, h, x0, l = 1, ls=1)
+    x0 = np.ones((300,1))
+    from scipy.linalg import eigvals
+    L = eigvals(A_sq).real.max()
+    x, k = compute_0sr1(z, grad_z, h, x0, l = 10, ls=1, L=L, max_iter=1e5, simple=False)

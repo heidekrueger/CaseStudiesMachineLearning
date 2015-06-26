@@ -1,10 +1,11 @@
 import numpy as np
 import sklearn.datasets
 import csv
+import re
 try:
     import MySQLdb
 except:
-    import PyMySQL as M
+    import pymysql as MySQLdb
 #### functions for reading from loooong file as stream
 
 def getstuff(filename, rowlim):
@@ -119,9 +120,9 @@ def create_higgs():
     
     try:
         cur.execute(sql)
-        cur.execute("CREATE UNIQUE INDEX id_index ON DATA (ID) USING BTREE;")
-    except Warning, w:
-        print w
+        # cur.execute("CREATE UNIQUE INDEX id_index ON DATA (ID) USING BTREE;")
+    except Warning as w:
+        print(w)
     cur.close()
     db.close()
     
@@ -134,22 +135,24 @@ def load_higgs_into_mysql():
     generic = "INSERT INTO " + table_name + " VALUES ("
     
     file_name = '../../datasets/HIGGS.csv'
-    csvfile = open(file_name, "rb")
+    csvfile = open(file_name, "r")
     
     for count, line in enumerate(iter(csvfile)):
-        entries = line.split(",")
+        line = re.sub('\s','',str(line))
+        entries = re.split(",",str(line))
         insert_statement = generic 
         insert_statement += str(count) + ","
         for index, entry in enumerate(entries):
             if index >= dimensions:
                 break
-            insert_statement += entry + ","
+            insert_statement += str(entry) + ","
             
         insert_statement = insert_statement[:-1]
         insert_statement += ')' 
-        print count
-#        if count > 1e5:
-#            break
+        if count%1000==0:
+            print(count)
+        if count > 1e6:
+            break
         try:
             cur.execute(insert_statement)
         except:
@@ -205,5 +208,5 @@ def load_higgs(rowlim=1000):
 
 if __name__ == "__main__":
     load_higgs_into_mysql()
-    print get_higgs_mysql([1,2,5, 55, 332, 3456, 0])
+    print(get_higgs_mysql([1,2,5, 55, 332, 3456, 0]))
     

@@ -45,7 +45,7 @@ def test_rosenbrock(sqn_method, X, z):
 			2*(a-x[0])*(-1) + 2*(x[1]-x[0]**2)*(-2*x[1]), 
 			2*(x[1]-x[0]**2) ])
 									
-	print sqn_method(rosenbrock, rosengrad, X=X, z=None, w1 = None, dim = 2, M=10, L=1.0, beta=0.1)
+	print(sqn_method(rosenbrock, rosengrad, X=X, z=None, w1 = None, dim = 2, M=10, L=1.0, beta=0.1))
 
 
 def test_Logistic_Regression(sqn_method, X, z, w1 = None, dim = 3, M=10, L=5, beta=0.1, batch_size = 5, batch_size_H = 10, max_iter=300, sampleFunction = "logreg", debug = False):
@@ -53,7 +53,7 @@ def test_Logistic_Regression(sqn_method, X, z, w1 = None, dim = 3, M=10, L=5, be
 	func = lambda w, X, z: logreg.F(w, X, z)
 	grad = lambda w, X, z: logreg.g(w, X, z)
 	L = 1e4
-	print "M:", M
+	print("M:", M)
 	print "L:", L
 	print "batch_size", batch_size
 	print "batch_size_H", batch_size_H
@@ -208,15 +208,14 @@ if __name__ == "__main__":
 		"""
 		
 		f = lambda b: print_f_vals(testcase, None, None, None, b)
-		p = Process(target=f, args=(100,))
-		p.start()
-		p = Process(target=f, args=(500,))
-		p.start()
-		p = Process(target=f, args=(1000,))
-		p.start()
-		p = Process(target=f, args=(10000,))
-		p.start()
-        
+		batch_sizes = [100, 500, 1000, 10000]
+		batch_sizes = [100]
+		n_processes = 1
+		for batch_size in batch_sizes:
+		    
+			p = Process(target=f, args=(batch_size,))
+			p.start()
+		
 #		pool = Pool(4)
 #		pool.map(f, [1, 20, 30])
 	    

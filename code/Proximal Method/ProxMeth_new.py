@@ -24,6 +24,7 @@ def compute_0sr1(f, grad_f, h, x0, **options):
     options.setdefault('tau', 2)
     options.setdefault('tau_min', 1e-12)
     options.setdefault('tau_max', 1e4)
+    options.setdefault('l', 1)
     options.setdefault('ls', 1)
     options.setdefault('beta', 0.5)
 
@@ -35,8 +36,6 @@ def compute_0sr1(f, grad_f, h, x0, **options):
 
     p = np.empty((n, 1))
     
-    #f_x = np.zeros((39,1))
-    
     for k in range(1, 1000): # make while or itercount later
         
         u_H, u_B, d_H, d_B = compute_sr1_update(s, y, k, **options)
@@ -45,7 +44,6 @@ def compute_0sr1(f, grad_f, h, x0, **options):
         x_old = x_new
         p = temp_x_new - x_old
         
-        #print(np.sqrt(np.dot(p.T, p)))
         if np.linalg.norm(p) < options['epsilon']: # termination criterion
             break
         
@@ -55,11 +53,8 @@ def compute_0sr1(f, grad_f, h, x0, **options):
         y = grad_f(x_new) - grad_f(x_old)
         
         #if k % 50 == 0:
-            
-        print(k)
-        #f_x[k-1]=f(x_new)
+        
         print(f(x_new) + h(x_new))
-        print(d_H)
     
     return x_new, k
 
@@ -149,7 +144,7 @@ def get_transition_points(x, **options):
     i.e. prox_h(x) = ax + b for t_j <= x <= t_(j+1)
     """
     
-    return np.tile([-1, 1], (len(x), 1))
+    return options['l'] * np.tile([-1, 1], (len(x), 1))
 
 
 
@@ -195,7 +190,8 @@ def prox(x, d, **options):
     
     n = len(x)
     
-    return np.median([-np.ones((n,1)), x, np.ones((n,1))], axis = 0)
+    return np.median([-options['l'] * np.ones((n,1)), x, options['l'] * 
+                    np.ones((n,1))], axis = 0)
     
 
 
@@ -267,7 +263,7 @@ def compute_simple_ls(f, h, p, x_old, **options):
     while f(x_old + beta * p) + h(x_old + beta * p) > F_old:
         beta *= options['beta']
         if beta < 1e-20:
-            print(beta)
+            print('break')
             break
         
     return beta
@@ -298,4 +294,4 @@ if __name__ == "__main__":
         
     x0 = np.ones((3000,1))
     
-    x, k = compute_0sr1(z, grad_z, h, x0, ls = 2)
+    x, k = compute_0sr1(z, grad_z, h, x0, l = 1000, ls=2)

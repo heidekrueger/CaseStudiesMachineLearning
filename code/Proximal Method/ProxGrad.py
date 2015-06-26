@@ -3,11 +3,13 @@
 Created on Wed Jun 24 22:48:16 2015
 
 @author: Fin Bauer
+
+This version works as of 26.6.2015 15:52
 """
 
 import numpy as np
 
-def proximal_gradient(f, grad_f, x0, t, **options):
+def proximal_gradient(f, grad_f, h, x0, t, **options):
     """
     proximal gradient for l1 regularization
     """
@@ -16,7 +18,7 @@ def proximal_gradient(f, grad_f, x0, t, **options):
     
     x_old = x0
     
-    for i in range(300):
+    for i in range(10000):
         
         x_new = prox(x_old - t * grad_f(x_old), t, **options)
         s = x_new - x_old
@@ -28,10 +30,8 @@ def proximal_gradient(f, grad_f, x0, t, **options):
             break
         
         x_old = x_new
-        
-        print(f(x_new))
     
-    return x_new
+    return x_new, i
     
 def prox(x, t, **options):
     
@@ -56,11 +56,15 @@ if __name__ == "__main__":
     def grad_z(x):
         
         return  np.dot(A_sq, x) - Ab
+    
+    def h(x):
+        
+        return np.linalg.norm(x, ord = 1)
         
     print "lol"
     x0 = np.ones((300,1))
     L = eigvals(A_sq).real.max()
     
     t0 = time()
-    x = proximal_gradient(z, grad_z, x0, 1 / L, l = 10)
+    x, i = proximal_gradient(z, grad_z, h, x0, 1 / L, l = 10)
     print(time() - t0)

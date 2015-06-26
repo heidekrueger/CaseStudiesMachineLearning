@@ -78,7 +78,7 @@ class StochasticDictionaryLearning:
         return D
 
 
-def algorithm1(x, n_components=100, l=0.01, n_iter=30, eta=40, verbose=0):
+def algorithm1(x, n_components=100, l=0.01, n_iter=30, eta=3, verbose=0):
     '''
     Online dictionary learning algorithm
 
@@ -131,6 +131,7 @@ def algorithm1(x, n_components=100, l=0.01, n_iter=30, eta=40, verbose=0):
         # 4: Sparse coding with LARS
         from sklearn.linear_model import LassoLars
         lars = LassoLars(alpha=l)
+        # Lars LassoLars
 
         lars.fit(D, xt)
         alpha = lars.coef_
@@ -163,7 +164,7 @@ def algorithm1(x, n_components=100, l=0.01, n_iter=30, eta=40, verbose=0):
     return D
 
 
-def algorithm2(D, A, B, c_max=15, eps=0.00001):
+def algorithm2(D, A, B, c_max=3, eps=0.00001):
     '''
     Dictionary update
 

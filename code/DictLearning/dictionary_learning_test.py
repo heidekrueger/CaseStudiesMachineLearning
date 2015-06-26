@@ -6,6 +6,7 @@
     algorithm and scikit learn's one.
 
     TODO:
+    - test on sklearn example and compare it
     - think about class organisation
     - fix coding/writting conventions problem
     - create a function to run scikit's algo and store results
@@ -21,6 +22,13 @@
     - load data
     - reconstruct data
     - run algorithm
+
+    STRATEGY:
+    1) Learn dictionary with both algorithm
+    2) Plots dictionaries
+    3) Use dictionaries to reconstruct images
+    4) Plot images
+    5) Measure differences
 
 """
 from dictionary_learning import StochasticDictionaryLearning
@@ -60,6 +68,39 @@ class StochasticDictionaryLearningTest(StochasticDictionaryLearning):
             '''
 
 
+def training_dictionary_learning(data):
+    '''
+    learning dictionary
+    '''
+
+    print('Learning the dictionary...')
+    t0 = time()
+    dico = StochasticDictionaryLearning(n_components=100, l=0.001, n_iter=50)
+    V = dico.fit(data)
+    dt = time() - t0
+    print('done in %.2fs.' % dt)
+
+    patch_size = (7, 7)
+
+    plt.figure(figsize=(4.2, 4))
+    for i, comp in enumerate(V[:100]):
+        plt.subplot(10, 10, i + 1)
+        plt.imshow(comp.reshape(patch_size), cmap=plt.cm.gray_r,
+                   interpolation='nearest')
+        plt.xticks(())
+        plt.yticks(())
+    plt.suptitle('Dictionary learned from Lena patches\n' +
+                 'Train time %.1fs on %d patches' % (dt, len(data)),
+                 fontsize=16)
+    plt.subplots_adjust(0.08, 0.02, 0.92, 0.85, 0.08, 0.23)
+
+
+def testing_dictionary_learning(V):
+    '''
+    testing dictionary learned
+    '''
+
+
 def load_data():
     '''
     code from sklearn application of dictionary learning
@@ -69,8 +110,6 @@ def load_data():
     '''
     from sklearn.feature_extraction.image import extract_patches_2d
     from scipy.misc import lena
-
-    # Load Lena image and extract patches
 
     lena = lena() / 256.0
 
@@ -172,23 +211,26 @@ if __name__ == '__main__':
     '''
     This stuffs should be embedded in a function or class method
     '''
-    sdl = StochasticDictionaryLearning()
+    data = load_data()
+    testing_dictionary_learning(data)
 
-    # Loading data
-    distorted, data_left, data_right, center = load_data_Fin_Jakob()
+    # sdl = StochasticDictionaryLearning()
 
-    # Learning dictionary
-    print("Fitting dictionary...")
-    D = sdl.fit(data_left)
-    print("Dictionary fitted.")
+    # # Loading data
+    # distorted, data_left, data_right, center = load_data_Fin_Jakob()
 
-    # Reconstructing/Denoising image
-    print("Reconstructing image...")
-    recon = reconstruct_data(D, data_right, distorted, center)
-    print("Image reconstructed.")
+    # # Learning dictionary
+    # print("Fitting dictionary...")
+    # D = sdl.fit(data_left)
+    # print("Dictionary fitted.")
 
-    plt.gray()
-    plt.imshow(distorted)
-    plt.show()
-    plt.imshow(recon)
-    plt.show
+    # # Reconstructing/Denoising image
+    # print("Reconstructing image...")
+    # recon = reconstruct_data(D, data_right, distorted, center)
+    # print("Image reconstructed.")
+
+    # plt.gray()
+    # plt.imshow(distorted)
+    # plt.show()
+    # plt.imshow(recon)
+    # plt.show

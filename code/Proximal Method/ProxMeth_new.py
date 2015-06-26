@@ -22,8 +22,10 @@ def compute_0sr1(f, grad_f, h, x0, **options):
     options.setdefault('epsilon', 1e-8)
     options.setdefault('gamma', 0.8)
     options.setdefault('tau', 2)
-    options.setdefault('tau_min', 1e-8)
+    options.setdefault('tau_min', 1e-12)
     options.setdefault('tau_max', 1e4)
+    options.setdefault('ls', 1)
+    options.setdefault('beta', 0.5)
 
     n = len(x0)
     x0 = x0.reshape((n, 1))
@@ -35,7 +37,7 @@ def compute_0sr1(f, grad_f, h, x0, **options):
     
     #f_x = np.zeros((39,1))
     
-    for k in range(1, 100000): # make while or itercount later
+    for k in range(1, 1000): # make while or itercount later
         
         u_H, u_B, d_H, d_B = compute_sr1_update(s, y, k, **options)
         temp_x_new = compute_proximal(u_H, u_B, d_H, d_B, grad_f, x_new, **options)
@@ -47,17 +49,17 @@ def compute_0sr1(f, grad_f, h, x0, **options):
         if np.linalg.norm(p) < options['epsilon']: # termination criterion
             break
         
-        t = 1
-        #t = line_search(f, h, y, p, x_old, **options)
+        t = line_search(f, h, p, x_old, **options)
         x_new = x_old + t * p
-        
         s = t * p
         y = grad_f(x_new) - grad_f(x_old)
         
-        if k % 100 == 0:
-            print(k)
+        #if k % 50 == 0:
+            
+        print(k)
         #f_x[k-1]=f(x_new)
-            print(f(x_new))
+        print(f(x_new) + h(x_new))
+        print(d_H)
     
     return x_new, k
 
@@ -95,13 +97,15 @@ def compute_sr1_update(s, y, k, **options):
         tau_bb2 = np.median([tau_min, tau_bb2, tau_max]) # Projection
         d_H = gamma * tau_bb2
         d_B = 1 / d_H
-        inter = s - d_H * y # save to reduce computational cost
         
         # skip quasi-Newton update
-        if np.dot(inter.T, y) <= 1e-8 * np.sqrt(y_squared) * np.linalg.norm(inter):
+        if np.dot(s.T, y) - d_H * np.dot(y.T, y) <= (1e-8 * np.sqrt(y_squared)
+                            * np.linalg.norm(s - d_H * y)):
             u_H = np.zeros((n, 1))
+            u_B = np.zeros((n, 1))
         else:
-            u_H = inter / np.sqrt(np.dot(inter.T, y))
+            u_H = s / np.sqrt(np.dot(s.T, y) - d_H * np.dot(y.T, y)) - (d_H *
+                    y / np.sqrt(np.dot(s.T, y) - d_H * np.dot(y.T, y)))
             u_B = u_H * d_B / np.sqrt(1 + d_B * np.dot(u_H.T, u_H))
             
     return u_H, u_B, d_H, d_B
@@ -235,7 +239,42 @@ def binary_search(trans_points, x, u, d, **options):
                     trans_points[l - 1]) / (p_right - p_left)
             
     return alpha
+
+
+
+def line_search(f, h, p, x_old, **options):
+    """
+    Computes line search factor dependent on chosen line search method
+    """
     
+    # step length always equals one
+    if options['ls'] == 1:
+        t = 1
+    # Armijo-type rule
+    else:
+        t = compute_simple_ls(f, h, p, x_old, **options)
+        
+    return t
+
+
+def compute_simple_ls(f, h, p, x_old, **options):
+    """
+    simple standard line search
+    """
+    
+    beta = 1
+    F_old = f(x_old) + h(x_old)
+    while f(x_old + beta * p) + h(x_old + beta * p) > F_old:
+        beta *= options['beta']
+        if beta < 1e-20:
+            print(beta)
+            break
+        
+    return beta
+
+
+
+
 if __name__ == "__main__":
         
     A = np.random.normal(size = (1500, 3000))
@@ -259,4 +298,4 @@ if __name__ == "__main__":
         
     x0 = np.ones((3000,1))
     
-    x, k = compute_0sr1(z, grad_z, h, x0, ls = 1, lambd = 1)
+    x, k = compute_0sr1(z, grad_z, h, x0, ls = 2)

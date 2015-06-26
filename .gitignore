@@ -6,6 +6,7 @@
 .idea/scopes/scope_settings.xml
 .idea/*
 datasets/HIGGS.csv
+datasets/HIGGS.csv.gz
 datasets/*
 
 *.pyc

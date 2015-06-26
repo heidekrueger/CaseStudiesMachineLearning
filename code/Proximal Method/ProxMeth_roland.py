@@ -67,6 +67,8 @@ def compute_0sr1(f, grad_f, h, x0, **options):
 	
     return x_new, k
 
+
+
 def compute_proximal(grad_f, x, s, y, **options):
     """
     Calls function-specific subroutines and subsquently computes proximal
@@ -86,6 +88,7 @@ def compute_proximal(grad_f, x, s, y, **options):
     proxi = prox(step - interm, d_H, **options)
     result = x - d_H * (grad_f - proxi) - u_H * np.dot(u_H.T, 
                 (grad_f - proxi))
+    
     return result
 
 

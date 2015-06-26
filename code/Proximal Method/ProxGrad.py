@@ -30,7 +30,7 @@ def proximal_gradient(f, grad_f, h, x0, t, **options):
             break
         
         x_old = x_new
-    
+	print(f(x_new) + h(x_new))
     return x_new, i
     
 def prox(x, t, **options):
@@ -61,10 +61,9 @@ if __name__ == "__main__":
         
         return np.linalg.norm(x, ord = 1)
         
-    print "lol"
     x0 = np.ones((300,1))
     L = eigvals(A_sq).real.max()
     
     t0 = time()
     x, i = proximal_gradient(z, grad_z, h, x0, 1 / L, l = 10)
-    print(time() - t0)
+    

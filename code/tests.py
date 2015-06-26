@@ -193,7 +193,7 @@ if __name__ == "__main__":
 			else:
 				w = sqn.solve_one_step(logreg.F, logreg.g, X = X, z = z, k=k)
 			
-			print k, sqn.f_vals[-1]
+			print sqn.f_vals[-1]
 			
 			if k > sqn.options['max_iter'] or sqn.termination_counter > 4:
 			    iterations = k

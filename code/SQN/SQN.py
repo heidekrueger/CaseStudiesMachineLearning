@@ -145,6 +145,7 @@ class SQN(StochasticOptimizer):
 		self.wbar = None
 		self.wbar_previous = None
 		self.f_vals = []
+		self.gradients = []
 		StochasticOptimizer.__init__(self)
 		#super(SQN, self).__init__()
 	
@@ -229,7 +230,7 @@ class SQN(StochasticOptimizer):
 		if k % self.options['L'] == 0:
 			self.wbar /= float(self.options['L']) 
 			if self.wbar_previous is not None:
-				print "HESSE"
+				if self.debug: print "HESSE"
 				self._update_correction_pairs(g, X, z)
 			self.wbar_previous = self.wbar
 			self.wbar = np.zeros(self.options['dim'])
@@ -277,6 +278,7 @@ class SQN(StochasticOptimizer):
 		self.w = self.w + np.multiply(alpha, search_direction)
 		
 		self.f_vals.append( f_S(self.w) )
+		self.gradients.append( g_S(self.w) )
 
 		return self.w
 	    

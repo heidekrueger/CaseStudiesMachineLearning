@@ -33,9 +33,10 @@ class StochasticDictionaryLearning:
     Attributes:
     - n_components
     - option, select SQN method or normal method
-    - l, regularization parameter
+    - alpha, regularization parameter for Lasso subproblem
     - n_iter, int, number of iterations
-    - eta, int, mini batch size
+    - max_iter, int, number of iterations for dictionary update
+    - batch_size, int, mini batch size
     - verbose, int, control verbosity of algorithm
 
 
@@ -48,13 +49,16 @@ class StochasticDictionaryLearning:
 
     '''
 
-    def __init__(self, n_components=100, option=None,
-                 l=0.001, n_iter=30, eta=100, verbose=0):
+    def __init__(self, n_components=100, option=None, alpha=0.001,
+                 n_iter=10, max_iter=100, batch_size=3, verbose=0):
+
         self.n_components = n_components
-        self.option = option  # select whether SQN method should be used
-        self.l = l
+        self.alpha = alpha
         self.n_iter = n_iter
-        self.eta = eta
+        self.max_iter = max_iter
+        self.batch_size = batch_size
+
+        self.option = option
         self.verbose = verbose
 
     def fit(self, X):
@@ -71,14 +75,14 @@ class StochasticDictionaryLearning:
 
         D = algorithm1(X,
                        n_components=self.n_components,
-                       l=self.l,
+                       alpha=self.alpha,
                        n_iter=self.n_iter,
-                       eta=self.eta,
+                       batch_size=self.batch_size,
                        verbose=self.verbose)
         return D
 
 
-def algorithm1(x, n_components=100, l=0.01, n_iter=30, eta=3, verbose=0):
+def algorithm1(x, n_components=100, alpha=0.01, n_iter=30, batch_size=3, verbose=0):
     '''
     Online dictionary learning algorithm
 
@@ -87,7 +91,7 @@ def algorithm1(x, n_components=100, l=0.01, n_iter=30, eta=3, verbose=0):
     - l, regularization parameter
     - n_components, number of components of dictionary
     - n_iter, int, number of iterations
-    - eta, int, mini batch size
+    - batch_size, int, mini batch size
     - verbose, int, control verbosity of algorithm
 
     OUTPUTS:
@@ -124,41 +128,41 @@ def algorithm1(x, n_components=100, l=0.01, n_iter=30, eta=3, verbose=0):
     for t in range(1, n_iter + 1):
 
         # 3: Draw xj from x
-        j = np.random.randint(0, n_s, eta)
+        j = np.random.randint(0, n_s, batch_size)
         xt = x[j, :]
         xt = np.asmatrix(xt).T
 
         # 4: Sparse coding with LARS
         from sklearn.linear_model import LassoLars
-        lars = LassoLars(alpha=l)
+        lars = LassoLars(alpha=alpha)
         # Lars LassoLars
 
         lars.fit(D, xt)
-        alpha = lars.coef_
-        alpha = (np.asmatrix(alpha)).T
+        coeff = lars.coef_
+        coeff = (np.asmatrix(coeff)).T
 
         # computing coefficient beta for step 5/6
-        if t < eta:
-            theta = float(t * eta)
+        if t < batch_size:
+            theta = float(t * batch_size)
         else:
-            theta = math.pow(eta, 2) + t - eta
+            theta = math.pow(batch_size, 2) + t - batch_size
 
-        beta = (theta + 1 - eta) / (theta + 1)
+        beta = (theta + 1 - batch_size) / (theta + 1)
 
         # 5: Update A
         a = np.zeros((k, k))
-        for i in range(0, eta):
-            a = a + (alpha[:, i]).dot(alpha[:, i].T)
+        for i in range(0, batch_size):
+            a = a + (coeff[:, i]).dot(coeff[:, i].T)
         A = beta * A + a
 
         # 6: Update B
         b = np.zeros((m, k))
-        for i in range(0, eta):
-            b = b + xt[:, i].dot(alpha[:, i].T)
+        for i in range(0, batch_size):
+            b = b + xt[:, i].dot(coeff[:, i].T)
         B = beta * B + b
 
         # Compute new dictionary update
-        D = algorithm2(D, A, B)
+        # D = algorithm2(D, A, B)
 
     # 9 : Return learned dictionary
     return D
@@ -230,8 +234,3 @@ def algorithm2(D, A, B, c_max=3, eps=0.00001):
 
 if __name__ == "__main__":
     sdl = StochasticDictionaryLearning()
-    # algorithm1(x)
-
-    '''
-    Testing is not here anymore
-    '''

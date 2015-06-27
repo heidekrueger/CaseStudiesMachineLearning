@@ -38,6 +38,7 @@ class StochasticDictionaryLearning:
     - max_iter, int, number of iterations for dictionary update
     - batch_size, int, mini batch size
     - verbose, int, control verbosity of algorithm
+    - components, dictionary atoms learnt
 
 
     Methods:
@@ -57,32 +58,67 @@ class StochasticDictionaryLearning:
         self.n_iter = n_iter
         self.max_iter = max_iter
         self.batch_size = batch_size
+        self.components = []
 
         self.option = option
         self.verbose = verbose
 
     def fit(self, X):
         '''
-        This methods runs dictionary learning algorithms on data X
+        This method runs online dictionary learning on data X and update
+        self.components
 
-        INPUTS:
-        - self
-        - X : (n_samples, m) array like, data
-
-        OUTPUTS:
-        - D : (m, k) array like, learned dictionary
+        INPUTS :
+        - self : sdl object
+        - X : data
         '''
 
-        D = algorithm1(X,
-                       n_components=self.n_components,
-                       alpha=self.alpha,
-                       n_iter=self.n_iter,
-                       batch_size=self.batch_size,
-                       verbose=self.verbose)
-        return D
+        # number of samples in x
+        n_s = len(X[:, 0])
+
+        # initial dictionary
+        D = np.random.rand(len(X[0, :]), self.n_components)
+        '''
+        Q? : should I work with self.components ??
+        '''
+
+        # Dimensions of dicitonary
+        [m, k] = D.shape
+
+        # 1: initialization
+        A = np.zeros((k, k))
+        B = np.zeros((m, k))
+
+        if self.verbose > 0:
+            print "Dimensions infos :"
+            print "    n_samples :", n_s
+            print "    D shape :", D.shape
+            print "    A shape :", A.shape
+            print "    B shape :", B.shape
+
+        for t in range(1, self.n_iter + 1):
+            '''
+            Q? : should I update D or self.components ?
+            Q? : should I input X or mini_batch ?
+            '''
+            self.online_dictionary_learning(X)
+
+    def online_dictionary_learning(self, X):
+        '''
+        This function perform online dictionary algorithm with data X and
+        update D or self.components
+
+        INPUT:
+        - X, data array
+
+        Q? : should I update D or self.components ??
+        '''
+
+        print "odl called"
 
 
-def algorithm1(x, n_components=100, alpha=0.01, n_iter=30, batch_size=3, verbose=0):
+def algorithm1(x, n_components=100,
+               alpha=0.01, n_iter=30, batch_size=3, verbose=0):
     '''
     Online dictionary learning algorithm
 

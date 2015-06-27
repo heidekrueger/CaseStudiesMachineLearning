@@ -24,6 +24,7 @@
 
 import numpy as np
 import math
+from time import time
 
 
 class StochasticDictionaryLearning:
@@ -73,11 +74,17 @@ class StochasticDictionaryLearning:
         - X : data
         '''
 
+        # Measure of running time
+        t_fit = time()
+        l_tsteps = []
+
         # number of samples in x
         n_s = len(X[:, 0])
 
-        # initial dictionary
-        D = np.random.rand(len(X[0, :]), self.n_components)
+        # initial dictionary : take some elements of X
+        jd = np.random.randint(0, n_s, self.n_components)
+        D = X[jd, :].T
+        # D = np.random.rand(len(X[0, :]), self.n_components)
         '''
         Q? : should I work with self.components ??
         '''
@@ -89,6 +96,7 @@ class StochasticDictionaryLearning:
         A = np.zeros((k, k))
         B = np.zeros((m, k))
 
+        # dimension control
         if self.verbose > 0:
             print "Dimensions infos :"
             print "    n_samples :", n_s
@@ -96,25 +104,184 @@ class StochasticDictionaryLearning:
             print "    A shape :", A.shape
             print "    B shape :", B.shape
 
-        for t in range(1, self.n_iter + 1):
+        if self.verbose > 0:
+            print "Running online dictionary learning"
+            print str(self.n_iter), "iter to perform"
+
+        t = 0
+        run_control = True
+        while t < self.n_iter and run_control is True:
+            t += 1
+
+            # verbosity control
+            if self.verbose > 10:
+                print "iter :", t
+
+            # Measure running time of each iteration
+            t_step = time()
+
+            # Draw mini-batch
+            j = np.random.randint(0, n_s, self.batch_size)
+            Xt = X[j, :]
+            Xt = np.asmatrix(Xt).T
+
+            # dimension control
+            if self.verbose > 20 and t == 1:
+                print "    Xt shape :", Xt.shape
+
+            # online dictionary learning algorithm called
+            run_control = self.online_dictionary_learning(Xt, D, A, B, t)
+
+            if t == 1 and run_control is False:
+                print "Please use a small value for regularization"
+                print "paremeter alpha"
+                t = self.n_iter
+
+            # Measure running time of each iteration
+            dt_step = time() - t_step
+            l_tsteps.append(dt_step)
+
             '''
             Q? : should I update D or self.components ?
-            Q? : should I input X or mini_batch ?
+            Q? : should I input X or mini_batch ? => mini-batch
             '''
-            self.online_dictionary_learning(X)
 
-    def online_dictionary_learning(self, X):
+        # Measure of running time
+        dt_fit = time() - t_fit
+        m_tsteps = np.mean(l_tsteps)
+
+        if self.verbose > 0:
+            print('fitting done in %.2fs.' % dt_fit)
+            print('updating dic in %.2fs.' % m_tsteps)
+
+    def online_dictionary_learning(self, Xt, D, A, B, t):
         '''
         This function perform online dictionary algorithm with data X and
         update D or self.components
 
-        INPUT:
-        - X, data array
+        INPUTS:
+        - self
+        - Xt, data array
+        - D, dictionary
+        - A, matrix
+        - B, matrix
+        - t, iter number
 
         Q? : should I update D or self.components ??
         '''
 
-        print "odl called"
+        # Nullity control
+        null_control = False
+        c_control = 0
+        max_control = 10
+        z_control = 0.0
+
+        if t == 1:
+            while null_control is False and c_control < max_control:
+
+                # update counter
+                c_control += 1
+
+                # 4: Sparse coding with LARS
+                coef = self.lasso_subproblem(Xt, D, A, B, t)
+
+                # 5/6: Update A and B
+                A, B = self.update_matrices(Xt, D, coef, A, B, t)
+
+                # Non nullity control
+                z_control = np.sum(A)
+
+                if z_control != 0:
+                    null_control = True
+
+                # if null_control is False and c_control == max_control:
+                #     print "Please use a small value for regularization"
+                #     print "paremeter alpha"
+
+        else:
+            null_control = True
+            # 4: Sparse coding with LARS
+            coef = self.lasso_subproblem(Xt, D, A, B, t)
+
+            # 5/6: Update A and B
+            A, B = self.update_matrices(Xt, D, coef, A, B, t)
+
+        return null_control
+
+    def lasso_subproblem(self, Xt, D, A, B, t):
+        '''
+        function which performs:
+        - 4: Sparse coding with LARS
+
+        INPUTS:
+        - self
+        - Xt, data array
+        - D, dictionary
+        - A, matrix
+        - B, matrix
+        - t, iter number
+
+        OUTPUT:
+        - coef
+        '''
+
+        # 4: Sparse coding with LARS
+        from sklearn.linear_model import LassoLars
+        lars = LassoLars(alpha=self.alpha)
+
+        lars.fit(D, Xt)
+        coef = lars.coef_
+        coef = (np.asmatrix(coef)).T
+
+        # Dimension control
+        if self.verbose > 20:
+            print "coef shape :", coef.shape
+
+        return coef
+
+    def update_matrices(self, Xt, D, coef, A, B, t):
+        '''
+        function which performs:
+        - computing coefficient beta for step 5/6
+        - 5: Update A
+        - 6: Update B
+
+        INPUTS:
+        - self
+        - Xt, data array
+        - D, dictionary
+        - coef, solution of Lasso subproblem
+        - A, matrix
+        - B, matrix
+        - t, iter number
+
+        OUTPUTS:
+        - A, matrix
+        - B, matrix
+        '''
+        [m, k] = D.shape
+
+        # computing coefficient beta for step 5/6
+        if t < self.batch_size:
+            theta = float(t * self.batch_size)
+        else:
+            theta = math.pow(self.batch_size, 2) + t - self.batch_size
+
+        beta = (theta + 1 - self.batch_size) / (theta + 1)
+
+        # 5: Update A
+        a = np.zeros((k, k))
+        for i in range(0, self.batch_size):
+            a = a + (coef[:, i]).dot(coef[:, i].T)
+        A = beta * A + a
+
+        # 6: Update B
+        b = np.zeros((m, k))
+        for i in range(0, self.batch_size):
+            b = b + Xt[:, i].dot(coef[:, i].T)
+        B = beta * B + b
+
+        return A, B
 
 
 def algorithm1(x, n_components=100,

@@ -37,6 +37,8 @@ from sklearn.linear_model import OrthogonalMatchingPursuit
 import numpy as np
 from time import time
 import matplotlib.pyplot as plt
+from sklearn.feature_extraction.image import extract_patches_2d
+from scipy.misc import lena
 
 
 def learn_dictionaries(data, n_components=100, option=None,
@@ -92,63 +94,39 @@ def plot_dictionary(D, dt=0, ld=0):
     plt.show()
 
 
-def training_dictionary_learning(data):
-    '''
-    learning dictionary
-    '''
+def show_with_diff(image, reference, title):
+    """Helper function to display denoising"""
+    plt.figure(figsize=(5, 3.3))
+    plt.subplot(1, 2, 1)
+    plt.title('Image')
+    plt.imshow(image, vmin=0, vmax=1,
+               cmap=plt.cm.gray, interpolation='nearest')
+    plt.xticks(())
+    plt.yticks(())
+    plt.subplot(1, 2, 2)
+    difference = image - reference
 
-    print('Learning the dictionary...')
-    t0 = time()
-    dico = StochasticDictionaryLearning(n_components=100, alpha=0, n_iter=10, batch_size=3)
-    V = dico.fit(data)
-    dt = time() - t0
-    print('done in %.2fs.' % dt)
-
-    patch_size = (7, 7)
-
-    # dico is in a matrix, not in a list
-    plt.figure(figsize=(4.2, 4))
-    for i in range(0, len(V[0, :])):
-        comp = V[:, i]
-        plt.subplot(10, 10, i + 1)
-        plt.imshow(comp.reshape(patch_size), cmap=plt.cm.gray_r,
-                   interpolation='nearest')
-        plt.xticks(())
-        plt.yticks(())
-    plt.suptitle('Dictionary learned from Lena patches\n' +
-                 'Train time %.1fs on %d patches' % (dt, len(data)),
-                 fontsize=16)
-    plt.subplots_adjust(0.08, 0.02, 0.92, 0.85, 0.08, 0.23)
-    plt.show()
-
-#     plt.figure(figsize=(4.2, 4))
-# for i, comp in enumerate(V[:100]):
-#     plt.subplot(10, 10, i + 1)
-#     plt.imshow(comp.reshape(patch_size), cmap=plt.cm.gray_r,
-#                interpolation='nearest')
-#     plt.xticks(())
-#     plt.yticks(())
-# plt.suptitle('Dictionary learned from Lena patches\n' +
-#              'Train time %.1fs on %d patches' % (dt, len(data)),
-#              fontsize=16)
-# plt.subplots_adjust(0.08, 0.02, 0.92, 0.85, 0.08, 0.23)
+    plt.title('Difference (norm: %.2f)' % np.sqrt(np.sum(difference ** 2)))
+    plt.imshow(difference, vmin=-0.5, vmax=0.5, cmap=plt.cm.PuOr,
+               interpolation='nearest')
+    plt.xticks(())
+    plt.yticks(())
+    plt.suptitle(title, size=16)
+    plt.subplots_adjust(0.02, 0.02, 0.98, 0.79, 0.02, 0.2)
 
 
-def testing_dictionary_learning(V):
-    '''
-    testing dictionary learned
-    '''
+def reconstruction(distorted):
+    """
+    """
 
 
-def load_data():
+def preprocess_data(lena):
     '''
     code from sklearn application of dictionary learning
 
     RETURNS:
     - data: n_patches, dim_patch array like. collection of patches
     '''
-    from sklearn.feature_extraction.image import extract_patches_2d
-    from scipy.misc import lena
 
     lena = lena() / 256.0
 
@@ -172,7 +150,32 @@ def load_data():
     data /= np.std(data, axis=0)
     print('done in %.2fs.' % (time() - t0))
 
-    return data
+    return data, lena, distorted
+
+
+def postprocess_data(lena):
+    # lena = lena() / 256.0
+
+    # # downsample for higher speed
+    # lena = lena[::2, ::2] + lena[1::2, ::2] + lena[::2, 1::2] + lena[1::2, 1::2]
+    # lena /= 4.0
+    height, width = lena.shape
+
+    # Distort the right half of the image
+    print('Distorting image...')
+    distorted = lena.copy()
+    distorted[:, height // 2:] += 0.075 * np.random.randn(width, height // 2)
+
+    print('Extracting noisy patches... ')
+    t0 = time()
+    patch_size = (7, 7)
+    data = extract_patches_2d(distorted[:, height // 2:], patch_size)
+    data = data.reshape(data.shape[0], -1)
+    intercept = np.mean(data, axis=0)
+    data -= intercept
+    print('done in %.2fs.' % (time() - t0))
+
+    return data, intercept
 
 
 def load_data_Fin_Jakob():
@@ -256,38 +259,55 @@ if __name__ == '__main__':
                                        option=None,
                                        alpha=1.0,
                                        n_iter=100,
-                                       max_iter=20,
+                                       max_iter=10,
                                        batch_size=10,
-                                       verbose=11)
+                                       verbose=10)
 
     # load data
-    X = load_data()
-    sdl.fit(X)
+    data, lena, distorted = preprocess_data(lena)
+    sdl.fit(data)
 
     D = sdl.components
 
-    plot_dictionary(D)
+    # plot_dictionary(D)
 
-    # training_dictionary_learning(data)
-    # testing_dictionary_learning(data)
+    data, intercept = postprocess_data(lena)
 
-    # sdl = StochasticDictionaryLearning()
+    # transform_algorithms = [
+    #     ('Orthogonal Matching Pursuit\n1 atom', 'omp',
+    #      {'transform_n_nonzero_coefs': 1}),
+    #     ('Orthogonal Matching Pursuit\n2 atoms', 'omp',
+    #      {'transform_n_nonzero_coefs': 2}),
+    #     ('Least-angle regression\n5 atoms', 'lars',
+    #      {'transform_n_nonzero_coefs': 5}),
+    #     ('Thresholding\n alpha=0.1', 'threshold', {'transform_alpha': .1})]
 
-    # # Loading data
-    # distorted, data_left, data_right, center = load_data_Fin_Jakob()
+    from sklearn.decomposition.dict_learning import sparse_encode
 
-    # # Learning dictionary
-    # print("Fitting dictionary...")
-    # D = sdl.fit(data_left)
-    # print("Dictionary fitted.")
+    t0 = time()
+    title = 'first try'
+    reconstructions = lena.copy()
 
-    # # Reconstructing/Denoising image
-    # print("Reconstructing image...")
-    # recon = reconstruct_data(D, data_right, distorted, center)
-    # print("Image reconstructed.")
+    code = sparse_encode(data, D.T, gram=None,
+                         cov=None, algorithm='omp',
+                         n_nonzero_coefs=None, alpha=None,
+                         copy_cov=True, init=None,
+                         max_iter=1000, n_jobs=1)
 
-    # plt.gray()
-    # plt.imshow(distorted)
-    # plt.show()
-    # plt.imshow(recon)
-    # plt.show
+    patch_size = (7, 7)
+    height, width = lena.shape
+
+    patches = np.dot(code, D.T)
+    patches += intercept
+    patches = patches.reshape(len(data), *patch_size)
+
+    reconstructions[:, height // 2:] = reconstruct_from_patches_2d(
+        patches, (width, height // 2))
+
+    dt = time() - t0
+    print('done in %.2fs.' % dt)
+
+    show_with_diff(distorted, lena, 'Distorted image')
+    show_with_diff(reconstructions, lena,
+                   title + ' (time: %.1fs)' % dt)
+    plt.show()

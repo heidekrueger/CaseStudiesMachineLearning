@@ -6,9 +6,9 @@ import math
 from collections import deque
 import scipy.optimize
 
-import stochastic_tools
-from stochastic_tools import stochastic_gradient
-from stochastic_tools import armijo_rule
+import SQN.stochastic_tools as stochastic_tools
+from SQN.stochastic_tools import stochastic_gradient
+from SQN.stochastic_tools import armijo_rule
 
 
 """

@@ -91,11 +91,14 @@ def plot_dictionary(D, dt=0, ld=0):
                  'Train time %.1fs on %d patches' % (dt, ld),
                  fontsize=16)
     plt.subplots_adjust(0.08, 0.02, 0.92, 0.85, 0.08, 0.23)
-    plt.show()
+    # plt.show()
 
 
 def show_with_diff(image, reference, title):
-    """Helper function to display denoising"""
+    '''
+    Helper function to display denoising
+    '''
+
     plt.figure(figsize=(5, 3.3))
     plt.subplot(1, 2, 1)
     plt.title('Image')
@@ -115,17 +118,14 @@ def show_with_diff(image, reference, title):
     plt.subplots_adjust(0.02, 0.02, 0.98, 0.79, 0.02, 0.2)
 
 
-def reconstruction(distorted):
-    """
-    """
-
-
 def preprocess_data(lena):
     '''
     code from sklearn application of dictionary learning
 
-    RETURNS:
+    OUTPUTS:
     - data: n_patches, dim_patch array like. collection of patches
+    - lena: original array updated/modified
+    - distorted: right half of the image distorted
     '''
 
     lena = lena() / 256.0
@@ -154,11 +154,14 @@ def preprocess_data(lena):
 
 
 def postprocess_data(lena):
-    # lena = lena() / 256.0
+    '''
+    code from sklearn application of dictionary learning
 
-    # # downsample for higher speed
-    # lena = lena[::2, ::2] + lena[1::2, ::2] + lena[::2, 1::2] + lena[1::2, 1::2]
-    # lena /= 4.0
+    OUTPUTS:
+    - data: noisy patches extracted from the right half of the image
+    - intercept
+    '''
+
     height, width = lena.shape
 
     # Distort the right half of the image
@@ -178,77 +181,6 @@ def postprocess_data(lena):
     return data, intercept
 
 
-def load_data_Fin_Jakob():
-    '''
-    code from sklearn application of dictionary learning
-
-    RETURNS:
-    - data: n_patches, dim_patch array like. collection of patches
-    '''
-    from sklearn.feature_extraction.image import extract_patches_2d
-    from scipy.misc import lena
-
-    # Load Lena image and extract patches
-    lena = lena() / 256.0
-
-    # downsample for higher speed
-    lena = lena[::2, ::2] + lena[1::2, ::2] + lena[::2, 1::2] + lena[1::2, 1::2]
-    lena /= 4.0
-    height, width = lena.shape
-
-    # Distort the right half of the image
-    print('Distorting image...')
-    distorted = lena.copy()
-    distorted[:, width // 2:] += 0.075 * np.random.randn(height, width // 2)
-
-    # Extract all reference patches from the left half of the image
-    print('Extracting reference patches...')
-    t0 = time()
-    patch_size = (7, 7)
-
-    data_left = extract_patches_2d(distorted[:, :width // 2], patch_size)
-    data_left = data_left.reshape(data_left.shape[0], -1)
-    data_left -= np.mean(data_left, axis=0)
-    data_left /= np.std(data_left, axis=0)
-
-    data_right = extract_patches_2d(distorted[:, width // 2:], patch_size)
-    data_right = data_right.reshape(data_right.shape[0], -1)
-    center = np.mean(data_right, axis=0)
-    data_right -= center
-    print('done in %.2fs.' % (time() - t0))
-
-    return distorted, data_left, data_right, center
-
-
-def reconstruct_data(D, data, dist, center):
-    """
-    reconstruct right side from learned dictionary
-
-    INPUTS:
-    - D : learned dictionary
-    - data: patches from right side
-    - dist: array of full distorted image
-    - center: mean of data to reverse centralization
-
-    OUTPUTS:
-    - recon: array of reconstructed image
-    """
-
-    t0 = time()
-    recon = dist.copy()
-    patch_size = (7, 7)
-    lars = OrthogonalMatchingPursuit(n_nonzero_coefs=2)
-    lars.fit(D, data.T)
-    code = lars.coef_
-    patches = np.dot(code, D.T)
-    patches += center
-    patches = patches.reshape(len(data), *patch_size)
-    recon[:, dist.shape[1] // 2:] = reconstruct_from_patches_2d(patches, (dist.shape[0], dist.shape[1] // 2))
-    print('done in %.2fs.' % (time() - t0))
-
-    return recon
-
-
 if __name__ == '__main__':
     '''
     Testing and correcting StochasticDictionaryLearning
@@ -258,29 +190,23 @@ if __name__ == '__main__':
     sdl = StochasticDictionaryLearning(n_components=100,
                                        option=None,
                                        alpha=1.0,
-                                       n_iter=100,
+                                       n_iter=500,
                                        max_iter=10,
                                        batch_size=10,
                                        verbose=10)
 
-    # load data
+    # loads data
     data, lena, distorted = preprocess_data(lena)
     sdl.fit(data)
 
+    # takes dictionary
     D = sdl.components
 
-    # plot_dictionary(D)
+    # plots dictionary
+    plot_dictionary(D)
 
+    # post process data
     data, intercept = postprocess_data(lena)
-
-    # transform_algorithms = [
-    #     ('Orthogonal Matching Pursuit\n1 atom', 'omp',
-    #      {'transform_n_nonzero_coefs': 1}),
-    #     ('Orthogonal Matching Pursuit\n2 atoms', 'omp',
-    #      {'transform_n_nonzero_coefs': 2}),
-    #     ('Least-angle regression\n5 atoms', 'lars',
-    #      {'transform_n_nonzero_coefs': 5}),
-    #     ('Thresholding\n alpha=0.1', 'threshold', {'transform_alpha': .1})]
 
     from sklearn.decomposition.dict_learning import sparse_encode
 
@@ -288,6 +214,7 @@ if __name__ == '__main__':
     title = 'first try'
     reconstructions = lena.copy()
 
+    # encode noisy patches with learnt dictionary
     code = sparse_encode(data, D.T, gram=None,
                          cov=None, algorithm='omp',
                          n_nonzero_coefs=None, alpha=None,
@@ -301,12 +228,14 @@ if __name__ == '__main__':
     patches += intercept
     patches = patches.reshape(len(data), *patch_size)
 
+    # reconstruct noisy image
     reconstructions[:, height // 2:] = reconstruct_from_patches_2d(
         patches, (width, height // 2))
 
     dt = time() - t0
     print('done in %.2fs.' % dt)
 
+    # show the difference
     show_with_diff(distorted, lena, 'Distorted image')
     show_with_diff(reconstructions, lena,
                    title + ' (time: %.1fs)' % dt)

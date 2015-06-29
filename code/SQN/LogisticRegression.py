@@ -54,6 +54,8 @@ class LogisticRegression():
 	def L_2(self, w):
 		return  0.5 * self.lam_2 * (np.linalg.norm(w[1:])**2)
 	
+	# TODO:
+	# Correct?
 	def L_1(self, w):
 		return  self.lam_1 * sum(map(abs, w[1:]))
 	    
@@ -68,6 +70,8 @@ class LogisticRegression():
 		"""
 		Gradient of F
 		"""
+		# TODO: L_1 term correct ???
+		# TODO
 		hyp = self.h(w, X)
 		self.gevals += 1
 		return (hyp - y)* X + self.lam_2* w + self.lam_1 * w

@@ -27,18 +27,18 @@ def compute_0sr1(f, grad_f, h, x0, **options):
     options.setdefault('l_reg', 1)
     options.setdefault('ls', 1)
     options.setdefault('beta', 0.5)
-
     n = len(x0)
+    options.setdefault('dim', n)
     x0 = x0.reshape((n, 1))
-    s = np.zeros((n, 1))
-    y = np.zeros((n, 1))
+    s = []
+    y = []
     x_new = x0.copy()
 
     p = np.empty((n, 1))
     
     for k in range(1, 5000): # make while or itercount later
         
-        u_H, u_B, d_H, d_B = compute_sr1_update(s, y, k, **options)
+        u_H, u_B, d_H, d_B = compute_sr1_update(s, y, **options)
         temp_x_new = compute_proximal(u_H, u_B, d_H, d_B, grad_f, x_new, **options)
         
         x_old = x_new
@@ -278,8 +278,8 @@ def compute_simple_ls(f, h, p, x_old, **options):
 
 if __name__ == "__main__":
         
-    A = np.random.normal(size = (1500, 3000))
-    b = np.random.normal(size = (1500, 1))
+    A = np.random.normal(size = (150, 300))
+    b = np.random.normal(size = (150, 1))
     A_sq = np.dot(A.T, A)
     Ab = np.dot(A.T, b)
 
@@ -297,6 +297,6 @@ if __name__ == "__main__":
         
         return np.linalg.norm(x, ord = 1)
         
-    x0 = np.ones((3000,1))
+    x0 = np.ones((300,1))
     
     x, k = compute_0sr1(z, grad_z, h, x0, l = 10)

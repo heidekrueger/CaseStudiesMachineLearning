@@ -198,7 +198,7 @@ def prox(x, **options):
                     np.ones((n,1))], axis = 0)
     
 
-
+import math
 def binary_search(trans_points, x, u, d, **options):
     """
     performs binary search on sorted transition points to obtain root of p
@@ -222,21 +222,22 @@ def binary_search(trans_points, x, u, d, **options):
             alpha = trans_points[-1] - 1 - p_end / (p_left - p_end)
         # normal case
         else:
-            l, r = 1, len(trans_points)
-            while r-l != 1:
-                m = np.floor(1 / 2 * (l + r))
-                p_middle = p(trans_points[m - 1], x, u, d, **options)
+            left, right = 1, len(trans_points)
+            while right - left != 1:
+                middle = math.floor(float(left + right)/2.)
+                middle = int(middle)
+                p_middle = p(trans_points[int(middle - 1)], x, u, d, **options)
                 if p_middle == 0:
-                    alpha = trans_points[m - 1]
+                    alpha = trans_points[middle - 1]
                     break
                 elif p_middle < 0:
-                    l = m
+                    left = middle
                     p_left = p_middle
                 else:
-                    r = m
+                    right = middle
                     p_right = p_middle
-            alpha = trans_points[l - 1] - p_left * (trans_points[r - 1] - 
-                    trans_points[l - 1]) / (p_right - p_left)
+            alpha = trans_points[left - 1] - p_left * (trans_points[right - 1] - 
+                    trans_points[left - 1]) / (p_right - p_left)
             
     return alpha
 

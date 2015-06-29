@@ -90,8 +90,7 @@ def print_f_vals(testcase, rowlim, options, folderpath, sqn):
         
     logreg = LogisticRegression(lam_1 = 1.0)    
     logreg.get_sample = lambda l, X, z: datasets.get_higgs_mysql(l)
-    sqn.set_options(options)
-    sqn.set_start(dim=options['dim'])
+    sqn.set_start(dim=sqn.options['dim'])
     w = sqn.get_position()
     
     if testcase == "higgs2":
@@ -101,7 +100,7 @@ def print_f_vals(testcase, rowlim, options, folderpath, sqn):
         X, z = datasets.load_higgs(rowlim)
     
     if folderpath is not None:
-        ffile = open(folderpath + "%d_%d.txt" %(options['batch_size'], options['batch_size_H']), "w+")
+        ffile = open(folderpath + "%d_%d.txt" %(sqn.options['batch_size'], sqn.options['batch_size_H']), "w+")
     for k in itertools.count():
         
         if testcase == "higgs2":
@@ -215,7 +214,7 @@ if __name__ == "__main__":
         """
         rowlim = 5e6
         batch_size = 100
-        options = {'dim':29, 'N':rowlim, 'L': 1, 'max_iter': 50, 'batch_size': batch_size, 'batch_size_H': 50, 'beta':10, 'M':3}
+        options = {'dim':29, 'N':rowlim, 'L': 10, 'max_iter': 50, 'batch_size': batch_size, 'batch_size_H': 50, 'beta':10, 'M':3}
         
         folderpath = "../outputs/"
         folderpath = None
@@ -226,8 +225,8 @@ if __name__ == "__main__":
         for batch_size in batch_sizes:
             options['batch_size'] = batch_size
             # Select method
-            #sqn = SQN()
-            sqn = PSQN()
+            sqn = SQN(options)
+            #sqn = PSQN(options)
             f = lambda b: print_f_vals(testcase, rowlim, options, folderpath, sqn)
             print(f(batch_size))
 #            p = Process(target=f, args=(batch_size,))

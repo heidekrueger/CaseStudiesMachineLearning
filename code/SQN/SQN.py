@@ -31,7 +31,7 @@ class StochasticOptimizer:
     max_iter: Terminate after this many steps
     debug: Print progress statements
     """
-    def __init__(self):
+    def __init__(self, options):
         self.options = dict()
         self.options['w1'] =  None
         self.options['dim'] =  None
@@ -46,6 +46,7 @@ class StochasticOptimizer:
         self.options['batch_size'] =  1
         self.options['batch_size_H'] =  1
         self.options['max_iter'] =  1e3
+        self.set_options(options)
         
         self.debug =  False
         
@@ -77,16 +78,15 @@ class SQN(StochasticOptimizer):
     """
 
 
-    def __init__(self):
+    def __init__(self, options):
         self.s, self.y = deque(), deque()
-        self.w, self.w_previous = None, None
+        self.w = None
         self.wbar = None
         self.wbar_previous = None
         self.f_vals = []
         self.g_norms = []
-        StochasticOptimizer.__init__(self)
-        #super(SQN, self).__init__()
-    
+        StochasticOptimizer.__init__(self, options)
+        
     def set_start(self, w1=None, dim=None, iterator=None):
         """
         Set start point of the optimization using numpy array, dim or flat.iterator object.
@@ -108,7 +108,6 @@ class SQN(StochasticOptimizer):
             
         # init
         self.w = w1
-        self.w_previous = self.w
         self.wbar = np.zeros(self.w.shape)
         self.wbar_previous = None
         self.s, self.y = deque(), deque()
@@ -269,26 +268,32 @@ class SQN(StochasticOptimizer):
         
         return self.w
         
-    def _update_correction_pairs(self, g, X, z):
+    def _get_correction_pairs(self, g_S, w, w_previous):
         """
-        returns correction pairs s,y
-        TODO: replace explicit stochastic gradient
-        
         Perlmutters Trick:
         https://justindomke.wordpress.com/2009/01/17/hessian-vector-products/
         H(x) v \approx \frac{g(x+r v) - g(x-r v)} {2r}
         r = 1e-2
         y = ( sg(w + r*s) - sg(w - r*s) ) / 2*r
         """
+        r = self.options['r_diff']
+        s_t = w - w_previous
+        s_t = np.multiply(r, s_t)
+        y_t = (g_S(w) - g_S(w - s_t)) / (r)
+        
+        return s_t, y_t
+            
+    def _update_correction_pairs(self, g, X, z):
+        """
+        returns correction pairs s,y
+        TODO: replace explicit stochastic gradient
+        """
         
         # draw hessian sample and get the corresponding stochastic gradient
         X_SH, y_SH = self._draw_sample(X, z, b = self.options['batch_size_H'])
         g_SH = lambda x: self.stochastic_gradient(g, x, X_SH, y_SH)
         
-        r = self.options['r_diff']
-        s_t = self.wbar - self.wbar_previous
-        s_t = np.multiply(r, s_t)
-        y_t = (g_SH(self.wbar) - g_SH(self.wbar - s_t)) / (r)
+        s_t, y_t = self._get_correction_pairs(g_SH, self.wbar, self.wbar_previous)
         
         if self.debug:
             print("correction:")

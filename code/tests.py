@@ -1,5 +1,5 @@
 
-from multiprocessing import Pool, Process
+#from multiprocessing import Pool, Process
 import itertools
         
 
@@ -89,7 +89,7 @@ def print_f_vals(testcase, rowlim, options, folderpath, sqn):
     print("\nSQN, Higgs-Dataset\n")
         
     logreg = LogisticRegression(lam_1 = 1.0)    
-    logreg.get_sample = datasets.get_higgs_mysql
+    logreg.get_sample = lambda l, X, z: datasets.get_higgs_mysql(l)
     sqn.set_options(options)
     sqn.set_start(dim=options['dim'])
     w = sqn.get_position()
@@ -208,29 +208,30 @@ if __name__ == "__main__":
     elif "higgs" in testcase:
         """
         Runs SQN-LogReg on the Higgs-Dataset, 
-    which is a 7.4GB csv file for binary classification
-    that can be obtained here:
-    https://archive.ics.uci.edu/ml/datasets/HIGGS
-    the file should be in <Git Project root directory>/datasets/
-    """
-    rowlim = 5e6
-    batch_size = 100
-    options = {'dim':29, 'N':rowlim , 'max_iter': 50, 'batch_size': batch_size, 'batch_size_H': 50, 'L':5, 'beta':10, 'M':3}
-    
-    folderpath = "../outputs/"
-    folderpath = None
-    
-    batch_sizes = [100, 500, 1000, 10000]        
-    batch_sizes = [100]
+        which is a 7.4GB csv file for binary classification
+        that can be obtained here:
+        https://archive.ics.uci.edu/ml/datasets/HIGGS
+        the file should be in <Git Project root directory>/datasets/
+        """
+        rowlim = 5e6
+        batch_size = 100
+        options = {'dim':29, 'N':rowlim , 'max_iter': 50, 'batch_size': batch_size, 'batch_size_H': 50, 'L':5, 'beta':10, 'M':3}
+        
+        folderpath = "../outputs/"
+        folderpath = None
+        
+        batch_sizes = [100, 500, 1000, 10000]        
+        batch_sizes = [100]
 
-    for batch_size in batch_sizes:
-        options['batch_size'] = batch_size
-        # Select method
-        sqn = SQN()
-        #sqn = PSQN()
-        f = lambda b: print_f_vals(testcase, rowlim, options, folderpath, sqn)
-        p = Process(target=f, args=(batch_size,))
-        p.start()
+        for batch_size in batch_sizes:
+            options['batch_size'] = batch_size
+            # Select method
+            sqn = SQN()
+            #sqn = PSQN()
+            f = lambda b: print_f_vals(testcase, rowlim, options, folderpath, sqn)
+            print(f(batch_size))
+#            p = Process(target=f, args=(batch_size,))
+#            p.start()
 
     
     elif testcase == 'prox':

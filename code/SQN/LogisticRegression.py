@@ -116,7 +116,7 @@ class LogisticRegression():
 			X = [X]
 		return map( lambda x: self.h(self.w, x), X)
 	
-	def get_sample(self, sampleList, X, z):
+	def get_sample(self, sampleList, X, z=None):
 		z_S = None if z is None else [z[i] for i in sampleList]
 		return [X[i] for i in sampleList], z_S
 		

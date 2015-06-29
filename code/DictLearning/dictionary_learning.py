@@ -52,7 +52,8 @@ class StochasticDictionaryLearning:
     '''
 
     def __init__(self, n_components=100, option=None, alpha=0.001,
-                 n_iter=10, max_iter=100, batch_size=3, verbose=0):
+                 n_iter=10, max_iter=100, epsilon=0.0001, batch_size=200,
+                 verbose=0):
 
         self.n_components = n_components
         self.alpha = alpha
@@ -60,6 +61,7 @@ class StochasticDictionaryLearning:
         self.max_iter = max_iter
         self.batch_size = batch_size
         self.components = []
+        self.epsilon = epsilon
 
         self.option = option
         self.verbose = verbose
@@ -93,11 +95,18 @@ class StochasticDictionaryLearning:
         [m, k] = D.shape
 
         # 1: initialization
-        A = np.zeros((k, k))
-        B = np.zeros((m, k))
+        # A = np.zeros((k, k))
+        # B = np.zeros((m, k))
+
+        A = np.identity(k)
+        B = X[jd, :].T
+
+        '''
+        Consider rescaling ?
+        '''
 
         # dimension control
-        if self.verbose > 0:
+        if self.verbose > 10:
             print "Dimensions infos :"
             print "    n_samples :", n_s
             print "    D shape :", D.shape
@@ -130,12 +139,7 @@ class StochasticDictionaryLearning:
                 print "    Xt shape :", Xt.shape
 
             # online dictionary learning algorithm called
-            run_control = self.online_dictionary_learning(Xt, D, A, B, t)
-
-            if t == 1 and run_control is False:
-                print "Please use a small value for regularization"
-                print "paremeter alpha"
-                t = self.n_iter
+            D = self.online_dictionary_learning(Xt, D, A, B, t)
 
             # Measure running time of each iteration
             dt_step = time() - t_step
@@ -154,6 +158,8 @@ class StochasticDictionaryLearning:
             print('fitting done in %.2fs.' % dt_fit)
             print('updating dic in %.2fs.' % m_tsteps)
 
+        self.components = D
+
     def online_dictionary_learning(self, Xt, D, A, B, t):
         '''
         This function perform online dictionary algorithm with data X and
@@ -170,43 +176,18 @@ class StochasticDictionaryLearning:
         Q? : should I update D or self.components ??
         '''
 
-        # Nullity control
-        null_control = False
-        c_control = 0
-        max_control = 10
-        z_control = 0.0
+        # 4: Sparse coding with LARS
+        coef = self.lasso_subproblem(Xt, D, A, B, t)
 
-        if t == 1:
-            while null_control is False and c_control < max_control:
+        # 5/6: Update A and B
+        A, B = self.update_matrices(Xt, D, coef, A, B, t)
+        if self.verbose > 20:
+            print "det A:", np.linalg.det(A)
 
-                # update counter
-                c_control += 1
+        D = self.dictionary_update(D, A, B)
 
-                # 4: Sparse coding with LARS
-                coef = self.lasso_subproblem(Xt, D, A, B, t)
-
-                # 5/6: Update A and B
-                A, B = self.update_matrices(Xt, D, coef, A, B, t)
-
-                # Non nullity control
-                z_control = np.sum(A)
-
-                if z_control != 0:
-                    null_control = True
-
-                # if null_control is False and c_control == max_control:
-                #     print "Please use a small value for regularization"
-                #     print "paremeter alpha"
-
-        else:
-            null_control = True
-            # 4: Sparse coding with LARS
-            coef = self.lasso_subproblem(Xt, D, A, B, t)
-
-            # 5/6: Update A and B
-            A, B = self.update_matrices(Xt, D, coef, A, B, t)
-
-        return null_control
+        # return Dictionary
+        return D
 
     def lasso_subproblem(self, Xt, D, A, B, t):
         '''
@@ -283,156 +264,87 @@ class StochasticDictionaryLearning:
 
         return A, B
 
+    def dictionary_update(self, D, A, B):
+        '''
+        Dictionary update
 
-def algorithm1(x, n_components=100,
-               alpha=0.01, n_iter=30, batch_size=3, verbose=0):
-    '''
-    Online dictionary learning algorithm
-
-    INPUTS:
-    - x : (n_samples, m) array like, data
-    - l, regularization parameter
-    - n_components, number of components of dictionary
-    - n_iter, int, number of iterations
-    - batch_size, int, mini batch size
-    - verbose, int, control verbosity of algorithm
-
-    OUTPUTS:
-    - D : (m, k) array like, learned dictionary
-    '''
-
-    n_s = len(x[:, 0])  # number of samples in x
-
-    D = np.random.rand(len(x[0, :]), n_components)  # initial dictionary
-    print D.shape
-
-    # Dimensions of dicitonary
-    [m, k] = D.shape
-
-    # 1: initialization
-    A = np.zeros((k, k))
-    B = np.zeros((m, k))
-
-    '''
-    First iteration in a while loop so that matrix A in not empty
-    - if empty => change l
-    - if empty => change batch size
-
-    So that we ensure that no problem occurs in algo2
-    '''
-
-    '''
-    Loop
-    for t in range(2, n_iter + 1):
-
-    '''
-
-    # 2: Loop
-    for t in range(1, n_iter + 1):
-
-        # 3: Draw xj from x
-        j = np.random.randint(0, n_s, batch_size)
-        xt = x[j, :]
-        xt = np.asmatrix(xt).T
-
-        # 4: Sparse coding with LARS
-        from sklearn.linear_model import LassoLars
-        lars = LassoLars(alpha=alpha)
-        # Lars LassoLars
-
-        lars.fit(D, xt)
-        coeff = lars.coef_
-        coeff = (np.asmatrix(coeff)).T
-
-        # computing coefficient beta for step 5/6
-        if t < batch_size:
-            theta = float(t * batch_size)
-        else:
-            theta = math.pow(batch_size, 2) + t - batch_size
-
-        beta = (theta + 1 - batch_size) / (theta + 1)
-
-        # 5: Update A
-        a = np.zeros((k, k))
-        for i in range(0, batch_size):
-            a = a + (coeff[:, i]).dot(coeff[:, i].T)
-        A = beta * A + a
-
-        # 6: Update B
-        b = np.zeros((m, k))
-        for i in range(0, batch_size):
-            b = b + xt[:, i].dot(coeff[:, i].T)
-        B = beta * B + b
-
-        # Compute new dictionary update
-        # D = algorithm2(D, A, B)
-
-    # 9 : Return learned dictionary
-    return D
+        INPUTS:
+        - self
+        - D, dictionary
+        - A, matrix
+        - B, matrix
 
 
-def algorithm2(D, A, B, c_max=3, eps=0.00001):
-    '''
-    Dictionary update
+        OUTPUT:
+        - D, updated dictionary
+        '''
 
-    INPUTS:
-    - D, (m, k), input dictionary
-    - A, (k, k)
-    - B, (m, k)
-    - c_max, int, max number of iterations
-    - eps, float, stopping criterion
+        [m, k] = D.shape
 
-    OUTPUT:
-    - D, updated dictionary
-    '''
+        c = 0  # counter
+        cv = False  # convergence or stop indicator
 
-    m = len(D[:, 0])
-    k = len(D[0, :])
+        # 2: loop to update each column
+        while cv is not True:
 
-    c = 0  # counter
-    cv = False  # convergence or stop indicator
+            # keep a trace of previous dictionary
+            D_old = np.zeros((m, k))
+            for i in range(0, m):
+                for j in range(0, k):
+                    D_old[i, j] = D[i, j]
 
-    # 2: loop to update each column
-    while cv is not True:
-
-        # keep a trace of previous dictionary
-        D_old = np.zeros((m, k))
-        for i in range(0, m):
             for j in range(0, k):
-                D_old[i, j] = D[i, j]
 
-        for j in range(0, k):
+                # 3: Update the j-th column of d
+                s_A = np.sum(A[:, j])
+                s_B = np.sum(B[:, j])
+                a_jj = A[j, j]
 
-            # 3: Update the j-th column of d
-            u = (1 / A[j, j]) * (B[:, j] - D.dot(A[:, j]))
-            u = u + np.asmatrix(D[:, j]).T
+                # print "s_A", s_A
+                # print "s_B", s_B
+                # print "a_jj", a_jj
+                # print ""
 
-            # renormalisation
-            renorm = max(np.linalg.norm(u), 1)
-            u = np.divide(u, renorm)
+                if s_A + s_B == 0 and a_jj == 0:
+                    u = 1 + np.asmatrix(D[:, j]).T
+                    if self.verbose > 20:
+                        print "0 case"
+                else:
+                    u = (1 / A[j, j]) * (B[:, j] - D.dot(A[:, j]))
+                    u = u + np.asmatrix(D[:, j]).T
+                    if self.verbose > 20:
+                        print "normal case"
 
-            for p in range(0, m):
-                D[p, j] = u[p]
+                # renormalisation
+                renorm = max(np.linalg.norm(u), 1)
+                u = np.divide(u, renorm)
 
-        # counter update
-        c = c + 1
+                '''
+                What if u == 0 ?
+                '''
 
-        # compute differences between two updates
-        grad = D - D_old
-        crit = np.linalg.norm(grad)
+                for p in range(0, m):
+                    D[p, j] = u[p]
 
-        # check convergence
-        if crit < eps:
-            cv = True
-        if c > c_max:
-            cv = True
+            # counter update
+            c += 1
 
-    if c == c_max:
-        print "Dictionary Updating Algo reached max number of iterations"
-        print "Consider higher max number of interations"
+            # compute differences between two updates
+            grad = D - D_old
+            crit = np.linalg.norm(grad)
 
-    # 6: Return updated dictionary
-    return D
+            # check convergence
+            if crit < self.epsilon:
+                cv = True
+            if c > self.max_iter:
+                cv = True
+
+        if c == self.max_iter and self.verbose > 10:
+            print "Dictionary Updating Algo reached max number of iterations"
+            print "Consider higher max number of interations"
+
+        # 6: Return updated dictionary
+        return D
 
 
 if __name__ == "__main__":

@@ -1,9 +1,3 @@
-
-'''
-    Here we will list some tools which come in handy optimizing stochastic 
-    functions
-'''
-
 import numpy as np
 import random as rd
 import math
@@ -19,13 +13,13 @@ def sample_batch_SQL(w, X, z = None, b = None, r = None, debug = False):
 	    nSamples = r*N
 	if nSamples > N:
 	    if debug:
-		print "Batch size larger than N, using whole dataset"
+		print("Batch size larger than N, using whole dataset")
 	    nSamples = N
 	##
 	## Draw from uniform distribution
 	##
 	random_indices = rd.sample( range(N), int(nSamples)) 
-	if debug: print "random indices", random_indices
+	if debug: print("random indices", random_indices)
 
 	TABLE_NAME = 'table'
 	KEY_FIELD_NAME = 'rowid'
@@ -33,7 +27,7 @@ def sample_batch_SQL(w, X, z = None, b = None, r = None, debug = False):
 				+ ' t WHERE t.' + KEY_FIELD_NAME \
 				+ ' IN (' + ','.join([str(i) for i in random_indices]) + ');'
  
- 	if debug: print 'Opening connection...'
+ 	if debug: print('Opening connection...')
 
  	raise NotImplementedError
 
@@ -41,7 +35,7 @@ def sample_batch_SQL(w, X, z = None, b = None, r = None, debug = False):
 	z_S = np.asarray([z[i] for i in random_indices]) if z != None else None
 	
 	
-	if debug: print X_S, z_S
+	if debug: print(X_S, z_S)
 		
 	   
 	if z == None or len(z) == 0:
@@ -87,19 +81,19 @@ def sample_batch(w, X, z = None, b = None, r = None, debug = False):
 	    nSamples = r*N
 	if nSamples > N:
 	    if debug:
-		print "Batch size larger than N, using whole dataset"
+		print("Batch size larger than N, using whole dataset")
 	    nSamples = N
 	##
 	## Draw from uniform distribution
 	##
 	random_indices = rd.sample( range(N), int(nSamples)) 
-	if debug: print "random indices", random_indices
+	if debug: print("random indices", random_indices)
 	 
 	X_S = np.asarray([X[i] for i in random_indices])
 	z_S = np.asarray([z[i] for i in random_indices]) if z != None else None
 	
 	
-	if debug: print X_S, z_S
+	if debug: print(X_S, z_S)
 		
 	   
 	if z == None or len(z) == 0:
@@ -114,15 +108,15 @@ def stochastic_gradient(g, w, X=None, z=None):
 	if X is not None:
 		nSamples = len(X)
 		nFeatures = len(X[0])
-	#print nSamples
-	#print X[0].shape, w.shape
+	#print(nSamples)
+	#print(X[0].shape, w.shape)
 	if X is None:
 		return g(w)
 	if z is None:
 		return np.array(sum( [ g(w,X[i]) for i in range(nSamples) ] ))
 	else:
 		assert len(X)==len(z), "Error: Dimensions must match" 
-		#print " one gradient:" , g(w,X[0],z[0])
+		#print(" one gradient:" , g(w,X[0],z[0]))
 		return sum([g(w,X[i],z[i]) for i in range(nSamples)])
  
 def armijo_rule(f, g, x, s, start = 1.0, beta=.5, gamma= 1e-4 ):
@@ -138,17 +132,17 @@ def armijo_rule(f, g, x, s, start = 1.0, beta=.5, gamma= 1e-4 ):
 		beta, gamma: parameters of rule
 	"""
 	candidate = start
-	#print "armijo"
-	#print f(x + np.multiply(candidate, s)) 
-	#print "fa", f(x)
-	#print candidate * gamma * np.dot( g(x).T, s)
-	#print s
-	#print "---"
+	#print("armijo")
+	#print(f(x + np.multiply(candidate, s)) )
+	#print("fa", f(x))
+	#print(candidate * gamma * np.dot( g(x).T, s))
+	#print(s)
+	#print("---")
 	while (f(x + np.multiply(candidate, s)) - f(x) > candidate * gamma * np.dot( g(x).T, s)) and candidate > 1e-4:
 	
-	#	print "armijo"
-	#	print f(x + np.multiply(candidate, s)) - f(x)
-	#	print candidate * gamma * np.dot( g(x).T, s)
+	#	print("armijo")
+	#	print(f(x + np.multiply(candidate, s)) - f(x))
+	#	print(candidate * gamma * np.dot( g(x).T, s))
 		
 		candidate *= beta
 	return candidate

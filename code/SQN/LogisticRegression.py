@@ -36,11 +36,11 @@ class LogisticRegression():
 	    return 1/(1.0+np.exp(-z))
 	
 	def h(self, w, X): 
-	#	print type(X)
-	#	print type(X[0])
-	#	print w
-	#	print type(w)
-	#	print "debug:", np.multiply(w,X)
+	#	print (type(X))
+	#	print (type(X[0]))
+	#	print (w)
+	#	print (type(w))
+	#	print ("debug:", np.multiply(w,X))
 		return self.sigmoid(np.multiply(w, X).sum())
 	    
 	def f(self, w, X, y):
@@ -125,7 +125,7 @@ class LogisticRegression():
 			b: parameter for desired max. subsample size (e.g. b=10)
 			r: desired relative max. subsample size (e.g. r=.1)
 		"""
-		if debug: print "debug: ", b
+		if debug: print ("debug: ", b)
 		assert b != None or r!= None, "Choose either absolute or relative sample size!"
 		assert (b != None) != (r!= None), "Choose only one: Absolute or relative sample size!"
 		
@@ -141,7 +141,7 @@ class LogisticRegression():
 		else:
 		    nSamples = r*N
 		if nSamples > N:
-		    if debug: print "Batch size larger than N, using whole dataset"
+		    if debug: print ("Batch size larger than N, using whole dataset")
 		    nSamples = N
 
 		# Find samples that are not classified correctly
@@ -164,7 +164,7 @@ class LogisticRegression():
 		# Count accessed data points
 		self.adp += nSamples
 		
-		if debug: print X_S, z_S
+		if debug: print(X_S, z_S)
 		   
 		return X_S, z_S
 

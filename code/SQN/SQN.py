@@ -85,6 +85,7 @@ class SQN(StochasticOptimizer):
 		self.wbar = None
 		self.wbar_previous = None
 		self.f_vals = []
+		self.g_norms = []
 		StochasticOptimizer.__init__(self)
 		#super(SQN, self).__init__()
 	
@@ -189,7 +190,35 @@ class SQN(StochasticOptimizer):
 			print("Direction:")
 			print(search_direction.T)
 		return search_direction
-	    
+	
+	def _armijo_rule(self, f, g, x, s, start = 1.0, beta=.5, gamma= 1e-4 ):
+		"""
+		Determines the armijo-rule step size alpha for approximating 
+		line search min f(x+omega*s)
+
+		Parameters:
+			f: objective function
+			g: gradient
+			x:= x_k
+			s:= x_k search direction
+			beta, gamma: parameters of rule
+		"""
+		candidate = start
+		#print "armijo"
+		#print f(x + np.multiply(candidate, s)) 
+		#print "fa", f(x)
+		#print candidate * gamma * np.dot( g(x).T, s)
+		#print s
+		#print "---"
+		while (f(x + np.multiply(candidate, s)) - f(x) > candidate * gamma * np.dot( g(x).T, s)) and candidate > 1e-4:
+		
+		#	print "armijo"
+		#	print f(x + np.multiply(candidate, s)) - f(x)
+		#	print candidate * gamma * np.dot( g(x).T, s)
+			
+			candidate *= beta
+		return candidate
+
 	# Calculate gradient and perform update
 	def _perform_update(self, f, g, X, z):
 		"""
@@ -208,20 +237,21 @@ class SQN(StochasticOptimizer):
 		search_direction = self._get_search_direction(g_S)
 		
 		# Line Search
-		alpha = armijo_rule(f_S, g_S, self.w, search_direction, start = self.options['beta'], beta=.5, gamma= 1e-2 )
+		alpha = self._armijo_rule(f_S, g_S, self.w, search_direction, start = self.options['beta'], beta=.5, gamma= 1e-2 )
 		alpha = max([alpha, 1e-5])
 		if self.debug: print("step size: %f"% alpha)
-		
-		# Check Termination Condition
-		if len(X_S) == 0 or self._has_terminated(g_S(self.w) , self.w):
-			self.termination_counter += 1
-			return self.w
 		
 		# Update
 		self.w = self.w + np.multiply(alpha, search_direction)
 		
+		# Store information
 		self.f_vals.append( f_S(self.w) )
-
+		self.g_norms.append(np.linalg.norm(g_S(self.w)))
+		
+		# Check Termination Condition
+		if len(X_S) == 0 or self._has_terminated(g_S(self.w) , self.w):
+			self.termination_counter += 1
+		
 		return self.w
 	    
 	def _update_correction_pairs(self, g, X, z):
@@ -239,7 +269,7 @@ class SQN(StochasticOptimizer):
 		# draw hessian sample and get the corresponding stochastic gradient
 		X_SH, y_SH = self._draw_sample(X, z, b = self.options['batch_size_H'])
 		g_SH = lambda x: stochastic_gradient(g, x, X_SH, y_SH)
-			    
+		
 		r = 0.01
 		s_t = self.wbar - self.wbar_previous
 		s_t = np.multiply(r, s_t)

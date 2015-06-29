@@ -53,13 +53,16 @@ class LogisticRegression():
 	    
 	def L_2(self, w):
 		return  0.5 * self.lam_2 * (np.linalg.norm(w[1:])**2)
+	
+	def L_1(self, w):
+		return  self.lam_1 * sum(map(abs, w[1:]))
 	    
 	def F(self, w, X, y, lam = 0.0):
 		"""
 		Overall objective function
 		"""
 		#return sum(map(lambda t: self.f(w, t[0], t[1]), zip(X, y)))/len(X) +  self.L_2(w) 
-		return sum([self.f(w,X[i],y[i]) for i in range(len(y))]) /float(len(y)) + self.L_2(w) 
+		return sum([self.f(w,X[i],y[i]) for i in range(len(y))]) /float(len(y)) + self.L_2(w) + self.L_1(w) 
 
 	def g(self, w, X, y, lam = 0.0):
 		"""
@@ -67,7 +70,7 @@ class LogisticRegression():
 		"""
 		hyp = self.h(w, X)
 		self.gevals += 1
-		return (hyp - y)* X + self.lam_2* w
+		return (hyp - y)* X + self.lam_2* w + self.lam_1 * w
 	
 	def train(self, X, y, method='SQN'):
 		'''

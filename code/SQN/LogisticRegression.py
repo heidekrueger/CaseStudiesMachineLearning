@@ -116,7 +116,7 @@ class LogisticRegression():
 			X = [X]
 		return map( lambda x: self.h(self.w, x), X)
 	
-	def get_sample(self, sampleList):
+	def get_sample(self, sampleList, X, z):
 		z_S = None if z is None else [z[i] for i in sampleList]
 		return [X[i] for i in sampleList], z_S
 		
@@ -159,14 +159,14 @@ class LogisticRegression():
 		counter = 0
 		while len(sampleList) < nSamples and counter < 10*b:
 			random_index = np.random.randint(N)
-			X_S, z_S = self.get_sample([random_index])
+			X_S, z_S = self.get_sample([random_index], X, z)
 			if self.sample_good_ones or self.f(w, X_S[0],z_S[0]) > .1:
 				sampleList.append(random_index)
 			counter += 1
 			
 		# if not enough samples are found, we simply return a smaller sample!
 		nSamples = len(sampleList)
-		X_S, z_S = self.get_sample(sampleList)
+		X_S, z_S = self.get_sample(sampleList, X, z)
 		
 		# Count accessed data points
 		self.adp += nSamples

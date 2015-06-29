@@ -95,8 +95,15 @@ class StochasticDictionaryLearning:
         [m, k] = D.shape
 
         # 1: initialization
-        A = np.zeros((k, k))
-        B = np.zeros((m, k))
+        # A = np.zeros((k, k))
+        # B = np.zeros((m, k))
+
+        A = np.identity(k)
+        B = X[jd, :].T
+
+        '''
+        Consider rescaling ?
+        '''
 
         # dimension control
         if self.verbose > 0:
@@ -132,12 +139,7 @@ class StochasticDictionaryLearning:
                 print "    Xt shape :", Xt.shape
 
             # online dictionary learning algorithm called
-            run_control = self.online_dictionary_learning(Xt, D, A, B, t)
-
-            if t == 1 and run_control is False:
-                print "Please use a small value for regularization"
-                print "paremeter alpha"
-                t = self.n_iter
+            D = self.online_dictionary_learning(Xt, D, A, B, t)
 
             # Measure running time of each iteration
             dt_step = time() - t_step
@@ -156,6 +158,8 @@ class StochasticDictionaryLearning:
             print('fitting done in %.2fs.' % dt_fit)
             print('updating dic in %.2fs.' % m_tsteps)
 
+        self.components = D
+
     def online_dictionary_learning(self, Xt, D, A, B, t):
         '''
         This function perform online dictionary algorithm with data X and
@@ -172,50 +176,9 @@ class StochasticDictionaryLearning:
         Q? : should I update D or self.components ??
         '''
 
-        # # Nullity control
-        # null_control = False
-        # c_control = 0
-        # max_control = 10
-        # z_control = 0.0
-
-        # if t == 1:
-        #     while null_control is False and c_control < max_control:
-
-        #         # update counter
-        #         c_control += 1
-
-        #         # 4: Sparse coding with LARS
-        #         coef = self.lasso_subproblem(Xt, D, A, B, t)
-
-        #         # 5/6: Update A and B
-        #         A, B = self.update_matrices(Xt, D, coef, A, B, t)
-
-        #         # Non nullity control
-        #         z_control = np.linalg.det(A)
-        #         print z_control
-
-        #         if z_control != 0:
-        #             null_control = True
-
-        #         # if null_control is False and c_control == max_control:
-        #         #     print "Please use a small value for regularization"
-        #         #     print "paremeter alpha"
-
-        # else:
-        #     null_control = True
-        #     # 4: Sparse coding with LARS
-        #     coef = self.lasso_subproblem(Xt, D, A, B, t)
-
-        #     # 5/6: Update A and B
-        #     A, B = self.update_matrices(Xt, D, coef, A, B, t)
-
-        # if null_control is True:
-        #     D = self.dictionary_update(D, A, B)
-
-        # return null_control
-
         # 4: Sparse coding with LARS
         coef = self.lasso_subproblem(Xt, D, A, B, t)
+        print "coef :", np.sum(coef)
 
         # 5/6: Update A and B
         A, B = self.update_matrices(Xt, D, coef, A, B, t)
@@ -224,7 +187,8 @@ class StochasticDictionaryLearning:
 
         D = self.dictionary_update(D, A, B)
 
-        return True
+        # return Dictionary
+        return D
 
     def lasso_subproblem(self, Xt, D, A, B, t):
         '''
@@ -337,20 +301,28 @@ class StochasticDictionaryLearning:
                 s_B = np.sum(B[:, j])
                 a_jj = A[j, j]
 
-                print "s_A", s_A
-                print "s_B", s_B
-                print "a_jj", a_jj
-                print ""
+                # print "s_A", s_A
+                # print "s_B", s_B
+                # print "a_jj", a_jj
+                # print ""
 
                 if s_A + s_B == 0 and a_jj == 0:
                     u = 1 + np.asmatrix(D[:, j]).T
+                    if self.verbose > 20:
+                        print "0 case"
                 else:
                     u = (1 / A[j, j]) * (B[:, j] - D.dot(A[:, j]))
                     u = u + np.asmatrix(D[:, j]).T
+                    if self.verbose > 20:
+                        print "normal case"
 
                 # renormalisation
                 renorm = max(np.linalg.norm(u), 1)
                 u = np.divide(u, renorm)
+
+                '''
+                What if u == 0 ?
+                '''
 
                 for p in range(0, m):
                     D[p, j] = u[p]
@@ -463,68 +435,68 @@ class StochasticDictionaryLearning:
 #     return D
 
 
-def algorithm2(D, A, B, c_max=3, eps=0.00001):
-    '''
-    Dictionary update
+# def algorithm2(D, A, B, c_max=3, eps=0.00001):
+#     '''
+#     Dictionary update
 
-    INPUTS:
-    - D, (m, k), input dictionary
-    - A, (k, k)
-    - B, (m, k)
-    - c_max, int, max number of iterations
-    - eps, float, stopping criterion
+#     INPUTS:
+#     - D, (m, k), input dictionary
+#     - A, (k, k)
+#     - B, (m, k)
+#     - c_max, int, max number of iterations
+#     - eps, float, stopping criterion
 
-    OUTPUT:
-    - D, updated dictionary
-    '''
+#     OUTPUT:
+#     - D, updated dictionary
+#     '''
 
-    m = len(D[:, 0])
-    k = len(D[0, :])
+#     m = len(D[:, 0])
+#     k = len(D[0, :])
 
-    c = 0  # counter
-    cv = False  # convergence or stop indicator
+#     c = 0  # counter
+#     cv = False  # convergence or stop indicator
 
-    # 2: loop to update each column
-    while cv is not True:
+#     # 2: loop to update each column
+#     while cv is not True:
 
-        # keep a trace of previous dictionary
-        D_old = np.zeros((m, k))
-        for i in range(0, m):
-            for j in range(0, k):
-                D_old[i, j] = D[i, j]
+#         # keep a trace of previous dictionary
+#         D_old = np.zeros((m, k))
+#         for i in range(0, m):
+#             for j in range(0, k):
+#                 D_old[i, j] = D[i, j]
 
-        for j in range(0, k):
+#         for j in range(0, k):
 
-            # 3: Update the j-th column of d
-            u = (1 / A[j, j]) * (B[:, j] - D.dot(A[:, j]))
-            u = u + np.asmatrix(D[:, j]).T
+#             # 3: Update the j-th column of d
+#             u = (1 / A[j, j]) * (B[:, j] - D.dot(A[:, j]))
+#             u = u + np.asmatrix(D[:, j]).T
 
-            # renormalisation
-            renorm = max(np.linalg.norm(u), 1)
-            u = np.divide(u, renorm)
+#             # renormalisation
+#             renorm = max(np.linalg.norm(u), 1)
+#             u = np.divide(u, renorm)
 
-            for p in range(0, m):
-                D[p, j] = u[p]
+#             for p in range(0, m):
+#                 D[p, j] = u[p]
 
-        # counter update
-        c = c + 1
+#         # counter update
+#         c = c + 1
 
-        # compute differences between two updates
-        grad = D - D_old
-        crit = np.linalg.norm(grad)
+#         # compute differences between two updates
+#         grad = D - D_old
+#         crit = np.linalg.norm(grad)
 
-        # check convergence
-        if crit < eps:
-            cv = True
-        if c > c_max:
-            cv = True
+#         # check convergence
+#         if crit < eps:
+#             cv = True
+#         if c > c_max:
+#             cv = True
 
-    if c == c_max:
-        print "Dictionary Updating Algo reached max number of iterations"
-        print "Consider higher max number of interations"
+#     if c == c_max:
+#         print "Dictionary Updating Algo reached max number of iterations"
+#         print "Consider higher max number of interations"
 
-    # 6: Return updated dictionary
-    return D
+#     # 6: Return updated dictionary
+#     return D
 
 
 if __name__ == "__main__":

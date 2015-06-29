@@ -85,47 +85,47 @@ def test_Logistic_Regression(sqn_method, X, z, w1 = None, dim = 3, M=10, L=5, be
 
 
 def print_f_vals(testcase, rowlim, options, folderpath, sqn):
-
-	print("\nSQN, Higgs-Dataset\n")
-	    
-	logreg = LogisticRegression(lam_1 = 1.0)	
-	logreg.get_sample = datasets.get_higgs_mysql
-	sqn.set_options(options)
-	sqn.set_start(dim=options['dim'])
-	w = sqn.get_position()
-	
-	if testcase == "higgs2":
-		sqn.set_options({'sampleFunction': logreg.sample_batch})
-		X, z = None, None
-	else:
-		X, z = datasets.load_higgs(rowlim)
-	
-	if folderpath is not None:
-		ffile = open(folderpath + "%d_%d.txt" %(options['batch_size'], options['batch_size_H']), "w+")
-	for k in itertools.count():
-	    
-		if testcase == "higgs2":
-			w = sqn.solve_one_step(logreg.F, logreg.g, k=k)
-		else:
-			w = sqn.solve_one_step(logreg.F, logreg.g, X = X, z = z, k=k)
-		
-		# performance analysis
-		sep = ","
-		
-		line = sep.join([str(logreg.fevals), str(logreg.gevals), str(logreg.adp), str(sqn.f_vals[-1]), str(sqn.g_norms[-1])] + [str(e) for e in list(w)])
-		line = line[:-1] + "\n"
-		
-		if folderpath is not None:
-			ffile.write(line)
-		else:
-			print(k, logreg.adp, sqn.f_vals[-1])
-		if k > sqn.options['max_iter'] or sqn.termination_counter > 4:
-		    iterations = k
-		    break
-	if folderpath is not None:
-		ffile.close()
-	
-	
+    
+    print("\nSQN, Higgs-Dataset\n")
+        
+    logreg = LogisticRegression(lam_1 = 1.0)    
+    logreg.get_sample = datasets.get_higgs_mysql
+    sqn.set_options(options)
+    sqn.set_start(dim=options['dim'])
+    w = sqn.get_position()
+    
+    if testcase == "higgs2":
+        sqn.set_options({'sampleFunction': logreg.sample_batch})
+        X, z = None, None
+    else:
+        X, z = datasets.load_higgs(rowlim)
+    
+    if folderpath is not None:
+        ffile = open(folderpath + "%d_%d.txt" %(options['batch_size'], options['batch_size_H']), "w+")
+    for k in itertools.count():
+        
+        if testcase == "higgs2":
+            w = sqn.solve_one_step(logreg.F, logreg.g, k=k)
+        else:
+            w = sqn.solve_one_step(logreg.F, logreg.g, X = X, z = z, k=k)
+        
+        # performance analysis
+        sep = ","
+        
+        line = sep.join([str(logreg.fevals), str(logreg.gevals), str(logreg.adp), str(sqn.f_vals[-1]), str(sqn.g_norms[-1])] + [str(e) for e in list(w)])
+        line = line[:-1] + "\n"
+        
+        if folderpath is not None:
+            ffile.write(line)
+        else:
+            print(k, logreg.adp, sqn.f_vals[-1])
+        if k > sqn.options['max_iter'] or sqn.termination_counter > 4:
+            iterations = k
+            break
+    if folderpath is not None:
+        ffile.close()
+    
+    
 """ 
 Dictionary Learning
 """
@@ -208,29 +208,29 @@ if __name__ == "__main__":
     elif "higgs" in testcase:
         """
         Runs SQN-LogReg on the Higgs-Dataset, 
-	which is a 7.4GB csv file for binary classification
-	that can be obtained here:
-	https://archive.ics.uci.edu/ml/datasets/HIGGS
-	the file should be in <Git Project root directory>/datasets/
-	"""
-	rowlim = 5e6
-	batch_size = 100
-	options = {'dim':29, 'N':rowlim , 'max_iter': 50, 'batch_size': batch_size, 'batch_size_H': 50, 'L':5, 'beta':10, 'M':3}
-	
-	folderpath = "../outputs/"
-	folderpath = None
-	
-	batch_sizes = [100, 500, 1000, 10000]		
-	batch_sizes = [100]
+    which is a 7.4GB csv file for binary classification
+    that can be obtained here:
+    https://archive.ics.uci.edu/ml/datasets/HIGGS
+    the file should be in <Git Project root directory>/datasets/
+    """
+    rowlim = 5e6
+    batch_size = 100
+    options = {'dim':29, 'N':rowlim , 'max_iter': 50, 'batch_size': batch_size, 'batch_size_H': 50, 'L':5, 'beta':10, 'M':3}
+    
+    folderpath = "../outputs/"
+    folderpath = None
+    
+    batch_sizes = [100, 500, 1000, 10000]        
+    batch_sizes = [100]
 
-	for batch_size in batch_sizes:
-		options['batch_size'] = batch_size
-		# Select method
-		sqn = SQN()
-		#sqn = PSQN()
-		f = lambda b: print_f_vals(testcase, rowlim, options, folderpath, sqn)
-		p = Process(target=f, args=(batch_size,))
-		p.start()
+    for batch_size in batch_sizes:
+        options['batch_size'] = batch_size
+        # Select method
+        sqn = SQN()
+        #sqn = PSQN()
+        f = lambda b: print_f_vals(testcase, rowlim, options, folderpath, sqn)
+        p = Process(target=f, args=(batch_size,))
+        p.start()
 
     
     elif testcase == 'prox':

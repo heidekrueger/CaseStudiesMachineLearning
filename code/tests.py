@@ -86,7 +86,7 @@ def test_Logistic_Regression(sqn_method, X, z, w1 = None, dim = 3, M=10, L=5, be
 
 def print_f_vals(testcase, rowlim, options, folderpath, sqn):
 
-	print "\nSQN, Higgs-Dataset\n"
+	print("\nSQN, Higgs-Dataset\n")
 	    
 	logreg = LogisticRegression(lam_1 = 1.0)	
 	logreg.get_sample = datasets.get_higgs_mysql
@@ -215,7 +215,7 @@ if __name__ == "__main__":
 	"""
 	rowlim = 5e6
 	batch_size = 100
-	options = {'dim':29, 'N':rowlim , 'max_iter': 50, 'batch_size': batch_size, 'batch_size_H': 50, 'L':5e7, 'beta':10, 'M':3}
+	options = {'dim':29, 'N':rowlim , 'max_iter': 50, 'batch_size': batch_size, 'batch_size_H': 50, 'L':5, 'beta':10, 'M':3}
 	
 	folderpath = "../outputs/"
 	folderpath = None

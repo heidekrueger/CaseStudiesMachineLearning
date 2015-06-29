@@ -118,7 +118,7 @@ def print_f_vals(testcase, rowlim, options, folderpath, sqn):
         if folderpath is not None:
             ffile.write(line)
         else:
-            print(k, logreg.adp, sqn.f_vals[-1])
+            print(k, logreg.adp, "%0.2f" %float(sqn.f_vals[-1]))
         if k > sqn.options['max_iter'] or sqn.termination_counter > 4:
             iterations = k
             break
@@ -215,7 +215,7 @@ if __name__ == "__main__":
         """
         rowlim = 5e6
         batch_size = 100
-        options = {'dim':29, 'N':rowlim , 'max_iter': 50, 'batch_size': batch_size, 'batch_size_H': 50, 'L':5, 'beta':10, 'M':3}
+        options = {'dim':29, 'N':rowlim, 'L': 1, 'max_iter': 50, 'batch_size': batch_size, 'batch_size_H': 50, 'beta':10, 'M':3}
         
         folderpath = "../outputs/"
         folderpath = None
@@ -226,8 +226,8 @@ if __name__ == "__main__":
         for batch_size in batch_sizes:
             options['batch_size'] = batch_size
             # Select method
-            sqn = SQN()
-            #sqn = PSQN()
+            #sqn = SQN()
+            sqn = PSQN()
             f = lambda b: print_f_vals(testcase, rowlim, options, folderpath, sqn)
             print(f(batch_size))
 #            p = Process(target=f, args=(batch_size,))

@@ -1,6 +1,6 @@
 import numpy as np
 
-from SQN.LogisticRegression import LogisticRegression
+from LogisticRegression import LogisticRegression
 
 class LogisticRegressionTest(LogisticRegression):
     def __init__(self):

@@ -2,7 +2,7 @@ import numpy as np
 import math
 import sklearn as sk
 
-from SQN.SQN import SQN
+from SQN import SQN
 
 class LogisticRegression():
     """

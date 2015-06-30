@@ -158,4 +158,36 @@ def set_iter_values(iterator, w):
     for i in range(len(w)):
         iterator[i] = w[i]
 
+def test_stationarity(f_evals):
+    """
+    Tests for stationarity of the input sequence using the sample autocorrelation function
+    TODO: seems to reject samples to often (~3/20 times for iid std normal series!)
+    """
+    n = len(f_evals)
+    # number of points that will be considered for stationarity:
+    m = 200
+    if n < m:
+        print "too small"
+        return false
+    else:
+        # consider only the last m points
+        f_evals = f_evals[n-m:]
 
+        fbar = 1/float(m)*sum(f_evals)
+
+        autocorrs = []
+        for h in range( int(0.4*m) ):
+            gamma = 0
+            for j in range(m-h):
+                gamma += (f_evals[j+h]-fbar)*(f_evals[j]-fbar)
+            gamma /= m
+            autocorrs.append(gamma)
+
+        # Find entries in 95%-Confidence interval
+        in_confidence_interval = filter(lambda x: x > -1.69/math.sqrt(m) and x < 1.69/math.sqrt(m), autocorrs)
+        print len(in_confidence_interval)
+        if len(in_confidence_interval)/0.4/m < .90:
+            return False
+        else:
+            print "Stationarity reached."
+            return True

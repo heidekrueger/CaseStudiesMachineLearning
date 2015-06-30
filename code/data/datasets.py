@@ -219,7 +219,34 @@ def load_higgs(rowlim=1000):
     print "done."
     return X, y
 
+def load_eeg():
+    '''
+    This function loads .npy files X and y which correspond to eeg recordings
+    and labels
+
+    For this you need to have the EEG data set (Named: eeg_data.npy, eeg_label.npy) in the /datasets/ folder.
+    folder. The dataset was sent around by Stan by email.
+
+    NB :
+    - Pay attention to label file dimension
+    - You may want to convert the label file into a vector
+    '''
+    print "Loading eeg data set..."
+    data_name = '../../datasets/eeg_data.npy'
+    label_name = '../../datasets/eeg_label.npy'
+
+    X = np.load(data_name)
+    y = np.load(label_name)
+
+
+    # print "Data dim : ", X.shape
+    # print "Label dim : ", y.shape
+
+    return X, y
+
 
 if __name__ == "__main__":
     load_higgs_into_mysql()
     print(get_higgs_mysql([1, 2, 5, 55, 332, 3456, 0]))
+
+

@@ -208,6 +208,7 @@ def get_higgs_mysql(ID_list):
 
 
 def load_higgs(rowlim=1000):
+    print "Loading data from csv (this may take a while)..."
     file_name = '../datasets/HIGGS.csv'
     X, y = [], []
     for row in getdata(file_name, rowlim):
@@ -215,6 +216,7 @@ def load_higgs(rowlim=1000):
         y.append(float(row[0]))
     # print type(X[0])
     # print X[0][0]
+    print "done."
     return X, y
 
 

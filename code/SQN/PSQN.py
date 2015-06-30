@@ -37,6 +37,9 @@ class PSQN(SQN):
         self.w_previous = None
         
     def _armijo_rule(self, f, g, x, s, start = 1.0, beta=.5, gamma= 1e-4 ):
+        """
+        no line search here!
+        """
         return(self.options['const_step'])
         
     def _get_search_direction(self, g_S):

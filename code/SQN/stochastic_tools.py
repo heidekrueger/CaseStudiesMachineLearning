@@ -166,10 +166,13 @@ def test_stationarity(f_evals):
     n = len(f_evals)
     # number of points that will be considered for stationarity:
     m = 200
+    M = 250
     if n < m:
         print "too small"
-        return false
+        return False
     else:
+        m = max(m, 0.1*len(f_evals))
+        m = min(m, M)
         # consider only the last m points
         f_evals = f_evals[n-m:]
 

@@ -238,11 +238,15 @@ def load_eeg():
     X = np.load(data_name)
     y = np.load(label_name)
 
-
     # print "Data dim : ", X.shape
     # print "Label dim : ", y.shape
+    
+    for i in range(len(y)):
+        x = np.array(list(X[i, :].flatten()))
+        X_new.append(x)
+    return X_new, list(y)
 
-    return X, y
+
 
 
 if __name__ == "__main__":

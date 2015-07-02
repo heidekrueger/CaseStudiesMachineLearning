@@ -236,11 +236,15 @@ if __name__ == "__main__":
 #            p.start()
 
     elif "eeg" in testcase:
-        print "eeg"
+
+        print "Loading eeg data..."
         X, y = datasets.load_eeg()
+        print "eeg data loaded."
 
         print "Data dim : ", X.shape
         print "Label dim : ", y.shape
+
+        # Testing logreg
 
     elif testcase == 'prox':
         # a = 1

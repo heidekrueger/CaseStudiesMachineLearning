@@ -235,17 +235,6 @@ if __name__ == "__main__":
 #            p = Process(target=f, args=(batch_size,))
 #            p.start()
 
-    elif "eeg" in testcase:
-
-        print "Loading eeg data..."
-        X, y = datasets.load_eeg()
-        print "eeg data loaded."
-
-        print "Data dim : ", X.shape
-        print "Label dim : ", y.shape
-
-        # Testing logreg
-
     elif testcase == 'prox':
         # a = 1
         # b = 100
@@ -271,5 +260,43 @@ if __name__ == "__main__":
     elif testcase == '66':
         from data.datasets import split_into_files
         split_into_files('../datasets/HIGGS.csv', '../datasets/HIGGS/')
+
+    elif "eeg" in testcase:
+
+        print "Loading eeg data..."
+        X, y = datasets.load_eeg()
+        print "eeg data loaded."
+
+        print "Data dim : ", X.shape
+        print "Label dim : ", y.shape
+
+        from sklearn.linear_model import LogisticRegression as LR
+        from sklearn.cross_validation import cross_val_score
+        from sklearn.cross_validation import StratifiedShuffleSplit
+        from scipy import stats
+
+        # standardizing data
+        nn = np.mean(X, axis=1)
+        X -= nn[:, None]
+
+        nn = np.sqrt(np.sqrt(np.sum(X * X, axis=1)))
+        X /= nn[:, None]
+
+        # features extraction
+        XX = np.concatenate((np.std(X, axis=1)[:, None],
+                             stats.kurtosis(X, axis=1)[:, None]), axis=1)
+
+        # create cross-valalidation sets
+        sss = StratifiedShuffleSplit(y, 5, train_size=0.8, random_state=0)
+
+        # creation of logreg object
+        lr = LR()
+
+        # scores
+        scores = cross_val_score(lr, XX, y,
+                                 cv=sss, scoring='roc_auc', n_jobs=5)
+
+        print scores
+
     else:
         print("\nNo such testcase:", testcase, "\n")

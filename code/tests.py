@@ -235,6 +235,13 @@ if __name__ == "__main__":
 #            p = Process(target=f, args=(batch_size,))
 #            p.start()
 
+    elif "eeg" in testcase:
+        print "eeg"
+        X, y = datasets.load_eeg()
+
+        print "Data dim : ", X.shape
+        print "Label dim : ", y.shape
+
     elif testcase == 'prox':
         # a = 1
         # b = 100

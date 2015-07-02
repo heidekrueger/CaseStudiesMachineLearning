@@ -19,7 +19,7 @@ import data.datasets as datasets
 
 import sys
 
-# from SQN import stochastic_tools
+from SQN import stochastic_tools
 
 """
 SQN

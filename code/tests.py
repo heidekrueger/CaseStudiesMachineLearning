@@ -101,7 +101,7 @@ def print_f_vals(testcase, rowlim, options, folderpath, sqn):
 
     print("\nSQN, Higgs-Dataset\n")
 
-    logreg = LogisticRegression(lam_1=1.0)
+    logreg = LogisticRegression(lam_1=0.0, lam_2=0.0)
     logreg.get_sample = lambda l, X, z: datasets.get_higgs_mysql(l)
     sqn.set_start(dim=sqn.options['dim'])
     w = sqn.get_position()
@@ -122,7 +122,7 @@ def print_f_vals(testcase, rowlim, options, folderpath, sqn):
         else:
             w = sqn.solve_one_step(logreg.F, logreg.g, X = X, z = z, k=k)
         
-        X_S, z_S = sqn._draw_sample(sqn.options['N'], b = 100)
+        X_S, z_S = sqn._draw_sample(sqn.options['N'], b = 500)
         f_evals.append(logreg.F(w, X_S, z_S))
         
         if k%30 == 0 and stochastic_tools.test_stationarity(f_evals):

@@ -294,6 +294,8 @@ if __name__ == "__main__":
         XX = np.concatenate((np.std(X, axis=1)[:, None],
                              stats.kurtosis(X, axis=1)[:, None]), axis=1)
 
+        # sklearn test
+
         # create cross-valalidation sets
         sss = StratifiedShuffleSplit(y, 5, train_size=0.8, random_state=0)
 
@@ -305,6 +307,24 @@ if __name__ == "__main__":
                                  cv=sss, scoring='roc_auc', n_jobs=5)
 
         print scores
+
+        # our test
+        print "our test begins"
+        logreg = LogisticRegression(lam_1=0.0, lam_2=0.0)
+        options = {'dim': len(X[0, :]),
+                   'L': 10,
+                   'max_iter': 1000,
+                   'batch_size': 50,
+                   'batch_size_H': 10,
+                   'beta': 10,
+                   'M': 3}
+        sqn = SQN(options)
+        y = np.asmatrix(y).T
+        print y.shape
+        print "INPROGRESS"
+        print "i do nothing else for the moment"
+        # sqn.solve(logreg.F, logreg.g, X, y)
+        print "our test ends"
 
     else:
         print("\nNo such testcase:", testcase, "\n")

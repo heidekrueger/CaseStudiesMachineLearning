@@ -33,7 +33,6 @@
 """
 from DictLearning.dictionary_learning import StochasticDictionaryLearning
 from sqndict import SqnDictionaryLearning
-from dictionary_learning import StochasticDictionaryLearning
 from sklearn.feature_extraction.image import reconstruct_from_patches_2d
 from sklearn.linear_model import OrthogonalMatchingPursuit
 import numpy as np

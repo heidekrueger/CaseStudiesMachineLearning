@@ -63,7 +63,7 @@ class StochasticOptimizer:
     max_iter: Terminate after this many steps
     debug: Print progress statements
     """
-    def __init__(self, options):
+    def __init__(self, options=None):
 
         # In case options is not given
         self.options = dict()
@@ -80,7 +80,6 @@ class StochasticOptimizer:
         self.options['batch_size'] = 1
         self.options['batch_size_H'] = 1
         self.options['max_iter'] = 1e3
-
         # If options is given
         self.set_options(options)
 
@@ -152,7 +151,7 @@ class SQN(StochasticOptimizer):
     methods:
     """
 
-    def __init__(self, options):
+    def __init__(self, options=None):
         self.s, self.y = deque(), deque()
         self.w = None
         self.wbar = None

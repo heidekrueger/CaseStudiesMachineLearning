@@ -1,3 +1,10 @@
+## MTheme
+
+We are using Matthias Vogelgesang's MTheme for LaTeX beamer. (See below for documentation and license.)
+
+Important: To use the theme properly you need to have the Mozilla Fira font family installed and use xelatex to compile the document! (not pdflatex)
+
+
 ## Beamer mtheme
 
 The *mtheme* is a Beamer theme with minimal visual noise. The core design principles

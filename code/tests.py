@@ -325,8 +325,8 @@ if __name__ == "__main__":
         options = {'dim': len(data[0]),
                    'L': 10,
                    'max_iter': 1000,
-                   'batch_size': 50,
-                   'batch_size_H': 10,
+                   'batch_size': 500,
+                   'batch_size_H': 100,
                    'beta': 10,
                    'M': 3}
         sqn = SQN(options)
@@ -334,6 +334,16 @@ if __name__ == "__main__":
         print "SQN starting"
         sqn.solve(logreg.F, logreg.g, data, label)
         print "SQN finished"
+
+        print 'predicting'
+        w = sqn.get_position()
+        logreg.w = w
+        label_pred = logreg.predict(data)
+        print 'predicted'
+
+        from sklearn.metrics import roc_auc_score
+        auc = roc_auc_score(label, label_pred)
+        print auc
 
     else:
         print("\nNo such testcase:", testcase, "\n")

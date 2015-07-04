@@ -44,7 +44,7 @@ def prox_comparison():
     import ProxMeth as pm
     import ProxGrad as pg
     
-    fval_0sr1 = pm.compute_0sr1(f, gf, x0, l_reg = l)[0]
+    fval_0sr1 = pm.compute_0sr1(f, gf, x0, l_reg = l)
     fval_prox_grad = pg.proximal_gradient(f, gf, x0, 1 / L, l_reg = l)
     spopt.fmin_l_bfgs_b(f_l_bfgs_b, x0_l_bfgs_b, gf_l_bfgs_b, 
                         bounds = bounds, callback = read_fval)
@@ -83,6 +83,6 @@ if __name__ == "__main__":
         temp = np.dot(A_sq, x[:np.floor(n/2)]) - np.dot(A_sq, x[np.floor(n/2):])
         return np.concatenate((temp, -temp)).T - Ab_l_bfgs_b + l * np.ones(n)
         
-    #prox_comparison()
+    prox_comparison()
     
-    test_gamma()
+    #test_gamma()

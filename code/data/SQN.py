@@ -245,6 +245,7 @@ class SQN(StochasticOptimizer):
                 print("Iteration %d" % k)
 
             self.w = self.solve_one_step(f, g, X, z, k)
+    
             if k > self.options['max_iter'] or self.termination_counter > 4:
                 self.iterations = k
                 break
@@ -379,6 +380,7 @@ class SQN(StochasticOptimizer):
             return g(w)
 
         elif z is None:
+            print("HERE")
             return np.array(sum([g(w, X[i]) for i in range(nSamples)]))
 
         else:

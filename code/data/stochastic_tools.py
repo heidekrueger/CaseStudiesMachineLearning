@@ -176,20 +176,7 @@ def set_iter_values(iterator, w):
     for i in range(len(w)):
         iterator[i] = w[i]
 
-from scipy.signal import welch
-def test_stat(phi):
-    
-        m = 20 # burn in 
-        n = len(phi)
-        nb = 0.5*n
-        na = 0.1*n
-        
-        phi_b = sum(phi[(m+1):(m+nb)])/nb
-        phi_a = sum(phi[(m+n-na+1):(m+n)])/na
-        
-        # n gets large and na/n and nb/n stay fixed
-        z_g = (phi_a - phi_b)/np.sqrt( 1 )
-        
+
 def test_stationarity(f_evals):
     """
     Tests for stationarity of the input sequence using the sample
@@ -200,10 +187,10 @@ def test_stationarity(f_evals):
     """
     n = len(f_evals)
     # number of points that will be considered for stationarity:
-    m = 50
-    M = 100
+    m = 200
+    M = 250
     if n < m:
-        print "too small"
+        print("too small")
         return False
     else:
         m = max(m, 0.1*len(f_evals))
@@ -223,9 +210,9 @@ def test_stationarity(f_evals):
 
         # Find entries in 95%-Confidence interval
         in_confidence_interval = filter(lambda x: x > -1.69/math.sqrt(m) and x < 1.69/math.sqrt(m), autocorrs)
-        print len(in_confidence_interval)
+        print(len(in_confidence_interval))
         if len(in_confidence_interval)/0.4/m < .90:
             return False
         else:
-            print "Stationarity reached."
+            print("Stationarity reached.")
             return True

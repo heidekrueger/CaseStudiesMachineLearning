@@ -9,14 +9,15 @@ This version works as of 26.6.2015 15:52
 
 import numpy as np
 
-def proximal_gradient(f, grad_f, h, x0, t, **options):
+def proximal_gradient(f, grad_f, x0, t, **options):
     """
     proximal gradient for l1 regularization
     """
     
-    options.setdefault('l', 1)
+    options.setdefault('l_reg', 1)
     
     x_old = x0
+    fval = []
     
     for i in range(10000):
         
@@ -30,40 +31,11 @@ def proximal_gradient(f, grad_f, h, x0, t, **options):
             break
         
         x_old = x_new
-	print(f(x_new) + h(x_new))
-    return x_new, i
+        fval.append(float(f(x_new)))
+        
+    return fval
     
 def prox(x, t, **options):
     
-    return np.maximum(x - t * options['l'], 0) - np.maximum(-x - t * 
-                        options['l'], 0)
-
-
-if __name__ == "__main__":
-    from scipy.linalg import eigvals
-    from time import time
-    A = np.random.normal(size = (150, 300))
-    b = np.random.normal(size = (150, 1))
-    A_sq = np.dot(A.T, A)
-    Ab = np.dot(A.T, b)
-
-    def z(x):
-    
-        temp = np.dot(A, x) - b
-    
-        return 1 / 2 * np.dot(temp.T, temp)
-    
-    def grad_z(x):
-        
-        return  np.dot(A_sq, x) - Ab
-    
-    def h(x):
-        
-        return np.linalg.norm(x, ord = 1)
-        
-    x0 = np.ones((300,1))
-    L = eigvals(A_sq).real.max()
-    
-    t0 = time()
-    x, i = proximal_gradient(z, grad_z, h, x0, 1 / L, l = 10)
-    
+    return np.maximum(x - t * options['l_reg'], 0) - np.maximum(-x - t * 
+                        options['l_reg'], 0)

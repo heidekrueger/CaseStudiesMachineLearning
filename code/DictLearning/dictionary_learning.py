@@ -12,13 +12,12 @@
     - Implementation with a .fit method = class ?
     - test it on scikit learn ex.
     - write test dictionary learning script
-
-
-    TODO :
     - add a verbose function
     - selection of best regularization parameter or inscrease batch size
-    - select option : SQN or normal where would be the access point ?
     - should I add a runtime attribute ? => maybe not yet, maybe not here
+
+    TODO :
+    - select option : SQN or normal where would be the access point ?
 """
 
 
@@ -52,7 +51,7 @@ class StochasticDictionaryLearning:
     '''
 
     def __init__(self, n_components=100, option=None, alpha=0.001,
-                 n_iter=10, max_iter=100, epsilon=0.0001, batch_size=200,
+                 n_iter=10, max_iter=100, epsilon=0.0001, batch_size=3,
                  verbose=0):
 
         self.n_components = n_components
@@ -85,14 +84,12 @@ class StochasticDictionaryLearning:
 
         # initial dictionary : take some elements of X
         jd = np.random.randint(0, n_s, self.n_components)
-        D = X[jd, :].T
-        # D = np.random.rand(len(X[0, :]), self.n_components)
-        '''
-        Q? : should I work with self.components ??
-        '''
+
+        # assign D to self.components
+        self.components = X[jd, :].T
 
         # Dimensions of dicitonary
-        [m, k] = D.shape
+        [m, k] = self.components.shape
 
         # 1: initialization
         # A = np.zeros((k, k))
@@ -109,7 +106,7 @@ class StochasticDictionaryLearning:
         if self.verbose > 10:
             print "Dimensions infos :"
             print "    n_samples :", n_s
-            print "    D shape :", D.shape
+            print "    D shape :", self.components.shape
             print "    A shape :", A.shape
             print "    B shape :", B.shape
 
@@ -139,7 +136,7 @@ class StochasticDictionaryLearning:
                 print "    Xt shape :", Xt.shape
 
             # online dictionary learning algorithm called
-            D = self.online_dictionary_learning(Xt, D, A, B, t)
+            self.online_dictionary_learning(Xt, A, B, t)
 
             # Measure running time of each iteration
             dt_step = time() - t_step
@@ -158,38 +155,33 @@ class StochasticDictionaryLearning:
             print('fitting done in %.2fs.' % dt_fit)
             print('updating dic in %.2fs.' % m_tsteps)
 
-        self.components = D
+        # self.components = D
 
-    def online_dictionary_learning(self, Xt, D, A, B, t):
+    def online_dictionary_learning(self, Xt, A, B, t):
         '''
         This function perform online dictionary algorithm with data X and
-        update D or self.components
+        update self.components
 
         INPUTS:
         - self
         - Xt, data array
-        - D, dictionary
         - A, matrix
         - B, matrix
         - t, iter number
 
-        Q? : should I update D or self.components ??
         '''
 
         # 4: Sparse coding with LARS
-        coef = self.lasso_subproblem(Xt, D, A, B, t)
+        coef = self.lasso_subproblem(Xt)
 
         # 5/6: Update A and B
-        A, B = self.update_matrices(Xt, D, coef, A, B, t)
+        A, B = self.update_matrices(Xt, coef, A, B, t)
         if self.verbose > 20:
             print "det A:", np.linalg.det(A)
 
-        D = self.dictionary_update(D, A, B)
+        self.dictionary_update(A, B)
 
-        # return Dictionary
-        return D
-
-    def lasso_subproblem(self, Xt, D, A, B, t):
+    def lasso_subproblem(self, Xt):
         '''
         function which performs:
         - 4: Sparse coding with LARS
@@ -197,7 +189,6 @@ class StochasticDictionaryLearning:
         INPUTS:
         - self
         - Xt, data array
-        - D, dictionary
         - A, matrix
         - B, matrix
         - t, iter number
@@ -210,7 +201,7 @@ class StochasticDictionaryLearning:
         from sklearn.linear_model import LassoLars
         lars = LassoLars(alpha=self.alpha)
 
-        lars.fit(D, Xt)
+        lars.fit(self.components, Xt)
         coef = lars.coef_
         coef = (np.asmatrix(coef)).T
 
@@ -220,7 +211,7 @@ class StochasticDictionaryLearning:
 
         return coef
 
-    def update_matrices(self, Xt, D, coef, A, B, t):
+    def update_matrices(self, Xt, coef, A, B, t):
         '''
         function which performs:
         - computing coefficient beta for step 5/6
@@ -230,7 +221,6 @@ class StochasticDictionaryLearning:
         INPUTS:
         - self
         - Xt, data array
-        - D, dictionary
         - coef, solution of Lasso subproblem
         - A, matrix
         - B, matrix
@@ -240,7 +230,7 @@ class StochasticDictionaryLearning:
         - A, matrix
         - B, matrix
         '''
-        [m, k] = D.shape
+        [m, k] = self.components.shape
 
         # computing coefficient beta for step 5/6
         if t < self.batch_size:
@@ -264,9 +254,9 @@ class StochasticDictionaryLearning:
 
         return A, B
 
-    def dictionary_update(self, D, A, B):
+    def dictionary_update(self, A, B):
         '''
-        Dictionary update
+        Dictionary update : updates self.components
 
         INPUTS:
         - self
@@ -274,12 +264,9 @@ class StochasticDictionaryLearning:
         - A, matrix
         - B, matrix
 
-
-        OUTPUT:
-        - D, updated dictionary
         '''
 
-        [m, k] = D.shape
+        [m, k] = self.components.shape
 
         c = 0  # counter
         cv = False  # convergence or stop indicator
@@ -291,7 +278,7 @@ class StochasticDictionaryLearning:
             D_old = np.zeros((m, k))
             for i in range(0, m):
                 for j in range(0, k):
-                    D_old[i, j] = D[i, j]
+                    D_old[i, j] = self.components[i, j]
 
             for j in range(0, k):
 
@@ -306,12 +293,12 @@ class StochasticDictionaryLearning:
                 # print ""
 
                 if s_A + s_B == 0 and a_jj == 0:
-                    u = 1 + np.asmatrix(D[:, j]).T
+                    u = 1 + np.asmatrix(self.components[:, j]).T
                     if self.verbose > 20:
                         print "0 case"
                 else:
-                    u = (1 / A[j, j]) * (B[:, j] - D.dot(A[:, j]))
-                    u = u + np.asmatrix(D[:, j]).T
+                    u = (1 / A[j, j]) * (B[:, j] - self.components.dot(A[:, j]))
+                    u = u + np.asmatrix(self.components[:, j]).T
                     if self.verbose > 20:
                         print "normal case"
 
@@ -324,13 +311,13 @@ class StochasticDictionaryLearning:
                 '''
 
                 for p in range(0, m):
-                    D[p, j] = u[p]
+                    self.components[p, j] = u[p]
 
             # counter update
             c += 1
 
             # compute differences between two updates
-            grad = D - D_old
+            grad = self.components - D_old
             crit = np.linalg.norm(grad)
 
             # check convergence
@@ -344,7 +331,6 @@ class StochasticDictionaryLearning:
             print "Consider higher max number of interations"
 
         # 6: Return updated dictionary
-        return D
 
 
 if __name__ == "__main__":

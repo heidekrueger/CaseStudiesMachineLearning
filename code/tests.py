@@ -308,10 +308,20 @@ if __name__ == "__main__":
 
         print scores
 
+        data = []
+        label = []
+
+        for i in range(0, len(y)):
+            data.append(XX[i, :])
+            label.append(y[i])
+
+        print len(data)
+        print len(label)
+
         # our test
         print "our test begins"
         logreg = LogisticRegression(lam_1=0.0, lam_2=0.0)
-        options = {'dim': len(X[0, :]),
+        options = {'dim': len(data[0]),
                    'L': 10,
                    'max_iter': 1000,
                    'batch_size': 50,
@@ -319,11 +329,10 @@ if __name__ == "__main__":
                    'beta': 10,
                    'M': 3}
         sqn = SQN(options)
-        y = np.asmatrix(y).T
-        print y.shape
+
         print "INPROGRESS"
         print "i do nothing else for the moment"
-        # sqn.solve(logreg.F, logreg.g, X, y)
+        sqn.solve(logreg.F, logreg.g, data, label)
         print "our test ends"
 
     else:

@@ -1,3 +1,8 @@
+"""
+    Description : Implementation of SQN method
+    @author : Roland Halbig / Stefan Heidekrueger
+"""
+
 import numpy as np
 import itertools
 from collections import deque
@@ -347,11 +352,12 @@ class SQN(StochasticOptimizer):
         # print "---"
         while (f(x + np.multiply(candidate, s)) - f(x) > candidate * gamma * np.inner( g(x), s)) and candidate > 1e-4:
 
-            print "armijo"
+            # print "armijo"
             # print f(x + np.multiply(candidate, s)) - f(x)
             # print candidate * gamma * np.dot(g(x).T, s)
 
             candidate *= beta
+
         return candidate
 
     def stochastic_gradient(self, g, w, X=None, z=None):

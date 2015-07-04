@@ -8,7 +8,7 @@ Created on Thu Jun 25 22:06:28 2015
 import numpy as np
 
 
-def compute_0sr1(f, grad_f, h, x0, **options):
+def compute_0sr1(f, grad_f, x0, **options):
     """
     Main function for Zero-memory Symmetric Rank 1 algorithm
     Input-Arguments:
@@ -24,43 +24,43 @@ def compute_0sr1(f, grad_f, h, x0, **options):
     options.setdefault('tau', 2)
     options.setdefault('tau_min', 1e-12)
     options.setdefault('tau_max', 1e4)
-    options.setdefault('l', 1)
+    options.setdefault('l_reg', 1)
     options.setdefault('ls', 1)
     options.setdefault('beta', 0.5)
-
     n = len(x0)
+    options.setdefault('dim', n)
     x0 = x0.reshape((n, 1))
-    s = np.zeros((n, 1))
-    y = np.zeros((n, 1))
+    s = []
+    y = []
     x_new = x0.copy()
 
     p = np.empty((n, 1))
+    fval = []
     
     for k in range(1, 5000): # make while or itercount later
         
-        u_H, u_B, d_H, d_B = compute_sr1_update(s, y, k, **options)
+        u_H, u_B, d_H, d_B = compute_sr1_update(s, y, **options)
         temp_x_new = compute_proximal(u_H, u_B, d_H, d_B, grad_f, x_new, **options)
         
         x_old = x_new
         p = temp_x_new - x_old
         
+        x_new = temp_x_new
+        
         if np.linalg.norm(p) < options['epsilon']: # termination criterion
             break
-        x_new = temp_x_new
         #t = line_search(f, h, p, x_old, **options)
         #x_new = x_old + t * p
         #s = t * p
         s = x_new - x_old
         y = grad_f(x_new) - grad_f(x_old)
+        fval.append(float(f(x_new)))
         
-        #if k % 50 == 0:
-        print(f(x_new) + h(x_new))
-    
-    return x_new, k
+    return fval
 
 
 
-def compute_sr1_update(s, y, k, **options):
+def compute_sr1_update(s, y, **options):
     """
     Computes Zero-memory Symmetric Rank 1 update
     Input-Arguments:
@@ -81,12 +81,15 @@ def compute_sr1_update(s, y, k, **options):
     tau_min = options['tau_min']
     tau_max = options['tau_max']
     
-    if k == 1:
+    if len(s) + len(y) == 0:
+        n = options['dim']
         d_H = tau
         u_H = np.zeros((n, 1))
         d_B = 1 / tau
         u_B = np.zeros((n, 1))
     else:
+        y.shape = (len(y), 1)
+        s.shape = (len(s), 1)
         y_squared = np.dot(y.T, y)
         tau_bb2 = np.dot(s.T, y) / y_squared # Barzilai-Borwein step length
         tau_bb2 = np.median([tau_min, tau_bb2, tau_max]) # Projection
@@ -107,13 +110,16 @@ def compute_sr1_update(s, y, k, **options):
 
 
 
-def compute_proximal(u_H, u_B, d_H, d_B, grad_f, x, **options):
+def compute_proximal(u_H, u_B, d_H, d_B, grad, x, **options):
     """
     Calls function-specific subroutines and subsquently computes proximal
     step (s. Corollary 9 and Prop. 10 in paper)
     """
+    grad_f = grad(x)
     
-    grad_f = grad_f(x)
+    grad_f.shape = u_B.shape
+    x.shape = u_B.shape
+    
     step = d_B * x - u_B * np.dot(u_B.T, x) - grad_f
     alpha = compute_root(step, u_H, d_H, **options)
     proxi = prox(step - alpha / d_H * u_H, **options)
@@ -143,7 +149,7 @@ def get_transition_points(x, **options):
     i.e. prox_h(x) = ax + b for t_j <= x <= t_(j+1)
     """
     
-    return options['l'] * np.tile([-1, 1], (len(x), 1))
+    return options['l_reg'] * np.tile([-1, 1], (len(x), 1))
 
 
 
@@ -188,11 +194,11 @@ def prox(x, **options):
     
     n = len(x)
     
-    return np.median([-options['l'] * np.ones((n,1)), x, options['l'] * 
+    return np.median([-options['l_reg'] * np.ones((n,1)), x, options['l_reg'] * 
                     np.ones((n,1))], axis = 0)
     
 
-
+import math
 def binary_search(trans_points, x, u, d, **options):
     """
     performs binary search on sorted transition points to obtain root of p
@@ -216,21 +222,22 @@ def binary_search(trans_points, x, u, d, **options):
             alpha = trans_points[-1] - 1 - p_end / (p_left - p_end)
         # normal case
         else:
-            l, r = 1, len(trans_points)
-            while r-l != 1:
-                m = np.floor(1 / 2 * (l + r))
-                p_middle = p(trans_points[m - 1], x, u, d, **options)
+            left, right = 1, len(trans_points)
+            while right - left != 1:
+                middle = math.floor(float(left + right)/2.)
+                middle = int(middle)
+                p_middle = p(trans_points[int(middle - 1)], x, u, d, **options)
                 if p_middle == 0:
-                    alpha = trans_points[m - 1]
+                    alpha = trans_points[middle - 1]
                     break
                 elif p_middle < 0:
-                    l = m
+                    left = middle
                     p_left = p_middle
                 else:
-                    r = m
+                    right = middle
                     p_right = p_middle
-            alpha = trans_points[l - 1] - p_left * (trans_points[r - 1] - 
-                    trans_points[l - 1]) / (p_right - p_left)
+            alpha = trans_points[left - 1] - p_left * (trans_points[right - 1] - 
+                    trans_points[left - 1]) / (p_right - p_left)
             
     return alpha
 
@@ -265,31 +272,3 @@ def compute_simple_ls(f, h, p, x_old, **options):
             break
         
     return beta
-
-
-
-
-if __name__ == "__main__":
-        
-    A = np.random.normal(size = (1500, 3000))
-    b = np.random.normal(size = (1500, 1))
-    A_sq = np.dot(A.T, A)
-    Ab = np.dot(A.T, b)
-
-    def z(x):
-    
-        temp = np.dot(A, x) - b
-    
-        return 1 / 2 * np.dot(temp.T, temp)
-    
-    def grad_z(x):
-        
-        return  np.dot(A_sq, x) - Ab
-        
-    def h(x):
-        
-        return np.linalg.norm(x, ord = 1)
-        
-    x0 = np.ones((3000,1))
-    
-    x, k = compute_0sr1(z, grad_z, h, x0, l = 10)

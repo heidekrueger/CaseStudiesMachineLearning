@@ -8,7 +8,7 @@ Created on Thu Jun 25 22:06:28 2015
 import numpy as np
 
 
-def compute_0sr1(f, grad_f, h, x0, **options):
+def compute_0sr1(f, grad_f, x0, **options):
     """
     Main function for Zero-memory Symmetric Rank 1 algorithm
     Input-Arguments:
@@ -35,6 +35,7 @@ def compute_0sr1(f, grad_f, h, x0, **options):
     x_new = x0.copy()
 
     p = np.empty((n, 1))
+    fval = []
     
     for k in range(1, 5000): # make while or itercount later
         
@@ -44,19 +45,18 @@ def compute_0sr1(f, grad_f, h, x0, **options):
         x_old = x_new
         p = temp_x_new - x_old
         
+        x_new = temp_x_new
+        
         if np.linalg.norm(p) < options['epsilon']: # termination criterion
             break
-        x_new = temp_x_new
         #t = line_search(f, h, p, x_old, **options)
         #x_new = x_old + t * p
         #s = t * p
         s = x_new - x_old
         y = grad_f(x_new) - grad_f(x_old)
+        fval.append(float(f(x_new)))
         
-        #if k % 50 == 0:
-        print(f(x_new) + h(x_new))
-    
-    return x_new, k
+    return fval
 
 
 
@@ -272,31 +272,3 @@ def compute_simple_ls(f, h, p, x_old, **options):
             break
         
     return beta
-
-
-
-
-if __name__ == "__main__":
-        
-    A = np.random.normal(size = (150, 300))
-    b = np.random.normal(size = (150, 1))
-    A_sq = np.dot(A.T, A)
-    Ab = np.dot(A.T, b)
-
-    def z(x):
-    
-        temp = np.dot(A, x) - b
-    
-        return 1 / 2 * np.dot(temp.T, temp)
-    
-    def grad_z(x):
-        
-        return  np.dot(A_sq, x) - Ab
-        
-    def h(x):
-        
-        return np.linalg.norm(x, ord = 1)
-        
-    x0 = np.ones((300,1))
-    
-    x, k = compute_0sr1(z, grad_z, h, x0, l = 10)

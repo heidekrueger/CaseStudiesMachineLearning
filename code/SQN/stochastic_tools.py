@@ -176,7 +176,20 @@ def set_iter_values(iterator, w):
     for i in range(len(w)):
         iterator[i] = w[i]
 
-
+from scipy.signal import welch
+def test_stat(phi):
+    
+        m = 20 # burn in 
+        n = len(phi)
+        nb = 0.5*n
+        na = 0.1*n
+        
+        phi_b = sum(phi[(m+1):(m+nb)])/nb
+        phi_a = sum(phi[(m+n-na+1):(m+n)])/na
+        
+        # n gets large and na/n and nb/n stay fixed
+        z_g = (phi_a - phi_b)/np.sqrt( 1 )
+        
 def test_stationarity(f_evals):
     """
     Tests for stationarity of the input sequence using the sample
@@ -187,8 +200,8 @@ def test_stationarity(f_evals):
     """
     n = len(f_evals)
     # number of points that will be considered for stationarity:
-    m = 200
-    M = 250
+    m = 50
+    M = 100
     if n < m:
         print "too small"
         return False

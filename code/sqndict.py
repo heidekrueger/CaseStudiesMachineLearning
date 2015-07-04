@@ -40,6 +40,7 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
                 print "X", X
                 self.D = self.vector_to_matrix(d)
                 self.alpha = [ self.lasso_subproblem(x) for x in X ]
+                
                 one_f = [ 0.5*np.linalg.norm(x - self.lasso_subproblem(x))**2 + lam*np.linalg.norm(a, ord=1) for x, a in zip(X, self.alpha) ]
                 return sum(one_f) / len(one_f)
             
@@ -49,8 +50,13 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
                         self.alpha = [self.alpha]
                 if not isinstance(X, list):
                         X = [X]
-                self.D = self.vector_to_matrix(d)
-                self.alpha = [ self.lasso_subproblem(x) for x in X ]
+                self.components = self.vector_to_matrix(d)
+                print len(X)
+                
+                self.lasso_subproblem(X[0])
+                #self.alpha = [ self.lasso_subproblem(np.asmatrix(x)) for x in X ]
+                
+                print len(alpha)
                 x = X[0]
                 a = self.alpha[0]
                 one_g = []

@@ -50,12 +50,12 @@ def print_f_vals(testcase, rowlim, options, folderpath, sqn):
         else:
             w = sqn.solve_one_step(logreg.F, logreg.g, X = X, z = z, k=k)
         
-        X_S, z_S = sqn._draw_sample(sqn.options['N'], b = 500)
+        X_S, z_S = sqn._draw_sample(sqn.options['N'], b = 100)
         f_evals.append(logreg.F(w, X_S, z_S))
         
         if k%30 == 0 and stochastic_tools.test_stationarity(f_evals):
                 print sqn.options['batch_size'], sqn.options['batch_size_H']
-                sqn.set_options({'batch_size': sqn.options['batch_size']+15, 'batch_size_H': sqn.options['batch_size_H']+10})
+       #         sqn.set_options({'batch_size': sqn.options['batch_size']+15, 'batch_size_H': sqn.options['batch_size_H']+10})
                 #sqn.f_vals = sqn.f_vals[-2:-1]
         # performance analysis
         #if logreg.adp >= 1e4:
@@ -98,7 +98,7 @@ if __name__ == "__main__":
         folderpath = None
         
         batch_sizes = [100, 500, 1000, 10000]        
-        batch_sizes = [40]
+        batch_sizes = [10]
         
         testcase = ""
         testcase = "sql"

@@ -308,6 +308,7 @@ if __name__ == "__main__":
 
         print scores
 
+        # data transformation
         data = []
         label = []
 
@@ -330,10 +331,9 @@ if __name__ == "__main__":
                    'M': 3}
         sqn = SQN(options)
 
-        print "INPROGRESS"
-        print "i do nothing else for the moment"
+        print "SQN starting"
         sqn.solve(logreg.F, logreg.g, data, label)
-        print "our test ends"
+        print "SQN finished"
 
     else:
         print("\nNo such testcase:", testcase, "\n")

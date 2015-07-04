@@ -214,8 +214,10 @@ def load_higgs(rowlim=1000):
     for row in getdata(file_name, rowlim):
         X.append(np.array([1.0] + [float(r) for r in row[1:]]))
         y.append(float(row[0]))
+
     # print type(X[0])
     # print X[0][0]
+
     print "done."
     return X, y
 
@@ -239,14 +241,6 @@ def load_eeg():
 
     X = np.load(data_name)
     y = np.load(label_name)
-
-    # print "Data dim : ", X.shape
-    # print "Label dim : ", y.shape
-
-    # for i in range(len(y)):
-    #     x = np.array(list(X[i, :].flatten()))
-    #     X_new.append(x)
-    # return X_new, list(y)
 
     return X, y
 

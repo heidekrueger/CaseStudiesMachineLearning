@@ -147,6 +147,47 @@ def print_f_vals(testcase, rowlim, options, folderpath, sqn):
             break
     if folderpath is not None:
         ffile.close()
+    
+    
+
+
+
+def run(data, labels):
+    
+        logreg = LogisticRegression()
+        sqn.set_start()
+        
+        for k in itertools.count():
+
+                w = sqn.solve_one_step(logreg.F, logreg.g, X=data, z = labels, k=k)
+                
+                X_S, z_S = sqn._draw_sample(sqn.options['N'], b = 500)
+                f_evals.append(logreg.F(w, X_S, z_S))
+                
+                if k%30 == 0 and stochastic_tools.test_stationarity(f_evals):
+                        print sqn.options['batch_size'], sqn.options['batch_size_H']
+                        sqn.set_options({'batch_size': sqn.options['batch_size']+15, 'batch_size_H': sqn.options['batch_size_H']+10})
+                        #sqn.f_vals = sqn.f_vals[-2:-1]
+                # performance analysis
+                #if logreg.adp >= 1e4:
+                #  break
+                
+                sep = ","
+
+                line = sep.join([str(logreg.fevals), str(logreg.gevals), str(logreg.adp), str(sqn.f_vals[-1]), str(sqn.g_norms[-1])] + [str(e) for e in list(w)])
+                line = line[:-1] + "\n"
+
+                if folderpath is not None:
+                    ffile.write(line)
+                else:
+                    print(k, logreg.adp, "%0.2f" % float(sqn.f_vals[-1]))
+                if k > sqn.options['max_iter'] or sqn.termination_counter > 4:
+                    iterations = k
+                    break
+        if folderpath is not None:
+            ffile.close()
+        
+        
 
 """
 Dictionary Learning

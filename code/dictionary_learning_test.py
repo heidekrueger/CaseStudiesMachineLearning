@@ -31,6 +31,8 @@
     5) Measure differences
 
 """
+from DictLearning.dictionary_learning import StochasticDictionaryLearning
+from sqndict import SqnDictionaryLearning
 from dictionary_learning import StochasticDictionaryLearning
 from sklearn.feature_extraction.image import reconstruct_from_patches_2d
 from sklearn.linear_model import OrthogonalMatchingPursuit
@@ -194,6 +196,15 @@ if __name__ == '__main__':
                                        max_iter=10,
                                        batch_size=10,
                                        verbose=10)
+    
+    sdl = SqnDictionaryLearning(n_components=100,
+                                       option=None,
+                                       alpha=1.0,
+                                       n_iter=500,
+                                       max_iter=10,
+                                       batch_size=10,
+                                       verbose=10)
+    
 
     # loads data
     data, lena, distorted = preprocess_data(lena)

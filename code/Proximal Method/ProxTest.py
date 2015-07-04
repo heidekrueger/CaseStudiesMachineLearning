@@ -5,53 +5,84 @@ Created on Fri Jul  3 17:27:00 2015
 @author: Fin Bauer
 """
 
-import numpy as np
-import scipy as sp
-
-def test_l_bfgs_b(x):
-    f_current = f_l_bfgs_b(x)
-    f_val_l_bfgs_b.append(f_current)
+def test_gamma():
+    import ProxMeth as pm
+    import matplotlib.pyplot as plt
+    for i in range(20):
+        fval = pm.compute_0sr1(f, gf, x0, gamma = (i+1) / 10)
+        plt.plot(range(len(fval)), fval)
     return
+
+
+def read_fval(x):
     
-def test_Lasso(A, b, f):
-    from sklearn.linear_model import Lasso
-    lars = Lasso()
-    lars.fit(A, b)
-    n_iter = int(np.floor(lars.n_iter_ / 10))
-    f_val = np.zeros((n_iter))
-    for i in range(n_iter):
-        lars = Lasso(max_iter = (i+1) * 10)
-        lars.fit(A, b)
-        f_val[i] = f(lars.coef_)
-    return f_val
+    f_current = f_l_bfgs_b(x)
+    fval_l_bfgs_b.append(f_current)
+    return
 
+def initialize_lasso(size_A, l):
+    
+    m, n = size_A
+    np.random.seed(0)
+    A = np.random.normal(size = (m, n))
+    b = np.random.normal(size = (m, 1))
+    b_l_bfgs_b = np.random.normal(size = m)
+    A_sq = np.dot(A.T, A)
+    Ab = np.dot(A.T, b)
+    Ab_l_bfgs_b = np.concatenate((np.dot(A.T, b_l_bfgs_b),-np.dot(A.T,b_l_bfgs_b))).T
+    x0 = np.ones((n, 1))
+    x0_l_bfgs_b = np.ones(2 * n)
+    bounds = 2 * n * [(0, None)]
+    L = sp.linalg.eigvals(A_sq).real.max()
+    
+    return A, b, b_l_bfgs_b, A_sq, Ab, Ab_l_bfgs_b, x0, x0_l_bfgs_b, bounds, l, L
+    
+def prox_comparison():
+    
+    import matplotlib.pyplot as plt
+    import scipy.optimize as spopt
+    import ProxMeth as pm
+    import ProxGrad as pg
+    
+    fval_0sr1 = pm.compute_0sr1(f, gf, x0, l_reg = l)[0]
+    fval_prox_grad = pg.proximal_gradient(f, gf, x0, 1 / L, l_reg = l)
+    spopt.fmin_l_bfgs_b(f_l_bfgs_b, x0_l_bfgs_b, gf_l_bfgs_b, 
+                        bounds = bounds, callback = read_fval)
+    
+    plt.plot(range(len(fval_0sr1)), fval_0sr1, 'r',
+             range(len(fval_prox_grad)), fval_prox_grad, 'b',
+             range(len(fval_l_bfgs_b)), fval_l_bfgs_b, 'g')
+    plt.ylim([0, 100])
+    plt.xlim([0, 1000])
 
+    return
 
 if __name__ == "__main__":
     
-    A = np.random.normal(size = (150, 300))
-    b = np.random.normal(size=(150))
-    A_sq = np.dot(A.T, A)
-    Ab = np.concatenate((np.dot(A.T, b),-np.dot(A.T,b))).T
+    import numpy as np
+    import scipy as sp
+    
+    A, b, b_l_bfgs_b, A_sq, Ab, Ab_l_bfgs_b, x0, x0_l_bfgs_b, bounds, l, L = initialize_lasso((15, 30), 1)
+    fval_l_bfgs_b = []
     
     def f(x):
         temp = np.dot(A, x) - b
-        return 1 / 2 * np.dot(temp, temp) + np.linalg.norm(x, ord = 1)
+        return 1 / 2 * np.dot(temp.T, temp) + l * np.linalg.norm(x, ord = 1)
+    
+    def gf(x):
+        
+        return  np.dot(A_sq, x) - Ab
         
     def f_l_bfgs_b(x):
         n = len(x)
-        temp = np.dot(A, x[:np.floor(n/2)]) - np.dot(A, x[np.floor(n/2):]) - b
-        return 1/2 * np.dot(temp.T, temp) + sum(abs(x))
+        temp = np.dot(A, x[:np.floor(n/2)]) - np.dot(A, x[np.floor(n/2):]) - b_l_bfgs_b
+        return 1/2 * np.dot(temp.T, temp) + l * sum(abs(x))
         
     def gf_l_bfgs_b(x):
         n = len(x)
-        x=x
         temp = np.dot(A_sq, x[:np.floor(n/2)]) - np.dot(A_sq, x[np.floor(n/2):])
-        return np.concatenate((temp, -temp)).T - Ab + np.ones(n)
+        return np.concatenate((temp, -temp)).T - Ab_l_bfgs_b + l * np.ones(n)
+        
+    #prox_comparison()
     
-    x0 = np.ones(600)
-    bounds = [(0, None)] * 600
-    
-    f_val_lasso = test_Lasso(np.sqrt(150) * A, np.sqrt(150) * b, f)
-    f_val_l_bfgs_b = []
-    x_bfgs, f, d = sp.optimize.fmin_l_bfgs_b(f_l_bfgs_b,x0,gf_l_bfgs_b,bounds = bounds, callback = test_l_bfgs_b)
+    test_gamma()

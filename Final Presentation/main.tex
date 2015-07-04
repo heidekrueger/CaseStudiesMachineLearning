@@ -1,10 +1,9 @@
 \documentclass[10pt]{beamer}
 
-\usetheme[sectionpage=progressbar]{m}
+\usetheme[]{m}
 
 \usepackage{booktabs}
 \usepackage[scale=2]{ccicons}
-
 
 \usepackage{pgfplots}
 \usepgfplotslibrary{dateplot}
@@ -21,6 +20,12 @@
 \maketitle
 
 \begin{frame}
+  \frametitle{Awesome Motivational Title}
+  Awesome Motivational Slide.\\
+  \emph{Yeah!}
+\end{frame}
+
+\begin{frame}
   \frametitle{Table of Contents}
   \setbeamertemplate{section in toc}[sections numbered]
   \tableofcontents[hideallsubsections]
@@ -28,41 +33,75 @@
 
 \section{Introduction}
 
-\begin{frame}[fragile]
-  \frametitle{mtheme}
+  \begin{frame}
+    \frametitle{Introduction}
+    What are we doing?
+    Why?
+  \end{frame}
 
-  The \emph{mtheme} is a Beamer theme with minimal visual noise inspired by the
-  \href{https://github.com/hsrmbeamertheme/hsrmbeamertheme}{\textsc{hsrm} Beamer
-  Theme} by Benjamin Weiss.
+\section{A Stochastic Quasi Newton Method}
 
-  Enable the theme by loading
+  \begin{frame}
+    \frametitle{Stochastic Quasi Newton}
+      What is it?\cite{SQN}
+      Why?
+      Main ideas, high-level pseudo code overview?
+      short bfgs repitition?
+      Extreme Cases (L-BFGS, SGD)
+  \end{frame}
 
-  \begin{verbatim}    \documentclass{beamer}
-    \usetheme{m}\end{verbatim}
+  \begin{frame}
+    \frametitle{HIGGS-Dataset}
+    Explain the Dataset quickly.
+    Why is this good for SQN testing?
+    Why is it challenging? (file size etc)
+  \end{frame}
 
-  Note, that you have to have Mozilla's \emph{Fira Sans} font and XeTeX
-  installed to enjoy this wonderful typography.
-\end{frame}
+  \begin{frame}
+    \frametitle{Behavior}
+      Pretty picures about the behaviour of SQN on HIGGS
+      and comparison with traditional SGD
+  \end{frame}
+
+ \section{Proximal Splitting Method}
+
+   \plain{Outline of Section by Jacob and Fin}
+   \begin{frame}\frametitle{First Prox Slide}
+       \begin{itemize}
+            \item hallo
+            \item \alert{du muschi}
+            \item \cite{becker2012quasi}
+          \end{itemize}   
+   
+   \end{frame}
+
+\section{Logistic Regression: An Example}
+  \begin{frame}\frametitle{Task}
+    Explain what we want to do, and explain the dataset,
+    and why using both SQN and Prox makes sense   
+  \end{frame}
+
+  \begin{frame}\frametitle{Results}
+    Nice table with SQN, SGD (no reg, L2), (Lasso,) Prox (L1) showing
+    Obj. value in found optimum, CPU time, Iterations, F1 score of prediction model
+
+    Use different reg. parameters??
+    Stop after fixed time? after fixed iters? after insign. improvements  
+  \end{frame}
 
 \section{Conclusion}
 
-\begin{frame}{Summary}
+  \begin{frame}{Summary}
+    \begin{center}\ccbysa\end{center}
+  \end{frame}
 
- 
+  \plain{Questions?}
 
-  \begin{center}\ccbysa\end{center}
+  \begin{frame}[allowframebreaks]\frametitle{Main References}
 
-\end{frame}
+    \bibliography{refs}
+    \bibliographystyle{abbrv}
 
-\plain{Questions?}
-
-\begin{frame}[allowframebreaks]
-
-  \frametitle{Main References}
-
-  \bibliography{references}
-  \bibliographystyle{abbrv}
-
-\end{frame}
+  \end{frame}
 
 \end{document}

@@ -2,10 +2,7 @@ import numpy as np
 import sklearn.datasets
 import csv
 import re
-try:
-    import MySQLdb
-except:
-    import pymysql as MySQLdb
+
 # functions for reading from loooong file as stream
 
 
@@ -208,7 +205,7 @@ def get_higgs_mysql(ID_list):
 
 
 def load_higgs(rowlim=1000):
-    print "Loading data from csv (this may take a while)..."
+    print("Loading data from csv (this may take a while)...")
     file_name = '../datasets/HIGGS.csv'
     X, y = [], []
     for row in getdata(file_name, rowlim):
@@ -218,7 +215,7 @@ def load_higgs(rowlim=1000):
     # print type(X[0])
     # print X[0][0]
 
-    print "done."
+    print("done.")
     return X, y
 
 
@@ -235,9 +232,9 @@ def load_eeg():
     - Pay attention to label file dimension
     - You may want to convert the label file into a vector
     '''
-    print "Loading eeg data set..."
-    data_name = '../datasets/eeg_data.npy'
-    label_name = '../datasets/eeg_label.npy'
+    print("Loading eeg data set...")
+    data_name = '../../datasets/eeg_data.npy'
+    label_name = '../../datasets/eeg_label.npy'
 
     X = np.load(data_name)
     y = np.load(label_name)
@@ -246,5 +243,4 @@ def load_eeg():
 
 
 if __name__ == "__main__":
-    load_higgs_into_mysql()
-    print(get_higgs_mysql([1, 2, 5, 55, 332, 3456, 0]))
+    X, y = load_eeg()

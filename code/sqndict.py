@@ -1,75 +1,93 @@
 import numpy as np
-import math
 from time import time
 from DictLearning.dictionary_learning import StochasticDictionaryLearning
 from SQN.SQN import SQN
 
+
 class SqnDictionaryLearning(StochasticDictionaryLearning):
-           
-        alpha = []
-        
+
+        recon = []
+
         def matrix_to_vector(self, D):
-                
+
                 v = []
                 for i in range(D.range[0]):
                         for j in range(D.range[1]):
-                                v.append(D[i,j])
+                                v.append(D[i, j])
                 return np.array(v)
-            
+
         def vector_to_matrix(self, v):
-                print "v:", len(v)
                 nrow = self.n_components
-                D = np.zeros( (self.n_components, len(v)) )
-                print D.shape
+                D = np.zeros((len(v)/self.n_components, self.n_components))
+
                 i = 0
                 j = 0
                 for index in range(len(v)):
-                    D[i,j] = v[index]
-                    j += 1 
+                    D[i, j] = v[index]
+                    j += 1
                     if j % nrow == 0:
                             i += 1
                             j = 0
                 return D
 
         def f(self, d, X, z=None):
-                
-                if not isinstance(self.alpha, list):
-                        self.alpha = [self.alpha]
-                if not isinstance(X, list):
+            #print "shape X:", len(X), len(d), d.shape
+
+            self.recon = []
+
+            if not isinstance(self.recon, list):
+                        self.recon = [self.recon]
+
+            if not isinstance(X, list):
                         X = [X]
-                print "X", X
-                self.D = self.vector_to_matrix(d)
-                self.alpha = [ self.lasso_subproblem(x) for x in X ]
-                
-                one_f = [ 0.5*np.linalg.norm(x - self.lasso_subproblem(x))**2 + lam*np.linalg.norm(a, ord=1) for x, a in zip(X, self.alpha) ]
-                return sum(one_f) / len(one_f)
-            
+
+            self.components = self.vector_to_matrix(d)
+
+            #print "doing lasso"
+            if len(self.recon) == 0:
+                    self.recon = [self.lasso_subproblem(np.asmatrix(x).T) for x in X]
+            #print "lasso done"
+
+            one_f = [0.5 * np.linalg.norm(x - (self.components).dot(a))**2 + self.alpha * np.linalg.norm(a, ord=1) for x, a in zip(X, self.recon) ]
+            return sum(one_f) / len(one_f)
+
         def g(self, d, X, z=None):
-            
-                if not isinstance(self.alpha, list):
-                        self.alpha = [self.alpha]
+
+                if not isinstance(self.recon, list):
+                        self.recon = [self.recon]
                 if not isinstance(X, list):
                         X = [X]
+                
                 self.components = self.vector_to_matrix(d)
-                print len(X)
-                
-                self.lasso_subproblem(X[0])
-                #self.alpha = [ self.lasso_subproblem(np.asmatrix(x)) for x in X ]
-                
-                print len(alpha)
+
+                if len(self.recon) == 0:
+                        print "doing lasso"
+                        self.recon = [self.lasso_subproblem(np.asmatrix(x).T) for x in X]
+
+                #print "lasso done"
                 x = X[0]
-                a = self.alpha[0]
+                a = np.array(self.recon[0].flat)
                 one_g = []
-                print a
-                for i in range(self.D.shape[0]):
-                        for j in range(self.D.shape[1]):
+                #print self.components.shape, x.shape
+                grad = None
+                for x, a in zip(X, self.recon):
+                    a = np.array(a.flat)
+                    for i in range(self.components.shape[1]):
+                        for j in range(self.components.shape[0]):
                                 S = 0.0
-                                for k in range(self.D.shape[1]):
-                                        S += self.D[i,k]*x[k]
-                                one_g.append( x[j] * S - a[i]*x[j] )
-                return self.vector_to_matrix( sum(one_g)/len(one_g) )
+                                for k in range(self.components.shape[0]):
+                        #                print i, k, self.components.shape
+                                        S += self.components[k,i] * x[k]
+                                #print S, x[j], a[i], x[j]
+                                one_g.append(x[j] * S - a[i]*x[j])
                     
-            
+                    if grad is None:
+                            grad = np.array(one_g)
+                    else:
+                            grad += np.array(one_g)
+                return np.multiply(len(X), grad)
+                
+
         def fit(self, X):
             '''
             This method runs online dictionary learning on data X and update
@@ -94,6 +112,8 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
             '''
             Q? : should I work with self.components ??
             '''
+            self.components = X[jd, :].T
+
 
             # Dimensions of dicitonary
             [m, k] = D.shape
@@ -120,40 +140,50 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
             if self.verbose > 0:
                 print "Running online dictionary learning"
                 print str(self.n_iter), "iter to perform"
-               
-            def sample_batch(w, X, z, b): 
+
+            def sample_batch(w, X, z, b):
                     j = np.random.randint(0, n_s, b)
-                    Xt = X[j, :]
-                    Xt = np.asmatrix(Xt).T
                     X_S = []
-                    for i in range(X.shape[0]):
-                            X_S.append(np.array(X[i,:].flat))
+                    for i in j:
+                            X_S.append(X[i])
                     return X_S, None
+            def stochastic_gradient(g, w, X=None, z=None):
+                    return g(w, X, z) 
             
-            options = {'dim': len(X[0,]),
-                             'max_iter': 45,
-                             'batch_size': 10,
-                             'beta': 10.,
-                             'M': 10,
-                             'batch_size_H': 10,
-                             'L': 10,
-                             'sampleFunction': sample_batch}
+            options = {'dim': len(X[0])*self.n_components,
+                       'max_iter': self.max_iter,
+                       'batch_size': self.batch_size,
+                       'beta': 10.,
+                       'M': 10,
+                       'batch_size_H': 10,
+                       'L': 10,
+                       'sampleFunction': sample_batch}
             
             sqn = SQN(options)
-            sqn.solve(self.f, self.g, X)
-            
-            
-            # Measure of running time
-            dt_fit = time() - t_fit
-            m_tsteps = np.mean(l_tsteps)
+         #   sqn.stochastic_gradient = stochastic_gradient
 
-            if self.verbose > 0:
-                print('fitting done in %.2fs.' % dt_fit)
-                print('updating dic in %.2fs.' % m_tsteps)
+            # sqn.set_options(self.options)
+            #sqn.solve(self.f, self.g, X)
+            "Please provide either a data set or a sampling function"
+
+            sqn.set_start(dim=sqn.options['dim'])
+            import itertools
+            for k in itertools.count():
+                print k
+                w = sqn.solve_one_step(self.f, self.g, X, None, k)
+                self.recon = []
+                if k > sqn.options['max_iter'] or sqn.termination_counter > 4:
+                    iterations = k
+                    break
+
+            if iterations < sqn.options['max_iter']:
+                print("Terminated successfully!")
+
+
+            
+            print "SQN done!"
 
             self.components = D
 
-
 if __name__ == '__main__':
-        
-        dictlearner
+        print "main"

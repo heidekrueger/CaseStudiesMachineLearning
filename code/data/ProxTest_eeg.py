@@ -16,4 +16,5 @@ lr = LogisticRegression()
 f = lambda x: lr.F(x, X, y)
 gf = lambda x: lr.g(x, X, y)
 
-pm.compute_0sr1(f, gf, )
+# x0 finden etc. hofffen dass es läuft
+fval = pm.compute_0sr1(f, gf, )

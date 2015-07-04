@@ -1,0 +1,68 @@
+\documentclass[10pt]{beamer}
+
+\usetheme[sectionpage=progressbar]{m}
+
+\usepackage{booktabs}
+\usepackage[scale=2]{ccicons}
+
+
+\usepackage{pgfplots}
+\usepgfplotslibrary{dateplot}
+
+\title{Stochastic Optimization in Machine Learning}
+\subtitle{Case Studies in Nonlinear Optimization}
+\date{\today}
+\author{F. Bauer \and S. Chambon \and R. Halbig \and S. Heidekrüger \and J. Heuke}
+\institute{Technische Universität München}
+% \titlegraphic{\hfill\includegraphics[height=1.5cm]{logo/logo}}
+
+\begin{document}
+
+\maketitle
+
+\begin{frame}
+  \frametitle{Table of Contents}
+  \setbeamertemplate{section in toc}[sections numbered]
+  \tableofcontents[hideallsubsections]
+\end{frame}
+
+\section{Introduction}
+
+\begin{frame}[fragile]
+  \frametitle{mtheme}
+
+  The \emph{mtheme} is a Beamer theme with minimal visual noise inspired by the
+  \href{https://github.com/hsrmbeamertheme/hsrmbeamertheme}{\textsc{hsrm} Beamer
+  Theme} by Benjamin Weiss.
+
+  Enable the theme by loading
+
+  \begin{verbatim}    \documentclass{beamer}
+    \usetheme{m}\end{verbatim}
+
+  Note, that you have to have Mozilla's \emph{Fira Sans} font and XeTeX
+  installed to enjoy this wonderful typography.
+\end{frame}
+
+\section{Conclusion}
+
+\begin{frame}{Summary}
+
+ 
+
+  \begin{center}\ccbysa\end{center}
+
+\end{frame}
+
+\plain{Questions?}
+
+\begin{frame}[allowframebreaks]
+
+  \frametitle{Main References}
+
+  \bibliography{references}
+  \bibliographystyle{abbrv}
+
+\end{frame}
+
+\end{document}

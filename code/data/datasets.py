@@ -70,11 +70,16 @@ def load_data2():
 
 def load_iris():
     iris = sklearn.datasets.load_iris()
+    X = iris.data
+    y = iris.target
+    
+    """    
     X, y = [], []
     for i in range(len(iris.target)):
         if iris.target[i] != 2:
             X.append(np.array([1] + list(iris.data[i])))
             y.append(iris.target[i])
+    """
     return X, y
 
 
@@ -233,8 +238,8 @@ def load_eeg():
     - You may want to convert the label file into a vector
     '''
     print("Loading eeg data set...")
-    data_name = '../../datasets/eeg_data.npy'
-    label_name = '../../datasets/eeg_label.npy'
+    data_name = '../datasets/eeg_data.npy'
+    label_name = '../datasets/eeg_label.npy'
 
     X = np.load(data_name)
     y = np.load(label_name)

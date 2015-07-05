@@ -199,7 +199,8 @@ class StochasticDictionaryLearning:
 
         # 4: Sparse coding with LARS
         from sklearn.linear_model import LassoLars
-        lars = LassoLars(alpha=self.alpha)
+        lars = LassoLars(alpha=self.alpha, verbose=False)
+        
 
         lars.fit(self.components, Xt)
         coef = lars.coef_

@@ -222,7 +222,7 @@ def test_stationarity(f_evals):
     m = 50
     M = 60
     if n < m:
-        print "too small"
+        print("too small")
         return False
     else:
         m = max(m, 0.1*len(f_evals))
@@ -242,9 +242,9 @@ def test_stationarity(f_evals):
 
         # Find entries in 95%-Confidence interval
         in_confidence_interval = filter(lambda x: x > -1.69/math.sqrt(m) and x < 1.69/math.sqrt(m), autocorrs)
-        print len(in_confidence_interval)
+        print(len(in_confidence_interval))
         if len(in_confidence_interval)/0.4/m < .90:
             return False
         else:
-            print "Stationarity reached."
+            print("Stationarity reached.")
             return True

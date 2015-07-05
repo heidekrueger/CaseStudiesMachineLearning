@@ -105,7 +105,7 @@ def split_into_files(src, dest_folder):
     GRANT ALL PRIVILEGES ON HIGGS.* TO 'casestudies'@'localhost';
 """
 
-import MySQLdb
+#import MySQLdb
 def get_mysql():
     db = MySQLdb.connect(user="casestudies",
                          db="HIGGS")  # name of the data base

@@ -11,10 +11,13 @@ import ProxMeth as pm
 import datasets as ds
 
 X, y = ds.load_eeg()
+y = y.reshape(len(y), 1)
 
 lr = LogisticRegression()
 f = lambda x: lr.F(x, X, y)
-gf = lambda x: lr.g(x, X, y)
-x0 = np.ones(shape = (600, 1))
+gf = lambda w: sum([lr.g(w, x, z) for x,z in zip(X,y)])/len(y)
+
 # x0 finden etc. hofffen dass es läuft
-fval = pm.compute_0sr1(f, gf, x0)
+xstart=np.zeros(600)
+
+fval = pm.compute_0sr1(f, gf, xstart)

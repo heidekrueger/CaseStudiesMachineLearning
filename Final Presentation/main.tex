@@ -1,6 +1,9 @@
+%!TEX program = xelatex
 \documentclass[10pt]{beamer}
 
-\usetheme[]{m}
+\usetheme[progressbar=frametitle, noframetitleoffset, block=fill]{m}
+%\definecolor{TUMblue}{RGB}{55,55,255}
+%\setbeamercolor{alerted text}{fg=TUMblue}
 
 \usepackage{booktabs}
 \usepackage[scale=2]{ccicons}
@@ -14,33 +17,46 @@
 \date{\today}
 \author{F. Bauer \and S. Chambon \and R. Halbig \and S. Heidekrüger \and J. Heuke}
 \institute{Technische Universität München}
-% \titlegraphic{\hfill\includegraphics[height=1.5cm]{logo/logo}}
+%\titlegraphic{\hfill\includegraphics[height=1.5cm]{logo.eps}}
 
 \begin{document}
 
 \maketitle
 
-\begin{frame}
-  \frametitle{Awesome Motivational Title}
-  Awesome Motivational Slide.\\
-  \emph{Yeah!}
-\end{frame}
+\plain{
+  \begin{quote}
+    We're not running out of data anytime soon. It's maybe the only resource that grows exponentially.
+    \\
+    \flushright{\alert{Andreas Weigend}}
+  \end{quote}
+  }
+
 
 \begin{frame}
-  \frametitle{Table of Contents}
+  \frametitle{Outline}
   \setbeamertemplate{section in toc}[sections numbered]
   \tableofcontents[hideallsubsections]
 \end{frame}
 
 \section{Introduction}
 
-  \begin{frame}
-    \frametitle{Introduction}
-    What are we doing?
-    Why?
+  \begin{frame}[t]\frametitle{Machine Learning}
+        
   \end{frame}
 
-\section{A Stochastic Quasi Newton Method}
+  \begin{frame}
+    \frametitle{Challenges in Machine Learning}
+      \begin{itemize}
+        \item Massive amounts of training data 
+        \item Construction of very large models
+        \item How to handle the high memory/computational demands?
+      \end{itemize}
+      \vspace{36pt}
+      \pause 
+    \textbf{\emph{Solution:} \alert{Stochastic Methods}}\\Update on smaller amounts of training data in each iteration!
+  \end{frame}
+
+\section{A Stochastic Quasi-Newton Method}
 
   \begin{frame}
     \frametitle{Stochastic Quasi Newton}

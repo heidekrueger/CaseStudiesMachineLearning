@@ -5,6 +5,8 @@ Created on Fri Jul  3 17:27:00 2015
 @author: Fin Bauer
 """
 
+from __future__ import division
+
 def test_gamma():
     import ProxMeth as pm
     import matplotlib.pyplot as plt
@@ -21,6 +23,7 @@ def read_fval(x):
     return
 
 def initialize_lasso(size_A, l):
+    import scipy.linalg as linalg
     
     m, n = size_A
     np.random.seed(0)
@@ -34,7 +37,7 @@ def initialize_lasso(size_A, l):
     x0 = np.ones((n, 1))
     x0_l_bfgs_b = np.concatenate((np.ones(n), np.zeros(n)))
     bounds = 2 * n * [(0, None)]
-    L = sp.linalg.eigvals(A_sq).real.max()
+    L = linalg.eigvals(A_sq).real.max()
     
     return A, b, b_l_bfgs_b, A_sq, Ab, Ab_l_bfgs_b, x0, x0_l_bfgs_b, bounds, l, L
     
@@ -44,6 +47,7 @@ def prox_comparison():
     import scipy.optimize as spopt
     import ProxMeth as pm
     import ProxGrad as pg
+    from matplotlib2tikz import save as tikz_save
     
     fval_0sr1 = pm.compute_0sr1(f, gf, x0, l_reg = l)
     fval_prox_grad = pg.proximal_gradient(f, gf, x0, 1 / L, l_reg = l)
@@ -55,10 +59,11 @@ def prox_comparison():
     plt.plot(range(len(fval_0sr1)), fval_0sr1, 'r',
              range(len(fval_prox_grad)), fval_prox_grad, 'b',
              range(len(fval_l_bfgs_b)), fval_l_bfgs_b, 'g', lw = 2)
-    plt.xlim([0, 60])
+    plt.xlim([0, 35])
     plt.yscale('log')
     plt.ylabel('Function Value')
     plt.xlabel('Number of Iterations')
+    tikz_save( 'myfile.tikz' );
 
     return
 

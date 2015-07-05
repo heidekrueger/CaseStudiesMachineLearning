@@ -7,7 +7,7 @@ import numpy as np
 import itertools
 from collections import deque
 import stochastic_tools
-
+from stochastic_tools import test_normality
 """
 TODO: Iterator support not yet tested! Try on Dictionary Learning Problem!
 """
@@ -80,6 +80,8 @@ class StochasticOptimizer:
         self.options['batch_size'] = 1
         self.options['batch_size_H'] = 1
         self.options['max_iter'] = 1e3
+        self.options['testinterval'] = 30
+        self.options['updates_per_batch'] = 1
         # If options is given
         self.set_options(options)
 
@@ -266,6 +268,13 @@ class SQN(StochasticOptimizer):
         else:
             return self.w
 
+    def is_stationary(self):
+            test_len = len(self.f_vals) - self.options['testinterval']
+            return test_len > 0 and test_normality(self.f_vals[test_len:], burn_in=1, level=0.05)     
+    def get_test_variance(self):
+            test_len = len(self.f_vals) - self.options['testinterval']
+            return np.var(self.f_vals[test_len:])
+        
     def solve_one_step(self, f, g, X=None, z=None, k=1):
         """
         perform one update step
@@ -281,9 +290,29 @@ class SQN(StochasticOptimizer):
 
         """
         assert self.w is not None, "Error! weights not initialized!"
+        
+        # Draw sample batch
+        if X is None:
+            X_S, z_S = self._draw_sample(self.options['N'],
+                                         b=self.options['batch_size'])
+        else:
+            X_S, z_S = self._draw_sample(X, z, b=self.options['batch_size'])
+        # Stochastic functions
+        f_S = lambda x: f(x, X_S, z_S)  # if z is not None else f(x, X_S)
+        g_S = lambda x: g(x, X_S, z_S)
 
         # perform gradient update using armijo rule and hessian information
-        self.w = self._perform_update(f, g, X, z)
+        for i in range(self.options['updates_per_batch']):
+                self.w = self._perform_update(f_S, g_S)
+        
+        # Check Termination Condition
+        if len(X_S) == 0 or self._has_terminated(g_S(self.w), self.w):
+            self.termination_counter += 1
+        if k % self.options['testinterval'] == 0 and self.is_stationary() and self.get_test_variance() < 0.005:
+                self.termination_counter += 1
+                if self.debug:
+                    print "stationary"
+        
         if self.debug:
             print(self.w)
 
@@ -358,36 +387,8 @@ class SQN(StochasticOptimizer):
 
         return candidate
 
-    def stochastic_gradient(self, g, w, X=None, z=None):
-        """
-        Calculates Stochastic gradient of F at w as per formula (1.4)
-
-        INPUTS:
-        - self
-        - g
-        - w
-        - X
-        - z
-
-        OUTPUT:
-        """
-        if X is not None:
-            nSamples = len(X)
-            nFeatures = len(X[0])
-
-        if X is None:
-            return g(w)
-
-        elif z is None:
-            return np.array(sum([g(w, X[i]) for i in range(nSamples)]))
-
-        else:
-            assert len(X) == len(z), "Error: Dimensions must match"
-            # print(" one gradient:" , g(w,X[0],z[0]))
-            return sum([g(w, X[i], z[i]) for i in range(nSamples)])
-
     # Calculate gradient and perform update
-    def _perform_update(self, f, g, X, z):
+    def _perform_update(self, f_S, g_S):
         """
         do the gradient updating rule
 
@@ -399,16 +400,6 @@ class SQN(StochasticOptimizer):
         - z
 
         """
-        # Draw sample batch
-        if X is None:
-            X_S, z_S = self._draw_sample(self.options['N'],
-                                         b=self.options['batch_size'])
-        else:
-            X_S, z_S = self._draw_sample(X, z, b=self.options['batch_size'])
-        # Stochastic functions
-        f_S = lambda x: f(x, X_S, z_S)  # if z is not None else f(x, X_S)
-        g_S = lambda x: self.stochastic_gradient(g, x, X_S, z_S)
-
         # Get search direction
         search_direction = self._get_search_direction(g_S)
 
@@ -431,10 +422,6 @@ class SQN(StochasticOptimizer):
         # Store information
         self.f_vals.append(f_S(self.w))
         self.g_norms.append(np.linalg.norm(g_S(self.w)))
-
-        # Check Termination Condition
-        if len(X_S) == 0 or self._has_terminated(g_S(self.w), self.w):
-            self.termination_counter += 1
 
         return self.w
 
@@ -478,7 +465,7 @@ class SQN(StochasticOptimizer):
 
         # draw hessian sample and get the corresponding stochastic gradient
         X_SH, y_SH = self._draw_sample(X, z, b=self.options['batch_size_H'])
-        g_SH = lambda x: self.stochastic_gradient(g, x, X_SH, y_SH)
+        g_SH = lambda x: g(x, X_SH, y_SH)
 
         s_t, y_t = self._get_correction_pairs(g_SH,
                                               self.wbar,
@@ -548,7 +535,7 @@ class SQN(StochasticOptimizer):
             grad: gradient
             w: current variable
         """
-
+        
         if self.debug:
             print("Check termination")
             print("len grad: %f" % np.linalg.norm(grad))

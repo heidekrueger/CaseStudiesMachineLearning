@@ -188,28 +188,33 @@ if __name__ == '__main__':
     '''
 
     # create sdl object
-    sdl = StochasticDictionaryLearning(n_components=100,
+    sdl = StochasticDictionaryLearning(n_components=5,
                                        option=None,
                                        alpha=1.0,
-                                       n_iter=500,
+                                       n_iter=20,
                                        max_iter=10,
                                        batch_size=10,
                                        verbose=10)
-
-    sdl = SqnDictionaryLearning(n_components=50,
+    
+    sdl2 = SqnDictionaryLearning(n_components=5,
                                 option=None,
                                 alpha=1.0,
                                 n_iter=1,
-                                max_iter=10,
+                                max_iter=2,
                                 batch_size=10,
                                 verbose=10)
-
+    
     # loads data
     data, lena, distorted = preprocess_data(lena)
-    sdl.fit(data)
-
+    
     # takes dictionary
-    D = sdl.components
+    case = 2
+    if case != 2:
+        sdl.fit(data)
+        D = sdl.components
+    else:
+        sdl2.fit(data)
+        D = sdl2.components
 
     # plots dictionary
     plot_dictionary(D)

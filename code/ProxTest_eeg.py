@@ -17,7 +17,7 @@ lr = LogisticRegression()
 print "X, y loaded, initializing F"
 f = lambda x: lr.F(x, X, y)
 print "done. initializing gf"
-gf = lambda w: lr.G(w, X, y)
+gf = lambda w: lr.G(np.array(w.flat), X, y).reshape(w.shape)
 print "done."
 # x0 finden etc. hofffen dass es läuft
 xstart=np.zeros(600)

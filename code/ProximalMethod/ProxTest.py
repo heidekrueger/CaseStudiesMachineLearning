@@ -52,14 +52,13 @@ def prox_comparison():
     fval_0sr1.insert(0, f(x0))
     fval_prox_grad.insert(0, f(x0))
     fval_l_bfgs_b.insert(0, f_l_bfgs_b(x0_l_bfgs_b))
-    plt.plot(range(len(fval_0sr1)), fval_0sr1, 'r', label = '0sr1',
-             range(len(fval_prox_grad)), fval_prox_grad, 'b', label = 'ProxGrad',
-             range(len(fval_l_bfgs_b)), fval_l_bfgs_b, 'g', label = 'LBFGSB', lw = 2)
+    plt.plot(range(len(fval_0sr1)), fval_0sr1, 'r',
+             range(len(fval_prox_grad)), fval_prox_grad, 'b',
+             range(len(fval_l_bfgs_b)), fval_l_bfgs_b, 'g', lw = 2)
     plt.xlim([0, 60])
     plt.yscale('log')
     plt.ylabel('Function Value')
     plt.xlabel('Number of Iterations')
-    plt.legend()
 
     return
 

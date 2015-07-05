@@ -23,7 +23,7 @@ print("done.")
 
 xstart=np.zeros(len(X[0]))
 
-sqn = PSQN({'dim':len(X[0])})
-sqn.solve(lr.F, lr.G, X, y)
+#sqn = PSQN({'dim':len(X[0])})
+#sqn.solve(lr.F, lr.G, X, y)
 
 fval = pm.compute_0sr1(f, gf, xstart)

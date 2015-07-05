@@ -233,8 +233,8 @@ def load_eeg():
     - You may want to convert the label file into a vector
     '''
     print("Loading eeg data set...")
-    data_name = '../../datasets/eeg_data.npy'
-    label_name = '../../datasets/eeg_label.npy'
+    data_name = '../datasets/eeg_data.npy'
+    label_name = '../datasets/eeg_label.npy'
 
     X = np.load(data_name)
     y = np.load(label_name)

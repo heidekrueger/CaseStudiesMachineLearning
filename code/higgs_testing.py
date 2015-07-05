@@ -34,29 +34,22 @@ def print_f_vals(testcase, rowlim, options, folderpath, sqn):
     sqn.set_start(dim=sqn.options['dim'])
     w = sqn.get_position()
 
-    if testcase == "sql":
-        sqn.set_options({'sampleFunction': logreg.sample_batch})
-        X, z = None, None
-    else:
-        X, z = datasets.load_higgs(rowlim)
-
+    sqn.set_options({'sampleFunction': logreg.sample_batch})
+    X, z = None, None
+    
     if folderpath is not None:
         ffile = open(folderpath + "%d_%d.txt" %(sqn.options['batch_size'], sqn.options['batch_size_H']), "w+")
+    
     f_evals = []
-    z_vals = []
     for k in itertools.count():
 
-        if testcase == "sql":
-            w = sqn.solve_one_step(logreg.F, logreg.G, k=k)
-        else:
-            w = sqn.solve_one_step(logreg.F, logreg.G, X = X, z = z, k=k)
+        w = sqn.solve_one_step(logreg.F, logreg.G, k=k)
         print k
-       # X_S, z_S = sqn._draw_sample(sqn.options['N'], b = 100)
+        
+        # X_S, z_S = sqn._draw_sample(sqn.options['N'], b = 100)
         f_evals.append(sqn.f_vals[-1])
         #print(logreg.F(w, X_S, z_S))
         
-        #z_vals.append(stochastic_tools.stationarity_convergence(f_evals))
-        #print stochastic_tools.test_normality(z_vals)
         
         if k%20 == 0 and sqn.is_stationary():
                 print sqn.get_test_variance()
@@ -102,7 +95,6 @@ if __name__ == "__main__":
         batch_sizes = [100, 500, 1000, 10000]        
         batch_sizes = [50]
         
-        testcase = ""
         testcase = "sql"
         
         for batch_size in batch_sizes:

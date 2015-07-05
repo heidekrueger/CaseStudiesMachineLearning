@@ -1,10 +1,9 @@
-import stochastic_tools
-from stochastic_tools import stochastic_gradient
-from stochastic_tools import armijo_rule
-from SQN import SQN
+import SQN.stochastic_tools as stochastic_tools
+from SQN.stochastic_tools import armijo_rule, stochastic_gradient
+from SQN.SQN import SQN
 import numpy as np
 
-import ProxMeth
+import ProximalMethod.ProxMeth as ProxMeth
 
 def prox_grad(x, t, l):
     """ 
@@ -18,7 +17,7 @@ class PSQN(SQN):
     """
     Proximal Methods SQN
     """
-    def __init__(self, options):
+    def __init__(self, options=None):
         SQN.__init__(self, options)
         self.options['L'] = 1
         self.options['M'] = 1.0

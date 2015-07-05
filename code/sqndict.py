@@ -153,8 +153,8 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
                 sqn.draw_sample = draw_sample
                 
                 self.components = d.reshape(len(d)/self.n_components, self.n_components)
-                #print self.components
                 self.recon = self.lasso_subproblem(Xt.T)
+                
                 print Xt
                 print self.recon
                 # TODO: WHY???

@@ -85,7 +85,8 @@ class StochasticOptimizer:
         self.options['testinterval'] = 30
         self.options['updates_per_batch'] = 1
         # If options is given
-        self.set_options(options)
+        if options is not None:
+                self.set_options(options)
 
         self.debug = False
         self.termination_counter = 0

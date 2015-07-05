@@ -70,11 +70,16 @@ def load_data2():
 
 def load_iris():
     iris = sklearn.datasets.load_iris()
+    X = iris.data
+    y = iris.target
+    
+    """    
     X, y = [], []
     for i in range(len(iris.target)):
         if iris.target[i] != 2:
             X.append(np.array([1] + list(iris.data[i])))
             y.append(iris.target[i])
+    """
     return X, y
 
 

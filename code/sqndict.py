@@ -3,7 +3,7 @@ import numpy as np
 from time import time
 from DictLearning.dictionary_learning import StochasticDictionaryLearning
 from SQN.SQN import SQN
-
+from scipy.optimize import minimize
 
 class SqnDictionaryLearning(StochasticDictionaryLearning):
 
@@ -40,9 +40,8 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
                 D = d.reshape(len(d)/self.n_components, self.n_components)
                # print D
                 one_f = []
-                print np.array(self.recon.T[0].flat)
-                print self.recon.T[0]
-                print "dot", D.dot(np.array(self.recon.T[0].flat))
+                #print np.array(self.recon.T[0].flat)
+                #print "dot", D.dot(np.array(self.recon.T[0].flat))
                 for x, a in zip(X, self.recon.T):
                         x = np.asarray(x.flat)
                         a = np.asarray(a.flat)
@@ -53,13 +52,13 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
 
         def finite_differences(self, d, X, z=None):
                 grad = np.zeros(d.shape)
-                r = 0.1
+                r = 0.001
                 for i in range(len(d)):
                         step = d.copy()
                         step[i] += r
                         #print step-d
                         grad[i] = (self.f(step, X, z) - self.f(d, X, z))/r
-                        print grad[i]
+                        #print grad[i]
                 return grad
             
         def g_fast(self, d, X, z=None):
@@ -90,11 +89,25 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
                 return np.multiply(1.0/len(X), grad)
                 
         def g(self, d, X, z=None):
-        #        print np.max(self.g_fast(d, X, z) - self.finite_differences(d, X, z))
-                print self.finite_differences(d, X, z)
-                return self.finite_differences(d, X, z)
+                """
+                print "g"
+                print np.max(self.g_fast(d, X, z) - self.finite_differences(d, X, z))
+                print np.max(self.g_comp_wise(d, X, z) - self.finite_differences(d, X, z))
+                print np.max(self.g_comp_wise(d, X, z) - self.g_fast(d, X, z))
+                """
+                #print self.finite_differences(d, X, z)
                 #return self.finite_differences(d, X, z)
-                
+                return self.g_fast(d, X, z)
+        
+        
+        """
+        def lasso_subproblem(self, X):
+                D = self.components
+                zielfun = lambda a, x: 0.5*np.linalg.norm(x - D.dot(a))**2
+                a = np.zeros( (D.shape[1], 1) )
+                alpha = [ minimize(lambda w: zielfun(w, x), a)['x'] for x in X.T ]
+                return np.asmatrix(alpha)
+        """                             
         def fit(self, X):
             '''
             This method runs online dictionary learning on data X and update
@@ -131,6 +144,7 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
                        'M': 5,
                        'batch_size_H': 10,
                        'L': 5,
+                       'normalize': True,
                        'updates_per_batch': 30}
             
             sqn = SQN(options)
@@ -141,10 +155,10 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
             sqn._armijo_rule = lambda f,g,x,s, start, beta, gamma: 0.001
             sqn.set_start(w1 = np.array(self.components.flat))
             d = sqn.get_position()
-            print d
+            #print d
             for k in itertools.count():
                 print k
-                j = np.random.randint(0, len(X), sqn.options['batch_size'])
+                j = np.random.randint(0, len(X), self.n_components)#sqn.options['batch_size'])
                 Xt = X[j, :]
                 Xt = np.asmatrix(Xt)
                     
@@ -153,15 +167,17 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
                 sqn.draw_sample = draw_sample
                 
                 self.components = d.reshape(len(d)/self.n_components, self.n_components)
+                #print Xt.T
+                
                 self.recon = self.lasso_subproblem(Xt.T)
                 
-                print Xt
+                #print Xt
                 print self.recon
                 # TODO: WHY???
                 break
                 d = sqn.solve_one_step(self.f, self.g, X, None, k)
-                print d[1:10]
-                self.recon = []
+                #print d[1:10]
+                #self.recon = []
                 if k > sqn.options['max_iter'] or sqn.termination_counter > 4:
                     iterations = k
                     break

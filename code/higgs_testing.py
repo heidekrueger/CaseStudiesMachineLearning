@@ -51,8 +51,8 @@ def print_f_vals(testcase, rowlim, options, folderpath, sqn):
         #print(logreg.F(w, X_S, z_S))
         
         
-        if k%20 == 0 and sqn.is_stationary():
-                print sqn.get_test_variance()
+        if k%20 == 0 and sqn._is_stationary():
+                print sqn._get_test_variance()
                 print sqn.options['batch_size'], sqn.options['batch_size_H']
     #            sqn.set_options({'batch_size': sqn.options['batch_size']+2, 'batch_size_H': sqn.options['batch_size_H']+1})
 
@@ -75,7 +75,6 @@ def print_f_vals(testcase, rowlim, options, folderpath, sqn):
 """
 Main
 """
-
 if __name__ == "__main__":
     
         """

@@ -6,8 +6,10 @@
 import numpy as np
 import itertools
 from collections import deque
-import stochastic_tools
-from stochastic_tools import test_normality
+try: import stochastic_tools
+except: import SQN.stochastic_tools as stochastic_tools
+try: from stochastic_tools import test_normality
+except: from SQN.stochastic_tools import test_normality
 """
 TODO: Iterator support not yet tested! Try on Dictionary Learning Problem!
 """
@@ -312,7 +314,7 @@ class SQN(StochasticOptimizer):
         if k % self.options['testinterval'] == 0 and self.is_stationary() and self.get_test_variance() < 0.005:
                 self.termination_counter += 1
                 if self.debug:
-                    print "stationary"
+                    print("stationary")
         
         if self.debug:
             print(self.w)

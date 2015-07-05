@@ -157,7 +157,7 @@ class LogisticRegression():
         """
         :returns: stochastic gradient of the logistic regression problem
         """
-        return sum([self.g(w, X[i], Y[i]) for i in range(len(X))])
+        return sum([self.g(w, X[i], Y[i]) for i in range(len(X))])/len(X)
 
     def train(self, X, y, method='SQN'):
         '''

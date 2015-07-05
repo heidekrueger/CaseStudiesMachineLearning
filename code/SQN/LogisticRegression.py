@@ -133,19 +133,17 @@ class LogisticRegression():
         #return sum(map(lambda t: self.f(w, t[0], t[1]), zip(X, y)))/len(X) +  self.L_2(w) 
         return sum([self.f(w,X[i],y[i]) for i in range(len(y))]) /float(len(y)) + self.L_2(w) + self.L_1(w)
 
-    def g(self, w, X, y, lam=0.0):
+    def g(self, w, X, y):
         '''
         Gradient of F
 
         INPUTS:
-        - self
         - w
         - X
         - y
-        - lam
 
         OUTPUT:
-        - gradient of f
+        - gradient of f evaluated at exactly one sample
         '''
 
         # TODO: L_1 term correct ???
@@ -154,6 +152,12 @@ class LogisticRegression():
         self.gevals += 1
 
         return (hyp - y) * X + self.lam_2 * w + self.lam_1 * w
+
+    def G(self, w, X, Y):
+        """
+        :returns: stochastic gradient of the logistic regression problem
+        """
+        return sum([self.g(w, X[i], Y[i]) for i in range(len(X))])
 
     def train(self, X, y, method='SQN'):
         '''

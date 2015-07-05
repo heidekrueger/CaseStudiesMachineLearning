@@ -43,27 +43,29 @@ def print_f_vals(testcase, rowlim, options, folderpath, sqn):
     if folderpath is not None:
         ffile = open(folderpath + "%d_%d.txt" %(sqn.options['batch_size'], sqn.options['batch_size_H']), "w+")
     f_evals = []
+    z_vals = []
     for k in itertools.count():
 
         if testcase == "sql":
-            w = sqn.solve_one_step(logreg.F, logreg.g, k=k)
+            w = sqn.solve_one_step(logreg.F, logreg.G, k=k)
         else:
-            w = sqn.solve_one_step(logreg.F, logreg.g, X = X, z = z, k=k)
+            w = sqn.solve_one_step(logreg.F, logreg.G, X = X, z = z, k=k)
+        print k
+       # X_S, z_S = sqn._draw_sample(sqn.options['N'], b = 100)
+        f_evals.append(sqn.f_vals[-1])
+        #print(logreg.F(w, X_S, z_S))
         
-        X_S, z_S = sqn._draw_sample(sqn.options['N'], b = 100)
-        f_evals.append(logreg.F(w, X_S, z_S))
+        #z_vals.append(stochastic_tools.stationarity_convergence(f_evals))
+        #print stochastic_tools.test_normality(z_vals)
         
-        if k%30 == 0 and stochastic_tools.test_stationarity(f_evals):
+        if k%20 == 0 and sqn.is_stationary():
+                print sqn.get_test_variance()
                 print sqn.options['batch_size'], sqn.options['batch_size_H']
-       #         sqn.set_options({'batch_size': sqn.options['batch_size']+15, 'batch_size_H': sqn.options['batch_size_H']+10})
-                #sqn.f_vals = sqn.f_vals[-2:-1]
-        # performance analysis
-        #if logreg.adp >= 1e4:
-          #  break
-        
+    #            sqn.set_options({'batch_size': sqn.options['batch_size']+2, 'batch_size_H': sqn.options['batch_size_H']+1})
+
         sep = ","
 
-        line = sep.join([str(logreg.fevals), str(logreg.gevals), str(logreg.adp), str(sqn.f_vals[-1]), str(sqn.g_norms[-1])] + [str(e) for e in list(w)])
+        line = sep.join([str(logreg.fevals), str(logreg.gevals), str(logreg.adp), str(sqn.f_vals[-1]), str(sqn.g_norms[-1])])
         line = line[:-1] + "\n"
 
         if folderpath is not None:
@@ -92,13 +94,13 @@ if __name__ == "__main__":
         """
         rowlim = 5e6
         batch_size = 100
-        options = {'dim':29, 'N':rowlim, 'L': 10, 'max_iter': 5000, 'batch_size': batch_size, 'batch_size_H': 10, 'beta':10, 'M':3}
+        options = {'dim':29, 'N':rowlim, 'L': 4, 'max_iter': 5000, 'batch_size': batch_size, 'batch_size_H': 10, 'beta':10, 'M':10, 'updates_per_batch': 3, 'testinterval':30}
         
         folderpath = "../outputs/"
-        folderpath = None
+        #folderpath = None
         
         batch_sizes = [100, 500, 1000, 10000]        
-        batch_sizes = [10]
+        batch_sizes = [50]
         
         testcase = ""
         testcase = "sql"

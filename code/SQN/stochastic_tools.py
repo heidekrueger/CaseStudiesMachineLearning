@@ -177,19 +177,38 @@ def set_iter_values(iterator, w):
         iterator[i] = w[i]
 
 from scipy.signal import welch
-def test_stat(phi):
+from statsmodels.tsa.stattools import acovf
+def stationarity_convergence(phi):
     
         m = 20 # burn in 
-        n = len(phi)
-        nb = 0.5*n
-        na = 0.1*n
+        n = len(phi) - m
+        if n <= 0:
+                return 0
+        na = max(1,int(0.1*n))
+        nb = max(1,int(0.5*n))
         
-        phi_b = sum(phi[(m+1):(m+nb)])/nb
-        phi_a = sum(phi[(m+n-na+1):(m+n)])/na
+        phi_a = phi[(m+n-na):(m+n)]
+        phi_b= phi[(m):(m+nb)]
+        phi_b= phi[(m+n-nb):(m+n)]
+        
+        phi_b_bar = sum(phi_b)/nb
+        phi_a_bar = sum(phi_a)/na
+        if len(phi_a) <= 1 or len(phi_b) <= 1:
+                return 1
+        
+        v_a = acovf(phi_a)
+        v_b = acovf(phi_b)
         
         # n gets large and na/n and nb/n stay fixed
-        z_g = (phi_a - phi_b)/np.sqrt( 1 )
-        
+        z_g = (phi_a_bar - phi_b_bar)/np.sqrt( v_a[0] + v_b[0] )
+        return z_g
+
+from statsmodels.stats.diagnostic import lillifors
+def test_normality(f, level = 0.01, burn_in = 200):
+        if len(f) <= burn_in + 1:
+                return False
+        return lillifors(f)[1] > level
+    
 def test_stationarity(f_evals):
     """
     Tests for stationarity of the input sequence using the sample
@@ -201,7 +220,7 @@ def test_stationarity(f_evals):
     n = len(f_evals)
     # number of points that will be considered for stationarity:
     m = 50
-    M = 100
+    M = 60
     if n < m:
         print "too small"
         return False

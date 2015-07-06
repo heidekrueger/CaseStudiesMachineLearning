@@ -20,7 +20,7 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
                 """
 
         def vector_to_matrix(self, v):
-                return v.reshape((len(v)/self.n_components, self.n_components))
+                return v.reshape((len(v.flat)/self.n_components, self.n_components))
                 """
                 nrow = self.n_components
                 D = np.zeros((len(v)/self.n_components, self.n_components))
@@ -197,4 +197,4 @@ if __name__ == '__main__':
         print D.flat[:]
         v = sd.matrix_to_vector(D)
         print sd.vector_to_matrix(v)
-        print v.reshape(2, len(v)/2)
+        print v.reshape(2, len(v.flat)/2)

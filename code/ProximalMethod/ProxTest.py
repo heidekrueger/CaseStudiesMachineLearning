@@ -52,18 +52,20 @@ def prox_comparison():
     fval_0sr1 = pm.compute_0sr1(f, gf, x0, l_reg = l)
     fval_prox_grad = pg.proximal_gradient(f, gf, x0, 1 / L, l_reg = l)
     spopt.fmin_l_bfgs_b(f_l_bfgs_b, x0_l_bfgs_b, gf_l_bfgs_b, 
-                        bounds = bounds, callback = read_fval)
+                        bounds = bounds, callback = read_fval, maxiter = 55)
     fval_0sr1.insert(0, f(x0))
     fval_prox_grad.insert(0, f(x0))
     fval_l_bfgs_b.insert(0, f_l_bfgs_b(x0_l_bfgs_b))
-    plt.plot(range(len(fval_0sr1)), fval_0sr1, 'r',
-             range(len(fval_prox_grad)), fval_prox_grad, 'b',
-             range(len(fval_l_bfgs_b)), fval_l_bfgs_b, 'g', lw = 2)
-    plt.xlim([0, 35])
+    line1, = plt.plot(range(len(fval_0sr1)), fval_0sr1, 'r', label = '0SR1', lw = 2)
+    line2, = plt.plot(range(len(fval_prox_grad)), fval_prox_grad, 'b', label = 'ProxGrad', lw = 2)
+    line3, = plt.plot(range(len(fval_l_bfgs_b)), fval_l_bfgs_b, 'g', label = 'L-BFGS-B', lw = 2)
+    plt.xlim([0, 55])
     plt.yscale('log')
+    plt.ylim([1e1, 1e13])
     plt.ylabel('Function Value')
     plt.xlabel('Number of Iterations')
-    tikz_save( 'myfile.tikz' );
+    plt.legend(handles = [line1, line2, line3])
+    tikz_save( 'myfile2.tikz' );
 
     return
 
@@ -72,8 +74,10 @@ if __name__ == "__main__":
     import numpy as np
     import scipy as sp
     
-    A, b, b_l_bfgs_b, A_sq, Ab, Ab_l_bfgs_b, x0, x0_l_bfgs_b, bounds, l, L = initialize_lasso((15, 30), 2)
+    A, b, b_l_bfgs_b, A_sq, Ab, Ab_l_bfgs_b, x0, x0_l_bfgs_b, bounds, l, L = initialize_lasso((1500, 3000), 0.1)
     fval_l_bfgs_b = []
+    x0 *= 0.1
+    x0_l_bfgs_b *= 0.1
     
     def f(x):
         temp = np.dot(A, x) - b

@@ -11,6 +11,12 @@
 \usepackage{pgfplots}
 \usepackage{tikz}
 \usepgfplotslibrary{dateplot}
+\usepackage{caption}
+
+\newlength\figureheight
+\newlength\figurewidth
+\DeclareMathOperator{\prox}{prox}
+\DeclareMathOperator{\argmin}{argmin}
 
 \title{Stochastic Optimization in Machine Learning}
 \subtitle{Case Studies in Nonlinear Optimization}
@@ -40,8 +46,31 @@
 
 \section{Introduction}
 
-  \begin{frame}[t]\frametitle{Machine Learning}
-        
+  \begin{frame}[t]\frametitle{What is Machine Learning?}
+	  	Implementation of autonomously learning software for:
+        \begin{itemize}
+        	\item Discovery of patterns and relationships in data
+        	\item Prediction of future events
+        \end{itemize}
+        \alert{Examples:}
+        \begin{columns}[T]
+        	\begin{column}{.25\textwidth}
+        		Higgs-Boson\\
+        		\includegraphics[width = \linewidth]{CMS_Higgs-event.jpg}
+        	\end{column}\hfill
+        	\begin{column}{.25\textwidth}
+        		Compressed Sensing\\
+        		\includegraphics[width = \linewidth]{plot_tomography_l1_reconstruction_001.png}
+        	\end{column}\hfill
+        	\begin{column}{.25\textwidth}
+        		EEG\\
+        		\includegraphics[width = \linewidth]{eeg_pic.jpg}
+        	\end{column}\hfill
+        	\begin{column}{.25\textwidth}
+        		Image Reconstruction\\
+        		\includegraphics[width = \linewidth]{lena_pic.jpg}
+        	\end{column}
+        \end{columns}
   \end{frame}
 
   \begin{frame}
@@ -49,15 +78,22 @@
       \begin{itemize}
         \item Massive amounts of training data 
         \item Construction of very large models
-        \item How to handle the high memory/computational demands?
+        \item Handling high memory/computational demands
       \end{itemize}
       \vspace{36pt}
-      \pause 
-    \textbf{\emph{Solution:} \alert{Stochastic Methods}}\\Update on smaller amounts of training data in each iteration!
+    \centering\alert{Stochastic Methods}
+  \end{frame}
+  
+  \begin{frame}{Stochastic Framework}
+  	
   \end{frame}
 
 \section{A Stochastic Quasi-Newton Method}
-
+ \plain{Classification\\
+ 	\vspace{10pt}
+ 	\alert{Did we just detect a Higgs-Boson?}
+ 	\vspace{15pt}\\
+ 	\includegraphics[width = 0.5\textwidth]{CMS_Higgs-event.jpg}}
   \begin{frame}
     \frametitle{Stochastic Quasi Newton}
       What is it?
@@ -80,16 +116,61 @@
       and comparison with traditional SGD
   \end{frame}
 
- \section{Proximal Splitting Method}
-
-   \plain{Outline of Section by Jacob and Fin}
-   \begin{frame}\frametitle{First Prox Slide}
-       \begin{itemize}
-            \item hallo
-            \item \alert{du muschi}
-            \item \cite{becker2012quasi}
-          \end{itemize}   
+ \section{Proximal Method}
+ \plain{Image Reconstruction\\
+ 	\vspace{10pt}
+ 	\alert{What did the original image look like?}
+ 	\vspace{15pt}\\
+ 	\includegraphics[width = 0.8\textwidth]{plot_tomography_l1_reconstruction_001.png}}
+ 
+ 
+   \begin{frame}\frametitle{Proximal Method}
+       \begin{flalign*}
+       	\text{\alert{Problem}}&&
+       	\min_x &\;F(x) := \underbrace{f(x)}_{smooth} \quad + \underbrace{h(x)}_{non-smooth}&
+       \end{flalign*}
+       \pause
+       \begin{flalign*}
+       	\text{\alert{Proximity Operator}}&&\prox_f(v) = &\underset{x}{\argmin} \; \bigl( f(x) + \frac{1}{2} \lVert x - v \rVert^2_2 \bigr)&
+       \end{flalign*}
+			\centering\includegraphics[width = 0.5\textwidth]{prox_boyd.jpg}
+   \end{frame}
    
+   \begin{frame}{Proximal Method}
+   	\alert{Traditional Proximal Gradient Step:}
+   	\begin{equation*}
+   	x_{k+1} = \prox_{\lambda_kh}(x_k - \lambda_k\nabla f(x_k))
+   	\end{equation*}
+   	\alert{Quasi-Newton Proximal Step:}
+   	\begin{equation*}
+   	x_{k+1} = \prox_h^{B_k}(x_k - B_k^{-1}\nabla f(x_k)),
+   	\end{equation*}
+   	with $B_k = \underbrace{D_k}_{diag} + \underbrace{u_k}_{\in\mathbb{R}^n}u_k^T$.
+   \end{frame}
+   
+   \begin{frame}{Proximal Method}
+   	\begin{columns}[T]
+   		\begin{column}{.5\textwidth}
+   			$F(x) = \lVert Ax - b \rVert + \lambda \lVert x \rVert_1$\\
+   			$A \in \mathbb{R}^{1500 \times 3000},\:b \in \mathbb{R}^{1500}$\\
+   			$A_{ij},\:b_i\:$ \textasciitilde $\:\mathcal{N}(0,1)$, $\:\lambda = 0.1$\\
+   			\vspace{10pt}
+   			\resizebox{\linewidth}{!}{\input{myfile2.tikz}}
+   		\end{column}\hfill
+   		\begin{column}{.5\textwidth}
+   			$F(x) = \lVert Ax - b \rVert + \lambda \lVert x \rVert_1$\\
+   			$A \in \mathbb{R}^{1500 \times 3000},\:b \in \mathbb{R}^{1500}$\\
+   			$A_{ij},\:b_i\:$ \textasciitilde $\:\mathcal{N}(0,1)$, $\:\lambda = 0.1$\\
+   			\vspace{10pt}
+   			\resizebox{\linewidth}{!}{\input{myfile2.tikz}}
+   		\end{column}
+   	\end{columns}
+   \end{frame}
+   
+   \begin{frame}{Proximal Method}
+   	\alert{Effect of regularization parameter $\lambda$ on solution:}\\
+   	\centering\includegraphics[width = 0.7\textwidth]{lambda1.png}\\
+   	\centering\includegraphics[width = 0.7\textwidth]{lambda2.png}
    \end{frame}
 
 \section{Logistic Regression: An Example}
@@ -111,20 +192,7 @@
   \begin{frame}{Summary}
     \begin{center}\ccbysa\end{center}
   \end{frame}
-
-  \begin{frame}
-    \frametitle{title}
-    \begin{figure}
-      \newlength\figureheight
-      \newlength\figurewidth
-      \setlength\figureheight{4cm}
-      \setlength\figurewidth{6cm}
-      \input{myfile.tikz}    
-    \end{figure}
-
-
-      hallo
-  \end{frame}
+  
 
   \plain{Questions?}
 

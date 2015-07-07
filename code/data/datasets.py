@@ -113,6 +113,7 @@ def split_into_files(src, dest_folder):
 try:
         import MySQLdb
 except:
+        import pymysql as MySQLdb
         print "SQL Functionality is not working!"
 def get_mysql():
     db = MySQLdb.connect(user="casestudies",

@@ -125,7 +125,7 @@ def print_f_vals(testcase, rowlim, options, folderpath, sqn):
         X_S, z_S = sqn._draw_sample(sqn.options['N'], b = 500)
         f_evals.append(logreg.F(w, X_S, z_S))
         
-        if k%30 == 0 and stochastic_tools.test_stationarity(f_evals):
+        if k%30 == 0 and k > 29 and stochastic_tools.test_stationarity(f_evals):
                 print sqn.options['batch_size'], sqn.options['batch_size_H']
                 sqn.set_options({'batch_size': sqn.options['batch_size']+15, 'batch_size_H': sqn.options['batch_size_H']+10})
                 #sqn.f_vals = sqn.f_vals[-2:-1]
@@ -264,7 +264,7 @@ if __name__ == "__main__":
         https://archive.ics.uci.edu/ml/datasets/HIGGS
         the file should be in <Git Project root directory>/datasets/
         """
-        rowlim = 5e6
+        rowlim = 5e4
         batch_size = 100
         options = {'dim':29, 'N':rowlim, 'L': 10, 'max_iter': 5000, 'batch_size': batch_size, 'batch_size_H': 10, 'beta':10, 'M':3}
         
@@ -272,7 +272,7 @@ if __name__ == "__main__":
         folderpath = None
         
         batch_sizes = [100, 500, 1000, 10000]        
-        batch_sizes = [20]
+        batch_sizes = [100]
 
         for batch_size in batch_sizes:
             options['batch_size'] = batch_size
@@ -365,9 +365,9 @@ if __name__ == "__main__":
         logreg = LogisticRegression(lam_1=0.0, lam_2=0.0)
         options = {'dim': len(data[0]),
                    'L': 10,
-                   'max_iter': 1000,
-                   'batch_size': 500,
-                   'batch_size_H': 100,
+                   'max_iter': 500,
+                   'batch_size': 100,
+                   'batch_size_H': 1000,
                    'beta': 10,
                    'M': 3}
         sqn = SQN(options)

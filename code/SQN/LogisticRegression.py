@@ -150,8 +150,9 @@ class LogisticRegression():
         # TODO
         hyp = self.h(w, X)
         self.gevals += 1
-
-        return (hyp - y) * X + self.lam_2 * w + self.lam_1 * w
+        #print "hyp-y, "(hyp-y).shape
+        #print X
+        return np.dot((hyp - y),X) + self.lam_2 * w + self.lam_1 * w
 
     def G(self, w, X, Y):
         """

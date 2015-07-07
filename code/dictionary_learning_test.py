@@ -34,7 +34,6 @@
 from DictLearning.dictionary_learning import StochasticDictionaryLearning
 from sqndict import SqnDictionaryLearning
 from sklearn.feature_extraction.image import reconstruct_from_patches_2d
-from sklearn.linear_model import OrthogonalMatchingPursuit
 import numpy as np
 from time import time
 import matplotlib.pyplot as plt
@@ -42,34 +41,34 @@ from sklearn.feature_extraction.image import extract_patches_2d
 from scipy.misc import lena
 
 
-def learn_dictionaries(data, n_components=100, option=None,
-                       alpha=0.001, n_iter=30, eta=100, verbose=0):
-    '''
-    Learn dictionaries with both methods
-    INPUTS : dictionaries parameters
-    - n_components
-    - option, select SQN method or normal method
-    - l, regularization parameter
-    - n_iter, int, number of iterations
-    - eta, int, mini batch size
-    - verbose, int, control verbosity of algorithm
+# def learn_dictionaries(data, n_components=100, option=None,
+#                        alpha=0.001, n_iter=30, eta=100, verbose=0):
+#     '''
+#     Learn dictionaries with both methods
+#     INPUTS : dictionaries parameters
+#     - n_components
+#     - option, select SQN method or normal method
+#     - l, regularization parameter
+#     - n_iter, int, number of iterations
+#     - eta, int, mini batch size
+#     - verbose, int, control verbosity of algorithm
 
-    OUTPUTS :
-    - D_us
-    - D_sklearn
-    '''
+#     OUTPUTS :
+#     - D_us
+#     - D_sklearn
+#     '''
 
-    d_us = StochasticDictionaryLearning(n_components=100,
-                                        option=None,
-                                        alpha=0.001,
-                                        n_iter=30,
-                                        eta=100,
-                                        verbose=0)
+#     d_us = StochasticDictionaryLearning(n_components=100,
+#                                         option=None,
+#                                         alpha=0.001,
+#                                         n_iter=30,
+#                                         eta=100,
+#                                         verbose=0)
 
-    d_sklearn = MiniBatchDictionaryLearning(n_components=100,
-                                            alpha=1,
-                                            n_iter=500,
-                                            batch_size=3)
+#     d_sklearn = MiniBatchDictionaryLearning(n_components=100,
+#                                             alpha=1,
+#                                             n_iter=500,
+#                                             batch_size=3)
 
 
 def plot_dictionary(D, dt=0, ld=0):
@@ -195,18 +194,18 @@ if __name__ == '__main__':
                                        max_iter=10,
                                        batch_size=10,
                                        verbose=10)
-    
+
     sdl2 = SqnDictionaryLearning(n_components=10,
-                                option=None,
-                                alpha=1.0,
-                                n_iter=1,
-                                max_iter=20,
-                                batch_size=10,
-                                verbose=10)
-    
+                                 option=None,
+                                 alpha=1.0,
+                                 n_iter=1,
+                                 max_iter=20,
+                                 batch_size=10,
+                                 verbose=10)
+
     # loads data
     data, lena, distorted = preprocess_data(lena)
-    
+
     # takes dictionary
     case = 2
     if case != 2:

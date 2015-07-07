@@ -19,7 +19,7 @@ def proximal_gradient(f, grad_f, x0, t, **options):
     x_old = x0
     fval = []
     
-    for i in range(55):
+    for i in range(300):
         
         x_new = prox(x_old - t * grad_f(x_old), t, **options)
         s = x_new - x_old

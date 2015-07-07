@@ -34,7 +34,6 @@
 from DictLearning.dictionary_learning import StochasticDictionaryLearning
 from sqndict import SqnDictionaryLearning
 from sklearn.feature_extraction.image import reconstruct_from_patches_2d
-from sklearn.linear_model import OrthogonalMatchingPursuit
 import numpy as np
 from time import time
 import matplotlib.pyplot as plt
@@ -42,34 +41,34 @@ from sklearn.feature_extraction.image import extract_patches_2d
 from scipy.misc import lena
 
 
-def learn_dictionaries(data, n_components=100, option=None,
-                       alpha=0.001, n_iter=30, eta=100, verbose=0):
-    '''
-    Learn dictionaries with both methods
-    INPUTS : dictionaries parameters
-    - n_components
-    - option, select SQN method or normal method
-    - l, regularization parameter
-    - n_iter, int, number of iterations
-    - eta, int, mini batch size
-    - verbose, int, control verbosity of algorithm
+# def learn_dictionaries(data, n_components=100, option=None,
+#                        alpha=0.001, n_iter=30, eta=100, verbose=0):
+#     '''
+#     Learn dictionaries with both methods
+#     INPUTS : dictionaries parameters
+#     - n_components
+#     - option, select SQN method or normal method
+#     - l, regularization parameter
+#     - n_iter, int, number of iterations
+#     - eta, int, mini batch size
+#     - verbose, int, control verbosity of algorithm
 
-    OUTPUTS :
-    - D_us
-    - D_sklearn
-    '''
+#     OUTPUTS :
+#     - D_us
+#     - D_sklearn
+#     '''
 
-    d_us = StochasticDictionaryLearning(n_components=100,
-                                        option=None,
-                                        alpha=0.001,
-                                        n_iter=30,
-                                        eta=100,
-                                        verbose=0)
+#     d_us = StochasticDictionaryLearning(n_components=100,
+#                                         option=None,
+#                                         alpha=0.001,
+#                                         n_iter=30,
+#                                         eta=100,
+#                                         verbose=0)
 
-    d_sklearn = MiniBatchDictionaryLearning(n_components=100,
-                                            alpha=1,
-                                            n_iter=500,
-                                            batch_size=3)
+#     d_sklearn = MiniBatchDictionaryLearning(n_components=100,
+#                                             alpha=1,
+#                                             n_iter=500,
+#                                             batch_size=3)
 
 
 def plot_dictionary(D, dt=0, ld=0):
@@ -195,18 +194,21 @@ if __name__ == '__main__':
                                        max_iter=10,
                                        batch_size=10,
                                        verbose=10)
-    
+
     sdl2 = SqnDictionaryLearning(n_components=10,
-                                option=None,
-                                alpha=1.0,
-                                n_iter=1,
-                                max_iter=20,
-                                batch_size=10,
-                                verbose=10)
-    
+                                 option=None,
+                                 alpha=1.0,
+                                 n_iter=1,
+                                 max_iter=20,
+                                 batch_size=10,
+                                 verbose=10)
+
+    # check sdl2 attributes
+    sdl2.print_attributes()
+
     # loads data
     data, lena, distorted = preprocess_data(lena)
-    
+
     # takes dictionary
     case = 2
     if case != 2:
@@ -216,41 +218,41 @@ if __name__ == '__main__':
         sdl2.fit(data)
         D = sdl2.components
 
-    # plots dictionary
-    plot_dictionary(D)
+    # # plots dictionary
+    # plot_dictionary(D)
 
-    # post process data
-    data, intercept = postprocess_data(lena)
+    # # post process data
+    # data, intercept = postprocess_data(lena)
 
-    from sklearn.decomposition.dict_learning import sparse_encode
+    # from sklearn.decomposition.dict_learning import sparse_encode
 
-    t0 = time()
-    title = 'first try'
-    reconstructions = lena.copy()
+    # t0 = time()
+    # title = 'first try'
+    # reconstructions = lena.copy()
 
-    # encode noisy patches with learnt dictionary
-    code = sparse_encode(data, D.T, gram=None,
-                         cov=None, algorithm='omp',
-                         n_nonzero_coefs=None, alpha=None,
-                         copy_cov=True, init=None,
-                         max_iter=1000, n_jobs=1)
+    # # encode noisy patches with learnt dictionary
+    # code = sparse_encode(data, D.T, gram=None,
+    #                      cov=None, algorithm='omp',
+    #                      n_nonzero_coefs=None, alpha=None,
+    #                      copy_cov=True, init=None,
+    #                      max_iter=1000, n_jobs=1)
 
-    patch_size = (7, 7)
-    height, width = lena.shape
+    # patch_size = (7, 7)
+    # height, width = lena.shape
 
-    patches = np.dot(code, D.T)
-    patches += intercept
-    patches = patches.reshape(len(data), *patch_size)
+    # patches = np.dot(code, D.T)
+    # patches += intercept
+    # patches = patches.reshape(len(data), *patch_size)
 
-    # reconstruct noisy image
-    reconstructions[:, height // 2:] = reconstruct_from_patches_2d(
-        patches, (width, height // 2))
+    # # reconstruct noisy image
+    # reconstructions[:, height // 2:] = reconstruct_from_patches_2d(
+    #     patches, (width, height // 2))
 
-    dt = time() - t0
-    print('done in %.2fs.' % dt)
+    # dt = time() - t0
+    # print('done in %.2fs.' % dt)
 
-    # show the difference
-    show_with_diff(distorted, lena, 'Distorted image')
-    show_with_diff(reconstructions, lena,
-                   title + ' (time: %.1fs)' % dt)
-    plt.show()
+    # # show the difference
+    # show_with_diff(distorted, lena, 'Distorted image')
+    # show_with_diff(reconstructions, lena,
+    #                title + ' (time: %.1fs)' % dt)
+    # plt.show()

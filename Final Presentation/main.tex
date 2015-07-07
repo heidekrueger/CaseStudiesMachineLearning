@@ -73,6 +73,31 @@
         \end{columns}
   \end{frame}
 
+  \begin{frame}\frametitle{ML and Optimization I}
+    \alert{Training} a Machine Learning model means finding optimal parameters $\omega$:
+
+    $$ \omega^* = \argmin_{\omega} F(\omega, X, z)$$
+    \pause
+    \begin{itemize}
+      \item \alert{$F$}: Loss function of chosen ML-model
+      \item \alert{$X$}: The training data ($N:=\#$samples $\times$ $\#$features matrix)
+      \item \alert{$z$}: Training labels (only in classification models; vector of size $N$)
+      \pause
+      \item The dimension $n$ of $\omega$ is model dependent, often $\#$features$+1$
+    \end{itemize}   
+  \end{frame}
+
+  \begin{frame}\frametitle{ML and Optimization II}
+    After we have found $\omega^*$, we can do \alert{Prediction} on new data points:
+
+    $$ \hat {z_i} := h(\omega^*, x_i)$$
+    \pause
+    \begin{itemize}
+      \item \alert{$x_i$}: new data point with \emph{unknown} label \alert{$z_i$}
+      \item \alert{$h$}: hypothesis function of the ML model
+    \end{itemize}   
+  \end{frame}
+
   \begin{frame}
     \frametitle{Challenges in Machine Learning}
       \begin{itemize}
@@ -81,39 +106,83 @@
         \item Handling high memory/computational demands
       \end{itemize}
       \vspace{36pt}
-    \centering\alert{Stochastic Methods}
+      \pause
+    \centering \large{Ansatz: \alert{Stochastic Methods}}
   \end{frame}
   
   \begin{frame}{Stochastic Framework}
-  	
+    $$ F(\omega) := \mathbb{E}\left[f(\omega, \xi)\right] \uncover<3>{= \frac{1}{N}\sum_{i=1}^N f(\omega, x_i, z_i)}$$
+    \begin{itemize}
+      \item<2-> \alert{$\xi$}: Random variable; takes the form of an input-output-pair $(x_i, z_i)$
+      \item<3-> \alert{$f$}: Partial loss function corresponding to a single data point.
+    \end{itemize}
   \end{frame}
 
-\section{A Stochastic Quasi-Newton Method}
+  \begin{frame}{Stochastic Methods}
+    \begin{columns}[T]
+      \begin{column}{.5\textwidth}
+        \centering \alert{Gradient Method}
+        $$\min F(\omega) $$
+
+        \uncover<2->{
+        $$\omega^{(k+1)}:= \omega^{(k)}-\alpha_k \nabla F(\omega^{(k)})$$\\
+        \phantom{zeile}
+        }
+      \end{column}\hfill
+      \begin{column}{.5\textwidth}
+        \centering \alert{Stochastic Gradient Descent}
+        $$\min \mathbb E \left [f(\omega, \xi)\right]$$
+        \uncover<3>{
+          $$\omega^{(k+1)}:= \omega^{(k)}-\alpha_k \alert{\nabla \hat F(\omega^{(k)})} $$
+          with
+          $$\alert{\nabla \hat F(\omega^{(k)})} := \frac{1}{b}\sum_{i\in \mathcal S_k}f(\omega, x_i, z_i)$$
+          where $\mathcal S_k \subset [N], \quad b:=|\mathcal S_k| \ll N$\\\alert{"Mini Batch"}
+        }
+      \end{column}
+    \end{columns}
+  \end{frame}
+
+\section{SQN: A Stochastic Quasi-Newton Method}
  \plain{Classification\\
  	\vspace{10pt}
  	\alert{Did we just detect a Higgs-Boson?}
  	\vspace{15pt}\\
  	\includegraphics[width = 0.5\textwidth]{CMS_Higgs-event.jpg}}
-  \begin{frame}
-    \frametitle{Stochastic Quasi Newton}
-      What is it?
-      Why?
-      Main ideas, high-level pseudo code overview?
-      short bfgs repitition?
-      Extreme Cases (L-BFGS, SGD)
-  \end{frame}
 
   \begin{frame}
-    \frametitle{HIGGS-Dataset}
-    Explain the Dataset quickly.
-    Why is this good for SQN testing?
-    Why is it challenging? (file size etc)
+    \frametitle{Higgs-Boson classification problem}
+      \begin{itemize}
+        \item Data from Monte-Carlo simulations
+        \item $X\in \mathbb R^{11.000.000 \times 29}$\\\emph{Lots} of samples, relatively small, dense feature set.
+        \item Here, we use \emph{Logistic Regression} for classification.
+      \end{itemize}
   \end{frame}
+
+  \begin{frame}\frametitle{Stochastic Quasi-Newton Method (SQN)}
+      \begin{itemize}
+        \item \alert{Stochastically} use second-order information
+        \item Based on BFGS-method.
+        \pause
+        \item Basic idea: $$ \omega^{(k+1)} = \omega^{(k)} - \alpha_k \alert{H_t} \nabla \hat F(\omega^{(k)})$$
+        \pause
+        \item $t$ running on slower time-scale than $k$. 
+        \item $H_t$ update in $\mathcal O(n)$ time and constant memory, using several tricks
+      \end{itemize}
+  \end{frame}
+
 
   \begin{frame}
     \frametitle{Behavior}
       Pretty picures about the behaviour of SQN on HIGGS
       and comparison with traditional SGD
+  \end{frame}
+
+  \begin{frame}\frametitle{Results}
+    \begin{itemize}
+      \item Can be faster than SGD on appropriate Datasets
+      \item Requires tedious, manual tuning of hyperparameters to be efficient!
+    \end{itemize}
+  
   \end{frame}
 
  \section{Proximal Method}
@@ -183,9 +252,42 @@
     Nice table with SQN, SGD (no reg, L2), (Lasso,) Prox (L1) showing
     Obj. value in found optimum, CPU time, Iterations, F1 score of prediction model
 
-    Use different reg. parameters??
-    Stop after fixed time? after fixed iters? after insign. improvements  
+    \begin{table}[t]
+    \centering
+      \begin{tabular}{r|c|c|c}
+        \phantom 0 & \textbf{$F(\omega^*)$} & \textbf{Model Score} & \textbf{Cost}\\
+      \hline \alert{No regularization}   &      & &  \\
+        SGD   & $0.01$  & $96\%$  & $x$ sec, $y$ AP\\
+        SQN   & $0.5$  & $96\%$  & $x$ sec, $y$ AP\\
+        Prox   & $0.01$  & $96\%$  & $x$ sec, $y$ AP\\
+      \hline \hline \alert{L1}        &    &   &  \\
+      LASSO & $.71$  &  $55\%$ & blablabla \\
+        Prox   & $0.01$  & $96\%$  & $x$ sec, $y$ AP\\
+      \hline \hline \alert{L2}        &    &   &  \\
+       SGD & $.71$  &  $55\%$ & blablabla \\
+        SQN   & $0.01$  & $96\%$  & $x$ sec, $y$ AP\\
+      \end{tabular}
+    \end{table}
   \end{frame}
+
+\plain{
+  \resizebox{\textwidth}{!}{    
+      \begin{tabular}{r|c|c|c}
+        \phantom 0 & \textbf{$F(\omega^*)$} & \textbf{Model Score} & \textbf{Cost}\\
+      \hline \alert{No regularization}   &      & &  \\
+        SGD   & $0.01$  & $96\%$  & $x$ sec, $y$ AP\\
+        SQN   & $0.5$  & $96\%$  & $x$ sec, $y$ AP\\
+        Prox   & $0.01$  & $96\%$  & $x$ sec, $y$ AP\\
+      \hline \hline \alert{L1}        &    &   &  \\
+      LASSO & $.71$  &  $55\%$ & blablabla \\
+        Prox   & $0.01$  & $96\%$  & $x$ sec, $y$ AP\\
+      \hline \hline \alert{L2}        &    &   &  \\
+       SGD & $.71$  &  $55\%$ & blablabla \\
+        SQN   & $0.01$  & $96\%$  & $x$ sec, $y$ AP\\
+      \end{tabular}
+      }
+    
+    }
 
 \section{Conclusion}
 

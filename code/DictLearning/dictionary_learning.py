@@ -65,6 +65,14 @@ class StochasticDictionaryLearning:
         self.option = option
         self.verbose = verbose
 
+    def print_attributes(self):
+        print "n_components", self.n_components
+        print "alpha", self.alpha
+        print "n_iter", self.n_iter
+        print "max_iter", self.max_iter
+        print "batch_size", self.batch_size
+        print "epsilon", self.epsilon
+
     def fit(self, X):
         '''
         This method runs online dictionary learning on data X and update
@@ -200,13 +208,13 @@ class StochasticDictionaryLearning:
         # 4: Sparse coding with LARS
         from sklearn.linear_model import LassoLars
         lars = LassoLars(alpha=self.alpha, verbose=False)
-        
-        #self.components = np.matrix([[8,2,3,4],[1,6,1,99]])
-        #Xt = np.matrix([[3,1],[6,7]])
-        #Xt[1,1] = 9999
+
+        # self.components = np.matrix([[8,2,3,4],[1,6,1,99]])
+        # Xt = np.matrix([[3,1],[6,7]])
+        # Xt[1,1] = 9999
         lars.fit(self.components, Xt)
         coef = lars.coef_
-        #print coef
+        # print coef
         coef = (np.asmatrix(coef)).T
 
         # Dimension control
@@ -339,3 +347,4 @@ class StochasticDictionaryLearning:
 
 if __name__ == "__main__":
     sdl = StochasticDictionaryLearning()
+    sdl.print_attributes()

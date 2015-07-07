@@ -124,10 +124,6 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
             - X : data
             '''
 
-            # Measure of running time
-            # t_fit = time()
-            # l_tsteps = []
-
             if self.verbose > 0:
                 print ""
                 print "Running online dictionary learning"
@@ -166,41 +162,51 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
             d = sqn.get_position()
 
             # check first dictionary
-            print ""
-            print "check first dictionary"
-            print "self.components dim", self.components.shape
+            if self.verbose > 20:
+                print ""
+                print "check first dictionary"
+                print "self.components dim", self.components.shape
 
-            print ""
-            print "check first position"
-            print "position dim", d.shape
+                print ""
+                print "check first position"
+                print "position dim", d.shape
 
             for k in itertools.count():
                 print k
 
-            #     # sqn.options['batch_size'])
-            #     j = np.random.randint(0, len(X), self.n_components)
-            #     Xt = X[j, :]
-            #     Xt = np.asmatrix(Xt)
+                # sqn.options['batch_size'])
+                j = np.random.randint(0, len(X), self.n_components)
+                Xt = X[j, :]
+                Xt = np.asmatrix(Xt)
+                print ""
+                print "check subsample dim"
+                print "subsample dim", Xt.shape
 
-            #     def draw_sample(w, X, z, b):
-            #         return Xt, None
-            #     sqn.draw_sample = draw_sample
+                def draw_sample(w, X, z, b):
+                    return Xt, None
+                sqn.draw_sample = draw_sample
 
-            #     self.components = d.reshape(len(d)/self.n_components, self.n_components)
-            #     # print Xt.T
+                # dictionary reshaping
+                self.components = d.reshape(len(d)/self.n_components,
+                                            self.n_components)
 
-            #     self.recon = self.lasso_subproblem(Xt.T)
+                # check dictionary shape
+                if self.verbose > 20:
+                    print ""
+                    print "check dictionary dim"
+                    print "dictionary dim", self.components.shape
 
-            #     # print Xt
-            #     print self.recon
-            #     # TODO: WHY???
-            #     break
-            #     d = sqn.solve_one_step(self.f, self.g, X, None, k)
+                self.recon = self.lasso_subproblem(Xt.T)
+                print self.recon
+
+                d = sqn.solve_one_step(self.f, self.g, X, None, k)
             #     # print d[1:10]
             #     # self.recon = []
-            #     if k > sqn.options['max_iter'] or sqn.termination_counter > 4:
-            #         iterations = k
-            #         break
+
+                # condition to stop the loop
+                if k > sqn.options['max_iter'] or sqn.termination_counter > 2:
+                    iterations = k
+                    break
 
             if iterations < sqn.options['max_iter']:
                 print("Terminated successfully!")

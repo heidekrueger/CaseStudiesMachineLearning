@@ -129,6 +129,7 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
             # l_tsteps = []
 
             if self.verbose > 0:
+                print ""
                 print "Running online dictionary learning"
                 print str(self.n_iter), "iter to perform"
 
@@ -153,6 +154,8 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
                        'normalize': True,
                        'updates_per_batch': 30}
 
+            print ""
+            print "Intialize sqn"
             sqn = SQN(options)
 
             # initial dictionary : take some elements of X
@@ -162,34 +165,42 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
             sqn.set_start(w1=np.array(self.components.flat))
             d = sqn.get_position()
 
-            # print d
+            # check first dictionary
+            print ""
+            print "check first dictionary"
+            print "self.components dim", self.components.shape
+
+            print ""
+            print "check first position"
+            print "position dim", d.shape
+
             for k in itertools.count():
                 print k
 
-                # sqn.options['batch_size'])
-                j = np.random.randint(0, len(X), self.n_components)
-                Xt = X[j, :]
-                Xt = np.asmatrix(Xt)
+            #     # sqn.options['batch_size'])
+            #     j = np.random.randint(0, len(X), self.n_components)
+            #     Xt = X[j, :]
+            #     Xt = np.asmatrix(Xt)
 
-                def draw_sample(w, X, z, b):
-                    return Xt, None
-                sqn.draw_sample = draw_sample
+            #     def draw_sample(w, X, z, b):
+            #         return Xt, None
+            #     sqn.draw_sample = draw_sample
 
-                self.components = d.reshape(len(d)/self.n_components, self.n_components)
-                # print Xt.T
+            #     self.components = d.reshape(len(d)/self.n_components, self.n_components)
+            #     # print Xt.T
 
-                self.recon = self.lasso_subproblem(Xt.T)
+            #     self.recon = self.lasso_subproblem(Xt.T)
 
-                # print Xt
-                print self.recon
-                # TODO: WHY???
-                break
-                d = sqn.solve_one_step(self.f, self.g, X, None, k)
-                # print d[1:10]
-                # self.recon = []
-                if k > sqn.options['max_iter'] or sqn.termination_counter > 4:
-                    iterations = k
-                    break
+            #     # print Xt
+            #     print self.recon
+            #     # TODO: WHY???
+            #     break
+            #     d = sqn.solve_one_step(self.f, self.g, X, None, k)
+            #     # print d[1:10]
+            #     # self.recon = []
+            #     if k > sqn.options['max_iter'] or sqn.termination_counter > 4:
+            #         iterations = k
+            #         break
 
             if iterations < sqn.options['max_iter']:
                 print("Terminated successfully!")

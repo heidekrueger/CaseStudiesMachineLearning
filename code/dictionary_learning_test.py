@@ -203,6 +203,9 @@ if __name__ == '__main__':
                                  batch_size=10,
                                  verbose=10)
 
+    # check sdl2 attributes
+    sdl2.print_attributes()
+
     # loads data
     data, lena, distorted = preprocess_data(lena)
 
@@ -215,41 +218,41 @@ if __name__ == '__main__':
         sdl2.fit(data)
         D = sdl2.components
 
-    # plots dictionary
-    plot_dictionary(D)
+    # # plots dictionary
+    # plot_dictionary(D)
 
-    # post process data
-    data, intercept = postprocess_data(lena)
+    # # post process data
+    # data, intercept = postprocess_data(lena)
 
-    from sklearn.decomposition.dict_learning import sparse_encode
+    # from sklearn.decomposition.dict_learning import sparse_encode
 
-    t0 = time()
-    title = 'first try'
-    reconstructions = lena.copy()
+    # t0 = time()
+    # title = 'first try'
+    # reconstructions = lena.copy()
 
-    # encode noisy patches with learnt dictionary
-    code = sparse_encode(data, D.T, gram=None,
-                         cov=None, algorithm='omp',
-                         n_nonzero_coefs=None, alpha=None,
-                         copy_cov=True, init=None,
-                         max_iter=1000, n_jobs=1)
+    # # encode noisy patches with learnt dictionary
+    # code = sparse_encode(data, D.T, gram=None,
+    #                      cov=None, algorithm='omp',
+    #                      n_nonzero_coefs=None, alpha=None,
+    #                      copy_cov=True, init=None,
+    #                      max_iter=1000, n_jobs=1)
 
-    patch_size = (7, 7)
-    height, width = lena.shape
+    # patch_size = (7, 7)
+    # height, width = lena.shape
 
-    patches = np.dot(code, D.T)
-    patches += intercept
-    patches = patches.reshape(len(data), *patch_size)
+    # patches = np.dot(code, D.T)
+    # patches += intercept
+    # patches = patches.reshape(len(data), *patch_size)
 
-    # reconstruct noisy image
-    reconstructions[:, height // 2:] = reconstruct_from_patches_2d(
-        patches, (width, height // 2))
+    # # reconstruct noisy image
+    # reconstructions[:, height // 2:] = reconstruct_from_patches_2d(
+    #     patches, (width, height // 2))
 
-    dt = time() - t0
-    print('done in %.2fs.' % dt)
+    # dt = time() - t0
+    # print('done in %.2fs.' % dt)
 
-    # show the difference
-    show_with_diff(distorted, lena, 'Distorted image')
-    show_with_diff(reconstructions, lena,
-                   title + ' (time: %.1fs)' % dt)
-    plt.show()
+    # # show the difference
+    # show_with_diff(distorted, lena, 'Distorted image')
+    # show_with_diff(reconstructions, lena,
+    #                title + ' (time: %.1fs)' % dt)
+    # plt.show()

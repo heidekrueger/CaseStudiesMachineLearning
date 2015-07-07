@@ -84,7 +84,7 @@ def prox_comparison():
     plt.ylabel('Function Value')
     plt.xlabel('Number of Iterations')
     plt.legend(handles = [line1, line2, line3])
-   # tikz_save( 'myfile2.tikz' );
+    tikz_save( 'ProxPDE.tikz' );
 
     return
 

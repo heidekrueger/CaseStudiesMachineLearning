@@ -25,8 +25,9 @@ from SQN import stochastic_tools
 SQN
 """
 
-def print_f_vals(testcase, rowlim, options, folderpath, sqn):
-
+def print_f_vals(sqn, options, folderpath, testcase=None, rowlim=None):
+    
+    
     print("\nSQN, Higgs-Dataset\n")
 
     logreg = LogisticRegression(lam_1=0.0, lam_2=0.0)
@@ -40,11 +41,15 @@ def print_f_vals(testcase, rowlim, options, folderpath, sqn):
     if folderpath is not None:
         ffile = open(folderpath + "%d_%d.txt" %(sqn.options['batch_size'], sqn.options['batch_size_H']), "w+")
     
+    sep = ","
+    
+    results = []
+    
     f_evals = []
     for k in itertools.count():
 
         w = sqn.solve_one_step(logreg.F, logreg.G, k=k)
-        print k
+        #print k
         
         # X_S, z_S = sqn._draw_sample(sqn.options['N'], b = 100)
         f_evals.append(sqn.f_vals[-1])
@@ -56,12 +61,10 @@ def print_f_vals(testcase, rowlim, options, folderpath, sqn):
                 print sqn.options['batch_size'], sqn.options['batch_size_H']
     #            sqn.set_options({'batch_size': sqn.options['batch_size']+2, 'batch_size_H': sqn.options['batch_size_H']+1})
 
-        sep = ","
-
-        line = sep.join([str(logreg.fevals), str(logreg.gevals), str(logreg.adp), str(sqn.f_vals[-1]), str(sqn.g_norms[-1])])
-        line = line[:-1] + "\n"
-
+        results.append([k, logreg.fevals, logreg.gevals, logreg.adp, sqn.f_vals[-1], sqn.g_norms[-1]])
+        
         if folderpath is not None:
+            line = sep.join([ str(r) for r in results[-1] ])[:-1] + "\n"
             ffile.write(line)
         else:
             print(k, logreg.adp, "%0.2f" % float(sqn.f_vals[-1]))
@@ -70,6 +73,8 @@ def print_f_vals(testcase, rowlim, options, folderpath, sqn):
             break
     if folderpath is not None:
         ffile.close()
+    
+    return results
     
 
 """
@@ -86,22 +91,36 @@ if __name__ == "__main__":
         """
         rowlim = 5e6
         batch_size = 100
-        options = {'dim':29, 'N':rowlim, 'L': 4, 'max_iter': 5000, 'batch_size': batch_size, 'batch_size_H': 10, 'beta':10, 'M':10, 'updates_per_batch': 3, 'testinterval':30}
+        options = {'dim':29, 'N':rowlim, 'L': 4, 'max_iter': 100, 'batch_size': batch_size, 'batch_size_H': 10, 'beta':10, 'M':10, 'updates_per_batch': 3, 'testinterval':30}
         
         folderpath = "../outputs/"
-        #folderpath = None
+        folderpath = None
         
         batch_sizes = [100, 500, 1000, 10000]        
         batch_sizes = [50]
         
+        result_list = []
+        n_Samples = 2
+        batch_size = 10
+        for i in range(n_Samples):
+                options['batch_size'] = batch_size
+                sqn = SQN(options)
+                result_list.append(print_f_vals(sqn, options, folderpath))
+        results = np.matrix(result_list[0])
+        for i in range(1, len(result_list)):
+                results += np.matrix(result_list[i])
+        results = np.multiply(1.0/len(result_list), results)
+        for r in results:
+                print list(r.flat)
         testcase = "sql"
-        
+        """
         for batch_size in batch_sizes:
             options['batch_size'] = batch_size
             # Select method
             sqn = SQN(options)
             #sqn = PSQN(options)
-            f = lambda b: print_f_vals(testcase, rowlim, options, folderpath, sqn)
+            f = lambda b: print_f_vals(sqn, options, folderpath)
             print(f(batch_size))
 #            p = Process(target=f, args=(batch_size,))
 #            p.start()
+        """

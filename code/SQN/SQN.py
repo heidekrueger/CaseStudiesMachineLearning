@@ -73,7 +73,6 @@ class SQN(Optimizer):
         self.iterator = None
         self.H = None
 
-
     def set_start(self, w1=None, dim=None, iterator=None):
         """
         Set start point of the optimization using numpy array, dim or
@@ -87,7 +86,11 @@ class SQN(Optimizer):
         OUTPUT: -
         """
         print(self.options)
-
+        if all( [w1 == None, dim == None, iterator == None] ):
+                w1 = self.options['w1']
+                dim = self.options['dim']
+                iterator = self.options['iterator']
+                
         err_mes1 = "Memory Parameter M must be a positive integer!"
         assert self.options['M'] > 0, err_mes1
 
@@ -138,22 +141,20 @@ class SQN(Optimizer):
         assert X is not None or self.options['sampleFunction'] is not None, \
             "Please provide either a data set or a sampling function"
 
-        self.set_start(w1=self.options['w1'],
-                       dim=self.options['dim'],
-                       iterator=self.options['iterator'])
+        self.set_start()
 
         for k in itertools.count():
 
             if self.debug: print("Iteration %d" % k)
 
             self.solve_one_step(f, g, X, z, k)
+            
             if k > self.options['max_iter'] or self.termination_counter > 4:
                 self.iterations = k
                 break
 
         if self.iterations < self.options['max_iter']:
             print("Terminated successfully!")
-
         print("Iterations:\t\t%d" % self.iterations)
 
         # id an iterator was used, write the result into it
@@ -174,7 +175,6 @@ class SQN(Optimizer):
         - X
         - z
         - k
-
         """
         assert self.w is not None, "Error! weights not initialized!"
         

@@ -19,7 +19,7 @@ def proximal_gradient(f, grad_f, x0, t, X, y, **options):
     N = len(X)
     fval = []
     
-    for i in range(300):
+    for i in range(100):
         
         batch = np.random.choice(N, options['batch_size'], False)
         y_b = y[batch].reshape(options['batch_size'], 1)
@@ -36,7 +36,7 @@ def proximal_gradient(f, grad_f, x0, t, X, y, **options):
         fval.append(float(f(x_new, X, y)))
         if i % 50 == 0:
             print(i)
-    return fval, x_new
+    return fval
     
 def prox(x, t, **options):
     

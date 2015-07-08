@@ -68,10 +68,10 @@ def prox_comparison():
     import ProxGrad as pg
     from matplotlib2tikz import save as tikz_save
     
-    fval_0sr1 = pm.compute_0sr1(f, gf, x0, l_reg = l)
+    fval_0sr1 = pm.compute_0sr1(f, gf, x0, l_reg = l, tau = 1 / L)
     fval_prox_grad = pg.proximal_gradient(f, gf, x0, 1 / L, l_reg = l)
     spopt.fmin_l_bfgs_b(f_l_bfgs_b, x0_l_bfgs_b, gf_l_bfgs_b, 
-                        bounds = bounds, callback = read_fval, maxiter = 300)
+                        bounds = bounds, callback = read_fval, maxiter = 20)
     fval_0sr1.insert(0, f(x0))
     fval_prox_grad.insert(0, f(x0))
     fval_l_bfgs_b.insert(0, f_l_bfgs_b(x0_l_bfgs_b))

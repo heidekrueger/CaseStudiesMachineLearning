@@ -41,19 +41,19 @@ def prox_comparison():
     import ProxGrad as pg
     from matplotlib2tikz import save as tikz_save
     
-    fval_0sr1 = pm.compute_0sr1(f, gf, x0, l_reg = l)
+    fval_0sr1 = pm.compute_0sr1(f, gf, x0, l_reg = l, tau = 1 / L)
     fval_prox_grad = pg.proximal_gradient(f, gf, x0, 1 / L, l_reg = l)
     spopt.fmin_l_bfgs_b(f_l_bfgs_b, x0_l_bfgs_b, gf_l_bfgs_b, 
-                        bounds = bounds, callback = read_fval, maxiter = 55)
+                        bounds = bounds, callback = read_fval, maxiter = 60)
     fval_0sr1.insert(0, f(x0))
     fval_prox_grad.insert(0, f(x0))
     fval_l_bfgs_b.insert(0, f_l_bfgs_b(x0_l_bfgs_b))
     line1, = plt.plot(range(len(fval_0sr1)), fval_0sr1, 'r', label = '0SR1', lw = 2)
     line2, = plt.plot(range(len(fval_prox_grad)), fval_prox_grad, 'b', label = 'ProxGrad', lw = 2)
     line3, = plt.plot(range(len(fval_l_bfgs_b)), fval_l_bfgs_b, 'g', label = 'L-BFGS-B', lw = 2)
-    plt.xlim([0, 55])
+    plt.xlim([0, 60])
     plt.yscale('log')
-    plt.ylim([1e1, 1e13])
+    plt.ylim([0, 1e5])
     plt.ylabel('Function Value')
     plt.xlabel('Number of Iterations')
     plt.legend(handles = [line1, line2, line3])

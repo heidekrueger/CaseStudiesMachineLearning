@@ -4,7 +4,7 @@ Created on Thu Jun 25 22:06:28 2015
 
 @author: Fin Bauer
 """
-
+from __future__ import division
 import numpy as np
 
 
@@ -36,7 +36,8 @@ def compute_0sr1(f, grad_f, x0, **options):
 
     p = np.empty((n, 1))
     fval = []
-    
+    x_vals=[]
+   
     for k in range(1, 10001): # make while or itercount later
         print("Iteration ",k)
         u_H, u_B, d_H, d_B = compute_sr1_update(s, y, **options)
@@ -47,6 +48,8 @@ def compute_0sr1(f, grad_f, x0, **options):
         
         x_new = temp_x_new
         
+                
+        
         if np.linalg.norm(p) < options['epsilon']: # termination criterion
             break
         #t = line_search(f, h, p, x_old, **options)
@@ -55,9 +58,9 @@ def compute_0sr1(f, grad_f, x0, **options):
         s = x_new - x_old
         y = grad_f(x_new) - grad_f(x_old)
         fval.append(float(f(x_new)))
-        
-    return fval
-
+        x_vals.append(x_new)
+ 
+    return fval, x_vals
 
 
 def compute_sr1_update(s, y, **options):

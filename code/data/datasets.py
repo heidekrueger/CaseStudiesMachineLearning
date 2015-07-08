@@ -184,32 +184,35 @@ def load_higgs_into_mysql():
     db.close()
 
 
-def get_higgs_mysql(ID_list):
-
-    db, cur, dimensions = get_mysql()
+def get_higgs_mysql(ID_list, db = None, cur = None, dimensions = None):
+    stay_inside = False
+    if any([db is None, cur is None, dimensions is None]):
+            stay_inside = True
+            db, cur, dimensions = get_mysql()
     table_name = "DATA"
     query = "SELECT * FROM " + table_name + " WHERE ID IN ("
     for ID in ID_list:
-        query += "'" + str(ID) + "'" + ","
+            query += "'" + str(ID) + "'" + ","
     query = query[:-1]
     query += ");"
     # print query
     cur.execute(query)
     X, y = [], []
     for c in cur:
-        X_tmp, y_tmp = [], None
-        for index in range(len(c)):
-            if index == 0:
-                continue
-            elif index == 1:
-                y_tmp = c[index]
-                X_tmp.append(1.0)
-            else:
-                X_tmp.append(c[index])
-        X.append(np.array(X_tmp))
-        y.append(y_tmp)
-    cur.close()
-    # db.close()
+            X_tmp, y_tmp = [], None
+            for index in range(len(c)):
+                    if index == 0:
+                            continue
+                    elif index == 1:
+                            y_tmp = c[index]
+                            X_tmp.append(1.0)
+                    else:
+                            X_tmp.append(c[index])
+            X.append(np.array(X_tmp))
+            y.append(y_tmp)
+    if stay_inside:
+        cur.close()
+        db.close()
 
     return X, y
 

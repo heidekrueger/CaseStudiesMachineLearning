@@ -59,13 +59,15 @@ def load_result_file_w(filepath):
         return w
 
 
-
 def print_f_vals(sqn, options, filepath, testcase=None, rowlim=None):
     
-    t_start = timeit.default_timer() #get current system time
     print("\nSQN, Higgs-Dataset\n")
+    
+    db, cur, dimensions = datasets.get_mysql()
+    t_start = timeit.default_timer() #get current system time
+    
     logreg = LogisticRegression(lam_1=0.0, lam_2=0.0)
-    logreg.get_sample = lambda l, X, z: datasets.get_higgs_mysql(l)
+    logreg.get_sample = lambda l, X, z: datasets.get_higgs_mysql(l, db, cur, dimensions)
     sqn.set_start(dim=sqn.options['dim'])
     w = sqn.get_position()
 
@@ -137,7 +139,7 @@ if __name__ == "__main__":
                             'L': 20, 
                             'M': 10, 
                             'beta':5., 
-                            'max_iter': 1000, 
+                            'max_iter': 200, 
                             'batch_size': 100, 
                             'batch_size_H': 0, 
                             'updates_per_batch': 1, 
@@ -150,6 +152,8 @@ if __name__ == "__main__":
                 print sys.argv
                 b_G, b_H = int(sys.argv[1]), int(sys.argv[2])
                 updates_per_batch = 1
+                if len(sys.argv) > 2:
+                        options['max_iter'] = int(sys.argv[3])
                 benchmark(b_G, b_H, updates_per_batch, options)
         else:
                 batch_sizes_G = [100, 1000]#, 10000]        

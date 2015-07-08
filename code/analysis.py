@@ -1,5 +1,8 @@
 import re
+import numpy as np
 from matplotlib import pyplot as plt
+from data.datasets import get_higgs_mysql as ghm
+from SQN.LogisticRegression import LogisticRegression as LR
 
 def get_batchsizes_from_name(filepath):
         filename = filepath.split("/")[-1]
@@ -7,6 +10,15 @@ def get_batchsizes_from_name(filepath):
         b_G = int(filename[0])
         b_H = int(filename[1])
         return b_G, b_H
+
+def get_fixed_sample(size):
+        logreg = LR()
+        return ghm(range(size))
+
+def get_fixed_F(size):
+        X_fix, y_fix = get_fixed_sample(size)
+        return lambda w: logreg.F(w,X_fix,y_fix)
+
 
 def load_result_file(filepath):
         
@@ -34,7 +46,7 @@ def load_result_file_w(filepath):
         for count, line in enumerate(iter(resfile)):
                 line = re.sub('\s', '', str(line))
                 entries = re.split(",", str(line))
-                w.append([float(s) for s in entries])
+                w.append(np.array([float(s) for s in entries]))
         return w
 
 
@@ -53,9 +65,26 @@ plt.title("f_S and moving averages")
 plt.plot(iters, f_S)
 plt.plot(iters, f_S_MA)
 plt.yscale("log")
-plt.ylim((-.01,.8))
+# fig =plt.figure()
+# plt.title("test.")
+# plt.plot(f_S_MA,iters)
+# plt.show()
 
-fig =plt.figure()
-plt.title("test.")
-plt.plot(f_S_MA,iters)
-plt.show()
+F = get_fixed_F(1000)
+
+logreg = LR()
+
+X_f, y_f = get_fixed_sample(5)
+
+logreg.w=w[-1]
+yp = logreg.predict(X_f)
+
+print yp, y_f
+
+#v = [F(w_i) for w_i in w]
+
+#fig = plt.figure()
+#plt.plot(iters, v)
+#plt.yscale('log')
+#plt.show()
+

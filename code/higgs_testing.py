@@ -9,7 +9,9 @@ Logistic Regression
 from SQN.LogisticRegression import LogisticRegression
 from SQN.LogisticRegressionTest import LogisticRegressionTest
 
-from SQN.SQN import SQN
+from SQN.NewSQN import SQN
+from SQN.SGD import SGD
+
 # from SQN.PSQN import PSQN
 
 import numpy as np
@@ -91,27 +93,26 @@ if __name__ == "__main__":
         """
         rowlim = 5e6
         batch_size = 100
-        options = {'dim':29, 'N':rowlim, 'L': 4, 'max_iter': 100, 'batch_size': batch_size, 'batch_size_H': 10, 'beta':10, 'M':10, 'updates_per_batch': 3, 'testinterval':30}
+        options = {'dim':29, 'N':rowlim, 'L': 4, 'max_iter': 1000, 'batch_size': batch_size, 'batch_size_H': 4000, 'beta':2, 'M':4, 'updates_per_batch': 2, 'testinterval':20}
         
         folderpath = "../outputs/"
         folderpath = None
         
         batch_sizes = [100, 500, 1000, 10000]        
-        batch_sizes = [50]
-        
+        batch_sizes = [500]
         result_list = []
-        n_Samples = 2
-        batch_size = 10
+        n_Samples = 1
+        batch_size = 10000
         for i in range(n_Samples):
                 options['batch_size'] = batch_size
-                sqn = SQN(options)
+                sqn = SGD(options)
                 result_list.append(print_f_vals(sqn, options, folderpath))
         results = np.matrix(result_list[0])
         for i in range(1, len(result_list)):
                 results += np.matrix(result_list[i])
         results = np.multiply(1.0/len(result_list), results)
-        for r in results:
-                print list(r.flat)
+       # for r in results:
+         #       print list(r.flat)
         testcase = "sql"
         """
         for batch_size in batch_sizes:

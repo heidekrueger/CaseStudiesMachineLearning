@@ -72,6 +72,10 @@ class SQN(Optimizer):
                 
         self.iterator = None
         self.H = None
+                        
+        err_mes1 = "Memory Parameter M must be a positive integer!"
+        assert self.options['M'] > 0, err_mes1
+
 
     def set_start(self, w1=None, dim=None, iterator=None):
         """

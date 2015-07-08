@@ -152,7 +152,7 @@ class LogisticRegression():
         self.gevals += 1
         #print "hyp-y, "(hyp-y).shape
         #print X
-        return np.dot((hyp - y),X) + self.lam_2 * w + self.lam_1 * w
+        return np.dot((hyp - y), X) + self.lam_2 * w + self.lam_1 * w
 
     def G(self, w, X, Y):
         """

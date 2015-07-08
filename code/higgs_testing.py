@@ -22,44 +22,6 @@ from SQN import stochastic_tools
 import re
 
 
-def get_batchsizes_from_name(filepath):
-        filename = filepath.split("/")[-1]
-        filename = filename.split("_")
-        b_G = int(filename[0])
-        b_H = int(filename[1])
-        return b_G, b_H
-
-def load_result_file(filepath):
-        
-        resfile = open(filepath, "r")
-        
-        iters, fevals, gevals, adp, f_S, g_norm_S, time = [], [], [], [], [], [], []
-        for count, line in enumerate(iter(resfile)):
-                line = re.sub('\s', '', str(line))
-                entries = re.split(",", str(line))
-                
-                iters.append( int(entries[0]) )
-                fevals.append( int(entries[1]) )
-                gevals.append( int(entries[2]) )
-                adp.append( int(entries[3]) )
-                f_S.append( float(entries[4]) )
-                g_norm_S.append( float(entries[5]) )
-                time.append( float(entries[6]) )
-                
-        return iters, fevals, gevals, adp, f_S, g_norm_S, time
-                
-def load_result_file_w(filepath):
-        
-        resfile = open(filepath, "r")
-        w = []
-        for count, line in enumerate(iter(resfile)):
-                line = re.sub('\s', '', str(line))
-                entries = re.split(",", str(line))
-                w.append([float(s) for s in entries])
-        return w
-
-
-
 def print_f_vals(sqn, options, filepath, testcase=None, rowlim=None):
     
     t_start = timeit.default_timer() #get current system time

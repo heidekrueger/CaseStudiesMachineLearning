@@ -61,7 +61,7 @@ class SQN(SGD):
         self.w = SGD.solve_one_step(self, f, g, X, z, k)
         # update wbar and get new correction pairs
         self.wbar = self.w if self.wbar is None else self.wbar + self.w 
-        if k % self.options['L'] == 0:
+        if self.options['batch_size_H'] > 0 and self.options['L'] > 0 and k % self.options['L'] == 0:
             self.wbar /= float(self.options['L'])
             if self.wbar_previous is not None:
                 if self.debug: print("HESSE")
@@ -86,7 +86,7 @@ class SQN(SGD):
         if len(self.y) < 2:
             search_direction = -g_S(self.w)
         else:
-            # search_direction = -self._two_loop_recursion(g_S)
+            # search_direction = self._two_loop_recursion(g_S(self.w))
             if self.H is None:
                 self.H = self._get_H()
             search_direction = -self.H.dot(g_S(self.w))
@@ -133,8 +133,6 @@ class SQN(SGD):
         
         # draw hessian sample and get the corresponding stochastic gradient
         X_SH, y_SH = self._draw_sample(X, z, b=self.options['batch_size_H'])
-        print self.options['batch_size_H']
-        print len(X_SH)
         g_SH = lambda x: g(x, X_SH, y_SH)
 
         s_t, y_t = self._get_correction_pairs(g_SH,
@@ -164,7 +162,12 @@ class SQN(SGD):
         returns H_t as defined in algorithm 2
         TODO: Two-Loop-Recursion
         """
-
+        I = np.identity(len(self.w))
+        
+        if min(len(self.s), len(self.y)) == 0:
+                print "Warning: No second order information used!"
+                return I
+            
         assert len(self.s) > 0, "s cannot be empty."
         assert len(self.s) == len(self.y), "s and y must have same length"
         assert self.s[0].shape == self.y[0].shape, \
@@ -188,7 +191,7 @@ class SQN(SGD):
 
         return H
 
-    def _two_loop_recursion(self, g_S):
+    def _two_loop_recursion(self, grad):
         """
         TODO: Description two loop recursion and wikipedia link
         TODO: Check and TEST!!
@@ -197,14 +200,17 @@ class SQN(SGD):
 
         Might have a problem with this function : s not defined
         """
-        assert len(s) > 0, "s cannot be empty."
+        if min(len(self.s), len(self.y)) == 0:
+                print "Warning: No second order information used!"
+                return grad
+        
         assert len(s) == len(y), "s and y must have same length"
         assert s[0].shape == y[0].shape, "s and y must have same shape"
         assert abs(y[-1]).sum() != 0, "latest y entry cannot be 0!"
         assert 1/np.inner(y[-1], s[-1]) != 0, "!"
         # H = (s_t^T y_t^T)/||y_t||^2 * I
 
-        q = g_S(self.w)
+        q = grad
         rho = 1./ np.inner(y[-1], s[-1])
         a = []
 

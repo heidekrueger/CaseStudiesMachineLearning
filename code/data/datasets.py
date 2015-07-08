@@ -115,20 +115,23 @@ try:
 except:
         import pymysql as MySQLdb
         print "SQL Functionality is not working!"
+
+
+"""
+LOADING DATASET
+"""
+
 def get_mysql():
     db = MySQLdb.connect(user="casestudies",
                          db="HIGGS")  # name of the data base
-
     cur = db.cursor()
-
-    table_name = "DATA"
     dimensions = 29
-
-    return db, cur, table_name, dimensions
-
+    return db, cur, dimensions
 
 def create_higgs():
-    db, cur, table_name, dimensions = get_mysql()
+    
+    table_name = "DATA"
+    db, cur, dimensions = get_mysql()
     sql = "CREATE TABLE IF NOT EXISTS " + table_name + " (ID INTEGER PRIMARY KEY, "
 
     for i in range(dimensions):
@@ -138,12 +141,10 @@ def create_higgs():
 
     try:
         cur.execute(sql)
-        # cur.execute("CREATE UNIQUE INDEX id_index ON DATA (ID) USING BTREE;")
     except Warning as w:
         print(w)
     cur.close()
     db.close()
-
 
 def load_higgs_into_mysql():
 
@@ -185,8 +186,8 @@ def load_higgs_into_mysql():
 
 def get_higgs_mysql(ID_list):
 
-    db, cur, table_name, dimensions = get_mysql()
-
+    db, cur, dimensions = get_mysql()
+    table_name = "DATA"
     query = "SELECT * FROM " + table_name + " WHERE ID IN ("
     for ID in ID_list:
         query += "'" + str(ID) + "'" + ","
@@ -211,6 +212,77 @@ def get_higgs_mysql(ID_list):
     # db.close()
 
     return X, y
+
+"""
+SAVING RESULTS TO DATABASE
+"""
+def create_higgs_eval():
+    
+    table_name = "EVAL"
+    db, cur, dimensions = get_mysql()
+    sql = "CREATE TABLE IF NOT EXISTS " + table_name + " (batch_size_G, INTEGER, batch_size_H INTEGER, iteration INTEGER, adp INTEGER, fcalls INTEGER, f_sample DOUBLE, g_norm DOUBLE, CPU DOUBLE, "
+    for i in range(dimensions):
+        sql += "x_" + str(i) + " DOUBLE, "
+    sql = sql[:-2]
+    sql += ");"
+    try:
+        cur.execute(sql)
+    except Warning as w:
+        print(w)
+    cur.close()
+    db.close()
+
+def load_results_into_mysql(batch_size_G, batch_size_H, iteration, adp, fcalls, f_sample, cpu, w):
+
+        create_higgs_eval()
+        db, cur, table_name, dimensions = get_mysql()
+
+        sql = "INSERT INTO " + table_name + " VALUES (" + str(batch_size_G) + ", "  + str(batch_size_H) + ", "  + str(iteration) + ", " + str(adp) + ", " + str(fcalls) + ", " + str(f_sample) + ", " + str(cpu) + ", "
+        for i in range(len(w)):
+            sql += str(w[i]) + ", "
+        sql = sql[-2:] + ")"
+        try:
+            cur.execute(insert_statement)
+        except Exception, e:
+            print e
+        db.commit()
+        cur.close()
+
+
+def get_higgs_result_mysql(query):
+
+    db, cur, table_name, dimensions = get_mysql()
+
+    cur.execute(query)
+    X, y = [], []
+    for c in cur:
+        X_tmp, y_tmp = [], None
+        for index in range(len(c)):
+            if index == 0:
+                continue
+            elif index == 1:
+                y_tmp = c[index]
+                X_tmp.append(1.0)
+            else:
+                X_tmp.append(c[index])
+        X.append(np.array(X_tmp))
+        y.append(y_tmp)
+    cur.close()
+    # db.close()
+
+    return X, y
+
+
+"""
+LOADAING RESULTS FROM DATABASE
+"""
+
+
+
+
+
+
+
 
 
 def load_higgs(rowlim=1000):
@@ -245,8 +317,8 @@ def load_eeg():
     data_name = '../datasets/eeg_data.npy'
     label_name = '../datasets/eeg_label.npy'
 
-    X = np.load(data_name)
-    y = np.load(label_name)
+    X = [ np.array(d) for d in np.load(data_name) ]
+    y = np.load(label_name).flat[:]
 
     return X, y
 

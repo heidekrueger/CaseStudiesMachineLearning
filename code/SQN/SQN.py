@@ -278,10 +278,9 @@ class SQN(Optimizer):
         search_direction = self._get_search_direction(g_S)
 
         # Line Search
-        alpha = self._armijo_rule(f_S, g_S, search_direction,
-                                  start=self.options['beta'],
-                                  beta=.5, gamma=1e-2)
-
+        print "OK"
+        alpha = self._armijo_rule(f_S, g_S, search_direction,  start=self.options['beta'], beta=.5, gamma=1e-2)
+        print "NOK"
         alpha = max([alpha, 1e-5])
         if self.debug:
             print("step size: %f" % alpha)

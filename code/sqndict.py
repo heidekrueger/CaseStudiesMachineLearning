@@ -2,7 +2,7 @@ import itertools
 import numpy as np
 from time import time
 from DictLearning.dictionary_learning import StochasticDictionaryLearning
-from SQN.SQN import SQN
+from SQN.NewSQN import SQN
 
 
 class SqnDictionaryLearning(StochasticDictionaryLearning):
@@ -20,7 +20,10 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
                 """
 
         def vector_to_matrix(self, v):
-                return v.reshape((len(v.flat)/self.n_components, self.n_components))
+                D = v.reshape((len(v.flat)/self.n_components, self.n_components))
+     #           for i in range(len(D)):
+        #                D[i] = np.multiply(min(1.0, 1.0/np.linalg.norm(D[i])), D[i])
+                return D
                 """
                 nrow = self.n_components
                 D = np.zeros((len(v)/self.n_components, self.n_components))
@@ -37,7 +40,7 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
                 """
 
         def f(self, d, X, z=None):
-                D = d.reshape(len(d)/self.n_components, self.n_components)
+                D = self.vector_to_matrix(d)
                 # print D
                 one_f = []
                 # print np.array(self.recon.T[0].flat)
@@ -51,6 +54,7 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
                 return sum(one_f) / len(one_f)
 
         def finite_differences(self, d, X, z=None):
+                print "differencing..."
                 grad = np.zeros(d.shape)
                 r = 0.001
                 for i in range(len(d)):
@@ -62,7 +66,7 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
                 return grad
 
         def g_fast(self, d, X, z=None):
-                D = d.reshape(len(d)/self.n_components, self.n_components)
+                D = self.vector_to_matrix(d)
                 grad = np.zeros(d.shape)
                 for x, a in zip(X, self.recon.T):
                     a = np.array(a.flat)
@@ -73,7 +77,7 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
                 return np.multiply(1.0/len(X), grad)
 
         def g_comp_wise(self, d, X, z=None):
-                D = d.reshape(len(d)/self.n_components, self.n_components)
+                D = self.vector_to_matrix(d)
                 grad = np.zeros(d.shape)
                 for x, a in zip(X, self.recon.T):
                     a = np.array(a.flat)
@@ -100,7 +104,7 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
                 """
                 # print self.finite_differences(d, X, z)
                 # return self.finite_differences(d, X, z)
-                return self.g_fast(d, X, z)
+                return self.finite_differences(d, X, z)
 
         """
         def lasso_subproblem(self, X):
@@ -143,12 +147,12 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
             options = {'dim': len(X[0])*self.n_components,
                        'max_iter': self.max_iter,
                        'batch_size': self.batch_size,
-                       'beta': 10.,
+                       'beta': 1.,
                        'M': 5,
                        'batch_size_H': 10,
-                       'L': 5,
+                       'L': 50000,
                        'normalize': True,
-                       'updates_per_batch': 30}
+                       'updates_per_batch': 3}
 
             print ""
             print "Intialize sqn"
@@ -157,7 +161,7 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
             # initial dictionary : take some elements of X
             jd = np.random.randint(0, len(X[:]), self.n_components)
             self.components = X[jd, :].T
-            sqn._armijo_rule = lambda f, g, x, s, start, beta, gamma: 0.001
+            #sqn._armijo_rule = lambda f, g, s, start, beta, gamma: 0.001
             sqn.set_start(w1=np.array(self.components.flat))
             d = sqn.get_position()
 
@@ -175,7 +179,7 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
                 print k
 
                 # sqn.options['batch_size'])
-                j = np.random.randint(0, len(X), self.n_components)
+                j = np.random.randint(0, len(X),options['batch_size'])
                 Xt = X[j, :]
                 Xt = np.asmatrix(Xt)
                 print ""
@@ -187,9 +191,8 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
                 sqn.draw_sample = draw_sample
 
                 # dictionary reshaping
-                self.components = d.reshape(len(d)/self.n_components,
-                                            self.n_components)
-
+                self.components = self.vector_to_matrix(d)
+                
                 # check dictionary shape
                 if self.verbose > 20:
                     print ""
@@ -197,7 +200,7 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
                     print "dictionary dim", self.components.shape
 
                 self.recon = self.lasso_subproblem(Xt.T)
-                print self.recon
+                #print self.recon
 
                 d = sqn.solve_one_step(self.f, self.g, X, None, k)
             #     # print d[1:10]
@@ -211,7 +214,10 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
             if iterations < sqn.options['max_iter']:
                 print("Terminated successfully!")
 
+            self.components = self.vector_to_matrix(d)
+            
             print "SQN done!"
+            
 
 if __name__ == '__main__':
         print "main"

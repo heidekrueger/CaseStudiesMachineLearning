@@ -6,6 +6,8 @@
 import numpy as np
 import itertools
 from collections import deque
+from statsmodels.stats.diagnostic import lillifors
+
 try: import stochastic_tools
 except: import SQN.stochastic_tools as stochastic_tools
 try: from stochastic_tools import test_normality
@@ -69,13 +71,19 @@ class SGD(StochasticOptimizer):
 
             # perform gradient one or more updates using armijo rule and hessian information
             for i in range(max(1,self.options['updates_per_batch'])):
-                    self.w = self._perform_update(f_S, g_S)
+                    self.w = self._perform_update(f_S, g_S, k)
+                    if self.options['normalize']:
+                            if self.debug: 
+                                    print "Normalizing position"
+                                    print np.linalg.norm(self.w)
+                            self.w = np.multiply(min(1.0,1.0/np.linalg.norm(self.w)), self.w)
+                            
                     
             
             # Check Termination Condition
             if len(X_S) == 0 or self._has_terminated(g_S(self.w), self.w):
                 self.termination_counter += 1
-            if self.options['testinterval'] != 0 and k % self.options['testinterval'] == 0 and self._is_stationary() and self._get_test_variance() < 0.005:
+            if self.options['testinterval'] > 0 and k % self.options['testinterval'] == 0 and self._is_stationary() and self._get_test_variance() < 0.005:
                     self.termination_counter += 1
                     if self.debug: print("stationary")
             
@@ -92,7 +100,7 @@ class SGD(StochasticOptimizer):
             return -g_S(self.w)
 
 
-    def _perform_update(self, f_S, g_S):
+    def _perform_update(self, f_S, g_S, k = None):
             """
             do the gradient updating rule
             INPUTS:
@@ -106,16 +114,37 @@ class SGD(StochasticOptimizer):
             search_direction = self._get_search_direction(g_S)
 
             # Line Search
-            alpha = self._armijo_rule(f_S, g_S, search_direction, \
-                                    start=self.options['beta'], \
-                                    beta=.5, gamma=1e-2)
+            # TODO
+            if k is None:
+                    alpha = self._armijo_rule(f_S, g_S, search_direction, start=self.options['beta'], beta=.5, gamma=1e-2)
+            else:
+                    alpha = self.options['beta']/(k+1.)
             if self.debug: print("step size: %f" % alpha)
 
             self.w = self.w + np.multiply(alpha, search_direction)
-            
-            if self.options['normalize']:
-                    if self.debug: print "Normalizing position"
-                    self.w = np.multiply(1.0/max(1.0, np.linalg.norm(self.w)), self.w)
-                    
+                   
             return self.w
 
+
+    def _test_normality(self, f, level = 0.01, burn_in = 200):
+            if len(f) <= burn_in + 1:
+                    return False
+            return lillifors(f)[1] > level
+    
+    def _is_stationary(self):
+            """
+            stationarity tests
+            OUTPUT: True or False
+            """
+            #phi = self.g_norms
+            phi = self.f_vals
+            test_len = len(phi) - self.options['testinterval']
+            return test_len > 0 and self._test_normality(phi[test_len:], burn_in=1, level=0.05)     
+    
+    def _get_test_variance(self):
+            """
+            OUTPUT: Variance estimate of the functionvalue in the testinterval
+            """
+            test_len = len(self.f_vals) - self.options['testinterval']
+            return np.var(self.f_vals[test_len:])
+      

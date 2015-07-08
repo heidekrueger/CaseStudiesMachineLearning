@@ -1,6 +1,4 @@
 import numpy as np
-
-from statsmodels.stats.diagnostic import lillifors
 from stochastic_tools import sample_batch
 
 class Optimizer:
@@ -196,6 +194,7 @@ class Optimizer:
 
 
     def _armijo_rule(self, f, g, s, start=1.0, beta=.5, gamma=1e-4):
+        
         """
         Determines the armijo-rule step size alpha for approximating
         line search min f(x+omega*s)
@@ -213,7 +212,6 @@ class Optimizer:
         fw = f(self.w)
         rhs = gamma * np.inner(g(self.w), s)
         while candidate > 1e-4 and (f(self.w + np.multiply(candidate, s)) - fw > candidate * rhs):
-
             candidate *= beta
 
         return candidate
@@ -290,25 +288,3 @@ class StochasticOptimizer(Optimizer):
                 print("sample length: %d, %d" % (len(X_S), len(z_S)))
         return X_S, z_S
 
-    
-    def _test_normality(self, f, level = 0.01, burn_in = 200):
-            if len(f) <= burn_in + 1:
-                    return False
-            return lillifors(f)[1] > level
-    
-    def _is_stationary(self):
-            """
-            stationarity tests
-            OUTPUT: True or False
-            """
-            test_len = len(self.f_vals) - self.options['testinterval']
-            return test_len > 0 and self._test_normality(self.f_vals[test_len:], burn_in=1, level=0.05)     
-    
-    
-    def _get_test_variance(self):
-            """
-            OUTPUT: Variance estimate of the functionvalue in the testinterval
-            """
-            test_len = len(self.f_vals) - self.options['testinterval']
-            return np.var(self.f_vals[test_len:])
-      

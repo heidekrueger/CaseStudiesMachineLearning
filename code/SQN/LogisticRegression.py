@@ -131,7 +131,7 @@ class LogisticRegression():
         '''
 
         #return sum(map(lambda t: self.f(w, t[0], t[1]), zip(X, y)))/len(X) +  self.L_2(w) 
-        return sum([self.f(w,X[i],y[i]) for i in range(len(y))]) /float(len(y)) + self.L_2(w) + self.L_1(w)
+        return sum([self.f(w,X[i],y[i]) for i in range(len(y))])/float(len(y)) + self.L_2(w) + self.L_1(w)
 
     def g(self, w, X, y):
         '''

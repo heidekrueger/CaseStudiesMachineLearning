@@ -42,6 +42,10 @@ file_dir = '../outputs/'
 file_name = '1000_0_1.txt'
 file_path = file_dir + file_name
 
+def get_col(file_path, col):
+        output = load_result_file(file_path)
+        return output[col]
+        
 b_G, b_H = get_batchsizes_from_name(file_path)
 iters, fevals, gevals, adp, f_S, g_norm_S, time = load_result_file(file_path)
 w = load_result_file_w(file_path+'_w.txt')
@@ -50,12 +54,13 @@ import numpy as np
 f_S_MA = [ np.mean(f_S[:i]) if i<100 else np.mean(f_S[i-100:i]) for i in range(len(f_S)) ]
 fig = plt.figure()
 plt.title("f_S and moving averages")
-plt.plot(iters, f_S)
-plt.plot(iters, f_S_MA)
+
+
+file_path = file_dir + '1000_0_1.txt'
+plt.plot(get_col(file_path, 0), get_col(file_path, 4))
+
+file_path = file_dir + '1000_4000_1.txt'
+plt.plot(get_col(file_path, 0), get_col(file_path, 4))
 plt.yscale("log")
 plt.ylim((-.01,.8))
-
-fig =plt.figure()
-plt.title("test.")
-plt.plot(f_S_MA,iters)
 plt.show()

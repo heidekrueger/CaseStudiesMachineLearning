@@ -246,6 +246,31 @@
    	\centering\includegraphics[width = 0.7\textwidth]{lambda1.png}\\
    	\centering\includegraphics[width = 0.7\textwidth]{lambda2.png}
    \end{frame}
+   
+   \begin{frame}{Proximal Method: Stochastic Extension}
+   High-dimensional data:
+   Extension to stochastic framework\\
+   \vspace{10pt}
+   \alert{Effect of batch size}
+   	\begin{columns}[T]
+   		\hspace{-16pt}
+   		\begin{column}{.3\textwidth}
+   			\hspace{30pt} \scriptsize Batch size = 1
+   			\vspace{10pt}
+   			\resizebox{1.18\linewidth}{!}{\input{StochProx_1.tikz}}
+   		\end{column}\hspace{-16pt}
+   		\begin{column}{.3\textwidth}
+   			\hspace{30pt} \scriptsize Batch size = 50
+   			\vspace{10pt}
+   			\resizebox{1.18\linewidth}{!}{\input{StochProx_50.tikz}}
+   		\end{column}\hspace{-16pt}
+   		\begin{column}{.3\textwidth}
+   			\hspace{30pt} \scriptsize Batch size = 150
+   			\vspace{10pt}
+   			\resizebox{1.18\linewidth}{!}{\input{StochProx_150.tikz}}
+   		\end{column}
+   	\end{columns}
+   \end{frame}
 
 \section{Logistic Regression: An Example}
   \begin{frame}\frametitle{Task}

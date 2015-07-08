@@ -1,29 +1,27 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Jul  7 17:58:03 2015
+Created on Wed Jun 24 22:48:16 2015
 
 @author: Fin Bauer
-"""
 
+This version works as of 26.6.2015 15:52
+"""
+from __future__ import division
 import numpy as np
 
-def proximal_gradient(f, grad_f, x0, t, X, y, **options):
+def proximal_gradient(f, grad_f, x0, t, **options):
     """
     proximal gradient for l1 regularization
     """
     
     options.setdefault('l_reg', 1)
-    options.setdefault('batch_size', 1)
     
     x_old = x0
-    N = len(X)
     fval = []
-    
-    for i in range(100):
+    xval = []
+    for i in range(10000):
         
-        batch = np.random.choice(N, options['batch_size'], False)
-        y_b = y[batch].reshape(options['batch_size'], 1)
-        x_new = prox(x_old - t * grad_f(x_old, X[batch], y_b), t, **options)
+        x_new = prox(x_old - t * grad_f(x_old), t, **options)
         s = x_new - x_old
         
 #        t = line_search(f, grad_f, s, x_old, **options)
@@ -33,9 +31,9 @@ def proximal_gradient(f, grad_f, x0, t, X, y, **options):
             break
         
         x_old = x_new
-        fval.append(float(f(x_new, X, y)))
-        
-    return fval, x_new
+        fval.append(float(f(x_new)))
+        xval.append(x_new)
+    return fval, xval
     
 def prox(x, t, **options):
     

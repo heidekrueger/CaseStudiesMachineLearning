@@ -34,9 +34,8 @@ def proximal_gradient(f, grad_f, x0, t, X, y, **options):
         
         x_old = x_new
         fval.append(float(f(x_new, X, y)))
-        if i % 50 == 0:
-            print(i)
-    return fval
+        
+    return fval, x_new
     
 def prox(x, t, **options):
     

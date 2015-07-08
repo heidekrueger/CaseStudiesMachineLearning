@@ -47,8 +47,7 @@ def compute_0sr1(f, grad_f, x0, X, z, **options):
     fval = []
     
     for k in range(1, 101): # make while or itercount later
-        #if k % 50 == 0:
-         #   print(k)
+        
         batch = np.random.choice(N, options['batch_size'], False)
         X_b = X[batch]
         z_b = z[batch].reshape(options['batch_size'], 1)
@@ -69,7 +68,7 @@ def compute_0sr1(f, grad_f, x0, X, z, **options):
         y = grad_f(x_new, X_b, z_b) - grad_f(x_old, X_b, z_b)
         fval.append(float(f(x_new, X, z)))
         
-    return fval
+    return fval, x_new
 
 
 def compute_sr1_update(s, y, **options):

@@ -7,14 +7,6 @@ Created on Fri Jul  3 17:27:00 2015
 
 from __future__ import division
 
-def test_gamma():
-    import ProxMeth as pm
-    import matplotlib.pyplot as plt
-    for i in range(20):
-        fval = pm.compute_0sr1(f, gf, x0, gamma = (i+1) / 10)
-        plt.plot(range(len(fval)), fval)
-    return
-
 
 def read_fval(x):
     
@@ -72,7 +64,6 @@ def prox_comparison():
 if __name__ == "__main__":
     
     import numpy as np
-    import scipy as sp
     
     A, b, b_l_bfgs_b, A_sq, Ab, Ab_l_bfgs_b, x0, x0_l_bfgs_b, bounds, l, L = initialize_lasso((1500, 3000), 0.1)
     fval_l_bfgs_b = []
@@ -98,5 +89,3 @@ if __name__ == "__main__":
         return np.concatenate((temp, -temp)).T - Ab_l_bfgs_b + l
     
     prox_comparison()
-    
-    #test_gamma()

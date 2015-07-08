@@ -82,7 +82,7 @@ def print_f_vals(sqn, options, filepath, testcase=None, rowlim=None):
 
 def benchmark(batch_size_G, batch_size_H, updates_per_batch, options):
         folderpath = "../outputs/"
-        filepath =  folderpath + "%d_%d_%d.txt" %(b_G, b_H, updates_per_batch)
+        filepath =  folderpath + "%d_%d_%d_eeg.txt" %(b_G, b_H, updates_per_batch)
         options['batch_size'] = b_G
         options['batch_size_H'] = b_H
         options['updates_per_batch'] = updates_per_batch
@@ -119,6 +119,8 @@ if __name__ == "__main__":
                 print sys.argv
                 b_G, b_H = int(sys.argv[1]), int(sys.argv[2])
                 updates_per_batch = 1
+                if len(sys.argv) > 2:
+                        options['max_iter'] = int(sys.argv[3])
                 benchmark(b_G, b_H, updates_per_batch, options)
         else:
                 batch_sizes_G = [100, 1000]#, 10000]        

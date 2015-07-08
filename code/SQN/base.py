@@ -45,7 +45,7 @@ class Optimizer:
         self.options['beta'] = 1
         self.options['batch_size'] = 1
         self.options['batch_size_H'] = 1
-        self.options['testinterval'] = 30
+        self.options['testinterval'] = 0
         self.options['normalize'] = False
         self.options['updates_per_batch'] = 1
         

@@ -91,6 +91,10 @@ def benchmark(batch_size_G, batch_size_H, updates_per_batch, options):
         options['batch_size'] = b_G
         options['batch_size_H'] = b_H
         options['updates_per_batch'] = updates_per_batch
+       # if batch_size_H == 0:
+         #       sqn = SGD(options)
+            #    print "SGD"
+        #else:
         sqn = SQN(options)
         print_f_vals(sqn, options, filepath)
 

@@ -167,10 +167,10 @@ if __name__ == '__main__':
 
     sdl2 = SqnDictionaryLearning(n_components=100,
                                  option=None,
-                                 alpha=0.001,
-                                 n_iter=5,
-                                 max_iter=25,
-                                 batch_size=100,
+                                 alpha=0.01,
+                                 n_iter=1,
+                                 max_iter=10,
+                                 batch_size=50,
                                  verbose=10)
 
     # check sdl2 attributes
@@ -180,17 +180,19 @@ if __name__ == '__main__':
     data, lena, distorted = preprocess_data(lena)
 
     # takes dictionary
-    case = 2
-    if case != 2:
+    case = 3
+    if case == 1:
         sdl.fit(data)
         D = sdl.components
-    else:
+    if case == 2:
         sdl2.fit(data)
         D = sdl2.components
+        np.save('dictionary', D)
+    if case == 3:
+        D = np.load('dictionary.npy')
+        print "D loaded"
 
-    # plots dictionary updates
-#    for d in sdl2.updates:
-  #      plot_dictionary(d)
+    plot_dictionary(D)
 
     # post process data
     data, intercept = postprocess_data(lena)
@@ -203,8 +205,8 @@ if __name__ == '__main__':
 
     # encode noisy patches with learnt dictionary
     code = sparse_encode(data, D.T, gram=None,
-                         cov=None, algorithm='omp',
-                         n_nonzero_coefs=None, alpha=None,
+                         cov=None, algorithm='lars',
+                         n_nonzero_coefs=20, alpha=None,
                          copy_cov=True, init=None,
                          max_iter=1000, n_jobs=1)
 

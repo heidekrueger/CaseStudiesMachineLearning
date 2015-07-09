@@ -191,14 +191,18 @@
   \end{frame}
 
  \section{Proximal Method}
- \plain{Image Reconstruction\\
+ \plain{Computed Tomography (CT)\\
  	\vspace{10pt}
- 	\alert{What did the original image look like?}
+ 	\alert{What did the original object look like?}
  	\vspace{15pt}\\
- 	\includegraphics[width = 0.8\textwidth]{plot_tomography_l1_reconstruction_001.png}}
+ 	\includegraphics[width = 0.8\textwidth]{plot_tomography_l1_reconstruction_001.png}\\
+ 	\vspace{15pt}
+ 	\small Images of object from different angles\\
+ 	\small Reconstruct original object
+ 	}
  
  
-   \begin{frame}\frametitle{Proximal Method}
+   \begin{frame}{Proximal Method}
        \begin{flalign*}
        	\text{\alert{Problem}}&&
        	\min_x &\;F(x) := \underbrace{f(x)}_{smooth} \quad + \underbrace{h(x)}_{non-smooth}&
@@ -273,43 +277,19 @@
    \end{frame}
 
 \section{Logistic Regression: An Example}
-  \begin{frame}\frametitle{Task}
-    Explain what we want to do, and explain the dataset,
-    and why using both SQN and Prox makes sense   
-  \end{frame}
-  
-  \begin{frame}{eeg data}
-Recording:
-\begin{itemize}
-\item eeg signal
-\item 20 nights from healthy patient
-\item each almost 10 hours
-\item 1 eeg channel, 200 Hz
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=0.8\textwidth]{eeg.png}
-\caption{eeg channels}
-\label{default}
-\end{figure}
-\end{itemize}
-\end{frame}
 
-\begin{frame}{detection of slow oscillations}
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=1.0\textwidth]{so_sub1.png}
-\caption{Slow oscillations for one subject}
-\label{default}
-\end{figure}
-\end{frame}
+\plain{Electroencephalography (EEG)\\
+	\vspace{10pt}
+	\alert{How deep is your sleep?}
+	\vspace{15pt}\\
+	\includegraphics[width=0.7\textwidth]{EEG_oscillation.png}\\
+	\vspace{15pt}
+	\small Sleeping patient / 20 nights of EEG recordings\\
+	\small Predict next slow wave
+	}
 
-\begin{frame}{The classification problem - roc auc metrics}
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=0.7\textwidth]{auc.png}
-\caption{AUC metrics}
-\label{default}
-\end{figure}
+\begin{frame}{EEG: Logistic Regression}
+	
 \end{frame}
 
   \begin{frame}\frametitle{Results}
@@ -334,24 +314,6 @@ Recording:
     \end{table}
   \end{frame}
 
-\plain{
-  \resizebox{\textwidth}{!}{    
-      \begin{tabular}{r|c|c|c}
-        \phantom 0 & \textbf{$F(\omega^*)$} & \textbf{Model Score} & \textbf{Cost}\\
-      \hline \alert{No regularization}   &      & &  \\
-        SGD   & $0.01$  & $96\%$  & $x$ sec, $y$ AP\\
-        SQN   & $0.5$  & $96\%$  & $x$ sec, $y$ AP\\
-        Prox   & $0.01$  & $96\%$  & $x$ sec, $y$ AP\\
-      \hline \hline \alert{L1}        &    &   &  \\
-      LASSO & $.71$  &  $55\%$ & blablabla \\
-        Prox   & $0.01$  & $96\%$  & $x$ sec, $y$ AP\\
-      \hline \hline \alert{L2}        &    &   &  \\
-       SGD & $.71$  &  $55\%$ & blablabla \\
-        SQN   & $0.01$  & $96\%$  & $x$ sec, $y$ AP\\
-      \end{tabular}
-      }
-    
-    }
 
 \section{Conclusion}
 

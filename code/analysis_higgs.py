@@ -79,8 +79,8 @@ Here be the action:
 
 Init Params:
 """
-maxIters = 100
-fixed_F_size = 1000
+maxIters = 1000
+fixed_F_size = 10000
 
 # will consider corresponding pairs of these:
 b_G = [100,100,100,100, 1000,1000,1000,1000, 10000,10000,10000,10000]
@@ -187,6 +187,7 @@ for bg, bh in zip(b_G, b_H):
 for i in range(8):
     plt.figure(i+1)
     plt.legend()
+
 
 plt.show()
 

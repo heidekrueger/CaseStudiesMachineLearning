@@ -226,13 +226,14 @@ class SQN(SGD):
         OUTPUT:
         - search_direction : np.array
         '''
-        if len(self.y) < 2:
-            search_direction = -g_S(self.w)
-        else:
-            # search_direction = self._two_loop_recursion(g_S(self.w))
+        search_direction = -g_S(self.w)
+        if len(self.y) >= 2:
             if self.H is None:
                 self.H = self._get_H()
-            search_direction = -self.H.dot(g_S(self.w))
+            search_direction = self.H.dot(search_direction)
+            #search_direction2 = self._two_loop_recursion(search_direction)
+            #print np.linalg.norm(search_direction - search_direction2)
+            
         if self.debug:
             print("Direction:", search_direction.T)
         return search_direction
@@ -303,7 +304,11 @@ class SQN(SGD):
     def _get_H(self, debug=False):
         """
         returns H_t as defined in algorithm 2
-        TODO: Two-Loop-Recursion
+        
+        Reference:
+        https://en.wikipedia.org/wiki/Limited-memory_BFGS
+        http://www.ccms.or.kr/data/pdfpaper/jcms21_1/21_1_117.pdf
+        https://homes.cs.washington.edu/~galen/files/quasi-newton-notes.pdf
         """
         I = np.identity(len(self.w))
         
@@ -329,43 +334,52 @@ class SQN(SGD):
 
         for (s_j, y_j) in itertools.izip(self.s, self.y):
             rho = 1.0/np.inner(y_j, s_j)
-            H = (I - rho * np.outer(s_j, y_j)).dot(H).dot(I - rho * np.outer(y_j, s_j))
-            H += rho * np.outer(s_j, s_j)
+            V = I - np.multiply(rho, np.outer(s_j, y_j))
+            H = (V).dot(H).dot(V.T)
+            H += np.multiply(rho, np.outer(s_j, s_j))
 
         return H
 
+
     def _two_loop_recursion(self, grad):
         """
-        TODO: Description two loop recursion and wikipedia link
+        TODO: Description two loop recursion 
         TODO: Check and TEST!!
         returns:
         z = H_k g_k
-
+        
         Might have a problem with this function : s not defined
+        
+        Reference:
+        
+        https://en.wikipedia.org/wiki/Limited-memory_BFGS
+        http://www.ccms.or.kr/data/pdfpaper/jcms21_1/21_1_117.pdf
+        https://homes.cs.washington.edu/~galen/files/quasi-newton-notes.pdf
         """
         if min(len(self.s), len(self.y)) == 0:
                 print "Warning: No second order information used!"
                 return grad
         
-        assert len(s) == len(y), "s and y must have same length"
-        assert s[0].shape == y[0].shape, "s and y must have same shape"
-        assert abs(y[-1]).sum() != 0, "latest y entry cannot be 0!"
-        assert 1/np.inner(y[-1], s[-1]) != 0, "!"
+        assert len(self.s) > 0, "s cannot be empty."
+        assert len(self.s) == len(self.y), "s and y must have same length"
+        assert self.s[0].shape == self.y[0].shape, \
+            "s and y must have same shape"
+        assert abs(self.y[-1]).sum() != 0, "latest y entry cannot be 0!"
+        assert 1/np.inner(self.y[-1], self.s[-1]) != 0, "!"
         # H = (s_t^T y_t^T)/||y_t||^2 * I
 
         q = grad
-        rho = 1./ np.inner(y[-1], s[-1])
         a = []
-
-        for j in range(len(s)):
-            a.append( rho * np.inner(s[j], q))
-            q = q - np.multiply(a[-1], y[j])
-
-        H_k = np.inner(y[-2], s[-2]) / np.inner(y[-2], y[-2])
+        for s_j, y_j in reversed(zip(self.s,self.y)):
+            alpha = 1.0 * np.inner(s_j, q) / np.inner(s_j, y_j)
+            q = q - np.multiply(alpha, y_j)
+            a.append( alpha )
+            
+        H_k = np.inner(self.y[-2], self.s[-2]) / np.inner(self.y[-2], self.y[-2])
         z = np.multiply(H_k, q)
-
-        for j in reversed(range(len(s))):
-            b_j = rho * np.inner(y[j], z)
-            q = q - np.multiply(a[j] - b_j, s[j])
-
+        
+        for s_i, y_i, a_i in itertools.izip(self.s,self.y,a):
+            b_i = 1.0 * np.inner(y_i, z) / np.inner(y_i, s_i)
+            z = z + np.multiply(a_i - b_i, s_i)
+            
         return z

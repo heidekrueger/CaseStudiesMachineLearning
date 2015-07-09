@@ -6,6 +6,7 @@ Created on Thu Jun 25 22:06:28 2015
 """
 
 import numpy as np
+from collections import deque
 
 
 def compute_0sr1(f, grad_f, x0, **options):
@@ -27,6 +28,8 @@ def compute_0sr1(f, grad_f, x0, **options):
     options.setdefault('l_reg', 1)
     options.setdefault('ls', 1)
     options.setdefault('beta', 0.5)
+    options.setdefault('max_iter', 1e5)
+    options.setdefault('timing', 0)
     n = len(x0)
     options.setdefault('dim', n)
     x0 = x0.reshape((n, 1))
@@ -35,10 +38,11 @@ def compute_0sr1(f, grad_f, x0, **options):
     x_new = x0.copy()
 
     p = np.empty((n, 1))
-    fval = []
+    fval = [float(f(x0))]
+    xval = deque([x0], 500)
     
-    for k in range(1, 10001): # make while or itercount later
-        print("Iteration ",k)
+    for k in range(1, int(options['max_iter']) + 1):
+        
         u_H, u_B, d_H, d_B = compute_sr1_update(s, y, **options)
         temp_x_new = compute_proximal(u_H, u_B, d_H, d_B, grad_f, x_new, **options)
         
@@ -54,9 +58,14 @@ def compute_0sr1(f, grad_f, x0, **options):
         #s = t * p
         s = x_new - x_old
         y = grad_f(x_new) - grad_f(x_old)
-        fval.append(float(f(x_new)))
         
-    return fval
+        if options['timing'] == 0:
+            fval.append(float(f(x_new)))
+            xval.append(x_new)
+            if k % 100 == 0:
+                print(k)
+        
+    return x_new, fval, xval
 
 
 

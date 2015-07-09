@@ -7,7 +7,7 @@ import re
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.pyplot import cm
-from data.datasets import load_eeg as load_eeg
+from sklearn.datasets import load_iris as load_iris
 from SQN.LogisticRegression import LogisticRegression as LR
 
 def get_batchsizes_from_name(filepath):
@@ -21,7 +21,7 @@ def get_filepaths(b_G, b_H, upd_stp = 1):
     """
     Returns the corresponding result paths for a pair of batch sizes
     """
-    filedir = '../outputs/eeg/'
+    filedir = '../outputs/iris/'
     filename = str(b_G) + '_' + str(b_H) + '_' + str(upd_stp) + '.txt'
     filename_w = filename + '_w.txt'
     return filedir+filename, filedir+filename_w
@@ -29,7 +29,9 @@ def get_filepaths(b_G, b_H, upd_stp = 1):
 def get_fixed_sample(size):
     """Returns X, y consisting of the first size rows of the dataset"""
     logreg = LR()
-    X, y = load_eeg()
+    iris = load_iris()
+    X = iris.data
+    y = iris.target
     return X[:size], y[:size]
 
 def get_fixed_F(size):
@@ -49,7 +51,7 @@ def load_result_file(filepath):
         line = re.sub('\s', '', str(line))
         entries = re.split(",", str(line))
         
-        iters.append( int(entries[0]) )
+        iters.append( int(entries[0]))
         fevals.append( int(entries[1]) )
         gevals.append( int(entries[2]) )
         adp.append( int(entries[3]) )
@@ -84,8 +86,8 @@ maxIters = 200
 fixed_F_size = 1000
 
 # will consider corresponding pairs of these:
-b_G = [100,100,100,100, 1000,1000,1000, 10000]
-b_H = [0,100,1000,4000,0,100,1000,0]
+b_G = [10, 10, 50, 50, 50, 150]
+b_H = [0, 10, 0, 10, 50, 0]
 
 #make color cycle
 
@@ -138,6 +140,7 @@ for bg, bh in zip(b_G, b_H):
     """Load the results """
     filepath, filepath_w = get_filepaths(bg, bh)
     iters, fevals, gevals, adp, f_S, g_norm_S, time = load_result_file(filepath)
+    print filepath_w
     w = load_result_file_w(filepath_w)
 
     """Plot the results """ 

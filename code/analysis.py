@@ -6,6 +6,7 @@ Performs analysis and plotting on outputs of SQN benchmarking run
 import re
 import numpy as np
 from matplotlib import pyplot as plt
+from matplotlib.pyplot import cm
 from data.datasets import get_higgs_mysql as ghm
 from SQN.LogisticRegression import LogisticRegression as LR
 
@@ -85,6 +86,10 @@ fixed_F_size = 1000
 b_G = [100,100,100,100, 1000,1000,1000,1000, 10000,10000,10000,10000]
 b_H = [0,100,1000,4000, 0,100,1000,4000, 0,100,1000,4000]
 
+#make color cycle
+
+color_cycle=iter(cm.gist_rainbow(np.linspace(0,1,len(b_G))))
+
 
 logreg = LR()
 F = get_fixed_F(fixed_F_size)
@@ -101,9 +106,11 @@ plt.title("Sample Objective vs. CPU time (s)")
 
 stochF_vs_adp = plt.figure(3)
 plt.title("Sample Objective vs. Accessed Data Points")
+plt.xscale('log')
 
 stochF_vs_fevals = plt.figure(4)
 plt.title("Sample Objective vs. Function Evaluations")
+plt.xscale('log')
 
 
 
@@ -115,9 +122,15 @@ plt.title("Fixed Subset Objective vs. CPU time (s)")
 
 fixed_vs_adp = plt.figure(7)
 plt.title("Fixed Subset Objective vs. Accessed Data Points")
+plt.xscale('log')
 
 fixed_vs_fevals = plt.figure(8)
 plt.title("Fixed Subset Objective vs. Function Evaluations")
+plt.xscale('log')
+
+for i in range(8):
+    plt.figure(i+1)
+    plt.yscale('log')
 
 
 for bg, bh in zip(b_G, b_H):
@@ -127,21 +140,55 @@ for bg, bh in zip(b_G, b_H):
     w = load_result_file_w(filepath_w)
 
     """Plot the results """ 
+    # next color
+    c = next(color_cycle)
+
+    if bh == 0:
+        l = 'SGD, b: '+str(bg)
+        ls = '--'
+    elif bg <1000:
+        l = 'SQN, bG '+str(bg)+' bH '+str(bh)
+        ls = '-'
+    else:
+        l = 'SQN, bG '+str(bg/1000)+'k bH '+str(bh)
+        ls = '-'
+
     plt.figure(1)
-    plt.plot(iters[:maxIters], f_S[:maxIters], label = ('bG '+str(bg)+' bH '+str(bh)))
-    
+    plt.plot(iters[:maxIters], f_S[:maxIters], label = l, c=c, ls=ls)
     # plot moving averages
     #plt.plot(iters[:maxIters], get_moving_average(f_S,100)[:maxIters], label = ('Avg bG '+str(bg)+' bH '+str(bh)))
 
-    plt.figure(5)
+    plt.figure(2)
+    plt.plot(time[:maxIters], f_S[:maxIters], label = l, c=c, ls=ls)
 
-    plt.plot(iters[:maxIters], [F(w_i) for w_i in w[:maxIters]], label = ('bG '+str(bg)+' bH '+str(bh)))
+    plt.figure(3)
+    plt.plot(adp[:maxIters], f_S[:maxIters], label = l, c=c, ls=ls)
+
+    plt.figure(4)
+    plt.plot(fevals[:maxIters], f_S[:maxIters], label = l, c=c, ls=ls)
+
+    
+    
+
+    # get vals on fixed set
+    Fvals = [F(w_i) for w_i in w[:maxIters]]
+    plt.figure(5)
+    plt.plot(iters[:maxIters], Fvals, label = l, c=c, ls=ls)
+
+    plt.figure(6)
+    plt.plot(time[:maxIters], Fvals, label = l, c=c, ls=ls)
+
+    plt.figure(7)
+    plt.plot(adp[:maxIters], Fvals, label = l, c=c, ls= ls)
+
+    plt.figure(8)
+    plt.plot(fevals[:maxIters], Fvals, label = l, c=c, ls=ls)
+
 
 for i in range(8):
     plt.figure(i+1)
     plt.legend()
-    plt.yscale('log')
-    plt.set_cmap(plt.colormaps.pairs)
+
 
 plt.show()
 

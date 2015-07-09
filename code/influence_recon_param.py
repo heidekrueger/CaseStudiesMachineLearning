@@ -74,7 +74,7 @@ if __name__ == '__main__':
 
     # creates a list of reconstruction algo and parameters
     l_algos = []
-    for i in range(1, 2):
+    for i in range(1, 10):
         l_algos.append({'algo': 'lars',
                         'n_nonzero_coefs': i})
 

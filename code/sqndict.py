@@ -85,7 +85,7 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
                 for x, a in zip(X, self.recon.T):
                     a = np.array(a.flat)
                     x = np.array(x.flat)
-                    Dx = D.T.dot(x)
+                    Dx = (D.T).dot(x)
                     grad += (np.outer(Dx, x) - np.outer(a, x)).flat[:]
 
                 return np.multiply(1.0/len(X), grad)
@@ -106,19 +106,40 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
                                     index += 1
                 return np.multiply(1.0/len(X), grad)
 
+        def g_fast_new(self, d, X, z=None):
+                D = self.vector_to_matrix(d)
+                GD = np.multiply(0.0, D.copy())
+                
+                for x, a in zip(X, self.recon.T):
+                        a = np.array(a.flat)
+                        x = np.array(x.flat)
+                        GD_S = np.multiply(0.0, D.copy())
+                        
+                        for j in range(D.shape[1]):
+                                GD_S[ : , j ] = np.multiply( 2.0 * a[ j ], D.dot(a) - x)
+                                
+                        GD = GD + GD_S
+                GD = np.multiply(1.0/len(X), GD)
+                return self.matrix_to_vector(GD)
+
         def g(self, d, X, z=None):
                 """
                 print "g"
                 print np.max(self.g_fast(d, X, z) - \
                  self.finite_differences(d, X, z))
-                print np.max(self.g_comp_wise(d, X, z) - \
-                 self.finite_differences(d, X, z))
+                
                 print np.max(self.g_comp_wise(d, X, z) - \
                  self.g_fast(d, X, z))
                 """
-                # print self.finite_differences(d, X, z)
-                # return self.finite_differences(d, X, z)
+                if False:
+                        fd = self.finite_differences(d, X, z)
+                        
+                        print "fast new", np.linalg.norm(self.g_fast_new(d, X, z) - fd)
+                        print "fast old", np.max(self.g_fast(d, X, z)  - fd)
+                        return fd
+                    
                 return self.finite_differences(d, X, z)
+                #return self.g_fast_new(d, X, z)
 
         """
         def lasso_subproblem(self, X):

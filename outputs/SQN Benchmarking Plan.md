@@ -9,7 +9,16 @@
 ###### 1000 iterations:
 * 100 g, 0 H, 148 s
 * 100 g, 100 H, 160 s
-* 100 g, 1000 H, 1470 s
+* 1000 g, 0 H, 1470 s
+
+###### 100 iterations:
+* 100 g, 1000 H, 24 s --> scales linearly for 200 iterations
+* 100 g, 4000 H, 45 s
+* 1000g, 100  H, 
+* 1000g, 1000 H, 154 s
+
+
+
 
 ## Initial Run
 

@@ -158,7 +158,7 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
                     return g(w, X, z)
 
             options = {'dim': len(X[0])*self.n_components,
-                       'max_iter': self.max_iter,
+                       'max_iter': self.n_iter,
                        'batch_size': self.batch_size,
                        'beta': 1.,
                        'M': 5,
@@ -166,7 +166,7 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
                        'L': 50000,
                        'normalize': True,
                        'normalization': self.normalization,
-                       'updates_per_batch': 20}
+                       'updates_per_batch': self.max_iter}
 
             print ""
             print "Intialize sqn"

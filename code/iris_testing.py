@@ -58,7 +58,7 @@ def print_f_vals(sqn, options, filepath, testcase=None, rowlim=None):
             if len(results) > 0: 
                     line = sep.join([ str(r) for r in results[-1] ])[:-1] + "\n"
                     ffile.write(line)
-            wfile.write(sep.join(["0.2%f" %l for l in w.flat[:]]) + "\n")
+            wfile.write(sep.join([str(l) for l in w.flat[:]]) + "\n")
         else:    
             print(k, logreg.adp, "%0.2f, %0.2f" % (float(sqn.f_vals[-1]), float(sqn.g_norms[-1])))
             
@@ -111,8 +111,8 @@ if __name__ == "__main__":
         the file should be in <Git Project root directory>/datasets/
         """
         options = { 'dim':4, 
-                            'L': 20, 
-                            'M': 10, 
+                            'L': 10, 
+                            'M': 5, 
                             'beta':5., 
                             'max_iter': 1000, 
                             'batch_size': 100, 

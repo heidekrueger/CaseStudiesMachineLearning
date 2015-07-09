@@ -165,11 +165,11 @@ if __name__ == '__main__':
                                        batch_size=10,
                                        verbose=10)
 
-    sdl2 = SqnDictionaryLearning(n_components=150,
+    sdl2 = SqnDictionaryLearning(n_components=50,
                                  option=None,
                                  alpha=0.01,
-                                 n_iter=190,
-                                 max_iter=20,
+                                 n_iter=30,
+                                 max_iter=10,
                                  batch_size=500,
                                  verbose=10)
 

@@ -47,9 +47,10 @@ def print_f_vals(sqn, options, filepath, testcase=None, rowlim=None):
     for k in itertools.count():
         
         if filepath is not None:
-            line = sep.join([ str(r) for r in results[-1] ])[:-1] + "\n"
-            ffile.write(line)
-            wfile.write(sep.join([str(l) for l in locations[-1]]) + "\n")
+            if len(results) > 0: 
+                    line = sep.join([ str(r) for r in results[-1] ])[:-1] + "\n"
+                    ffile.write(line)
+            wfile.write(sep.join(["0.2%f" %l for l in w.flat[:]]) + "\n")
         else:    
             print(k, logreg.adp, "%0.2f, %0.2f" % (float(sqn.f_vals[-1]), float(sqn.g_norms[-1])))
         

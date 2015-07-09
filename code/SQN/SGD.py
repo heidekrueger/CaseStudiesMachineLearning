@@ -59,8 +59,6 @@ class SGD(StochasticOptimizer):
         self.options['batch_size'] = 1
         self.options['batch_size_H'] = 1
         self.options['testinterval'] = 0
-        self.options['normalize'] = False
-        self.options['normalization'] = None
         
         self.options['updates_per_batch'] = 1
         if options is not None:
@@ -95,14 +93,6 @@ class SGD(StochasticOptimizer):
             # perform gradient one or more updates using armijo rule and hessian information
             for i in range(max(1,self.options['updates_per_batch'])):
                     self.w = self._perform_update(f_S, g_S)
-                    if self.options['normalize']:
-                            if self.options['normalization'] is None:
-                                    print("Warning:Normalization function is not provided; Using L2-normalization")
-                                    self.w = np.multiply(1.0/np.linalg.norm(self.w), self.w)
-                            else:
-                                    self.w = self.options['normalization'](self.w)
-                            if self.debug: 
-                                    print "Normalizing position"
                             
             # Check Termination Condition
             if len(X_S) == 0 or self._has_terminated(g_S(self.w), self.w):
@@ -123,7 +113,6 @@ class SGD(StochasticOptimizer):
             '''
             return -g_S(self.w)
 
-
     def _perform_update(self, f_S, g_S, k = None):
             """
             do the gradient updating rule
@@ -139,7 +128,7 @@ class SGD(StochasticOptimizer):
             if self.debug: print("step size: %f" % alpha)
 
             self.w = self.w + np.multiply(alpha, search_direction)
-                   
+            
             return self.w
 
 
@@ -339,7 +328,7 @@ class SQN(SGD):
                    self.y[-1])), I)
 
         for (s_j, y_j) in itertools.izip(self.s, self.y):
-            rho = 1/np.inner(y_j, s_j)
+            rho = 1.0/np.inner(y_j, s_j)
             H = (I - rho * np.outer(s_j, y_j)).dot(H).dot(I - rho * np.outer(y_j, s_j))
             H += rho * np.outer(s_j, s_j)
 

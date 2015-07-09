@@ -160,16 +160,16 @@ if __name__ == '__main__':
     sdl = StochasticDictionaryLearning(n_components=5,
                                        option=None,
                                        alpha=1.0,
-                                       n_iter=20,
+                                       n_iter=10,
                                        max_iter=10,
                                        batch_size=10,
                                        verbose=10)
 
-    sdl2 = SqnDictionaryLearning(n_components=100,
+    sdl2 = SqnDictionaryLearning(n_components=15,
                                  option=None,
                                  alpha=0.001,
-                                 n_iter=20,
-                                 max_iter=5,
+                                 n_iter=5,
+                                 max_iter=15,
                                  batch_size=10,
                                  verbose=10)
 
@@ -189,8 +189,8 @@ if __name__ == '__main__':
         D = sdl2.components
 
     # plots dictionary updates
-    for d in sdl2.updates:
-        plot_dictionary(d)
+#    for d in sdl2.updates:
+  #      plot_dictionary(d)
 
     # post process data
     data, intercept = postprocess_data(lena)

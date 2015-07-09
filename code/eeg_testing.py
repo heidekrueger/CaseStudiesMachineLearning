@@ -49,6 +49,15 @@ def print_f_vals(sqn, options, filepath, testcase=None, rowlim=None):
     locations = []
     f_evals = []
     for k in itertools.count():
+        
+        if filepath is not None:
+            line = sep.join([ str(r) for r in results[-1] ])[:-1] + "\n"
+            ffile.write(line)
+            wfile.write(sep.join([str(l) for l in locations[-1]]) + "\n")
+        else:    
+            print(k, logreg.adp, "%0.2f, %0.2f" % (float(sqn.f_vals[-1]), float(sqn.g_norms[-1])))
+            
+            
         w = sqn.solve_one_step(logreg.F, logreg.G, X, y, k=k)
         
         #X_S, z_S = sqn._draw_sample(b = 100)
@@ -65,12 +74,6 @@ def print_f_vals(sqn, options, filepath, testcase=None, rowlim=None):
         results.append([k, logreg.fevals, logreg.gevals, logreg.adp, sqn.f_vals[-1], sqn.g_norms[-1], timeit.default_timer()-t_start])
         locations.append(w)
         
-        if filepath is not None:
-            line = sep.join([ str(r) for r in results[-1] ])[:-1] + "\n"
-            ffile.write(line)
-            wfile.write(sep.join([str(l) for l in locations[-1]]) + "\n")
-        else:    
-            print(k, logreg.adp, "%0.2f, %0.2f" % (float(sqn.f_vals[-1]), float(sqn.g_norms[-1])))
         if k > sqn.options['max_iter'] or sqn.termination_counter > 4:
             iterations = k
             break

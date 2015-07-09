@@ -10,9 +10,11 @@ from __future__ import division
 
 def read_fval(x):
     
-    f_current = f_l_bfgs_b(x)
-    fval_l_bfgs_b.append(f_current)
+    print(x[0])
+    xv = x.copy()
+    xval_l_bfgs_b.append(xv)
     return
+    
 
 def initialize_lasso(size_A, l):
     import scipy.linalg as linalg
@@ -37,23 +39,54 @@ def prox_comparison():
     
     import matplotlib.pyplot as plt
     import scipy.optimize as spopt
-    import ProxMeth as pm
-    import ProxGrad as pg
+    import ProxMeth_returnx as pm
+    import ProxGrad_returnx as pg
     from matplotlib2tikz import save as tikz_save
     
-    fval_0sr1 = pm.compute_0sr1(f, gf, x0, l_reg = l, tau = 1 / L, epsilon = 1e-6)
-    fval_prox_grad = pg.proximal_gradient(f, gf, x0, 1 / L, l_reg = l)
+    _, xval_0sr1 = pm.compute_0sr1(f, gf, x0, l_reg = l, tau = 1 / L)
+    _, xval_prox_grad = pg.proximal_gradient(f, gf, x0, 1 / L, l_reg = l)
     spopt.fmin_l_bfgs_b(f_l_bfgs_b, x0_l_bfgs_b, gf_l_bfgs_b, 
                         bounds = bounds, callback = read_fval, maxiter = 10000)
-    fval_0sr1.insert(0, f(x0))
-    fval_prox_grad.insert(0, f(x0))
-    fval_l_bfgs_b.insert(0, f_l_bfgs_b(x0_l_bfgs_b))
-    line1, = plt.plot(range(len(fval_0sr1)), fval_0sr1, 'r', label = '0SR1', lw = 2)
-    line2, = plt.plot(range(len(fval_prox_grad)), fval_prox_grad, 'b', label = 'ProxGrad', lw = 2)
-    line3, = plt.plot(range(len(fval_l_bfgs_b)), fval_l_bfgs_b, 'g', label = 'L-BFGS-B', lw = 2)
-    plt.xlim([0, 60])
-    plt.yscale('log')
-    plt.ylim([0, 1e5])
+                        
+    final_x1=xval_0sr1[len(xval_0sr1)-1]
+    final_x2=xval_prox_grad[len(xval_prox_grad)-1]
+    final_x3=xval_l_bfgs_b[len(xval_l_bfgs_b)-1]
+                        
+    xval_0sr1.insert(0, x0)
+    xval_prox_grad.insert(0, x0)
+    xval_l_bfgs_b.insert(0, x0_l_bfgs_b)
+    
+    diff1=[]
+    diff2=[]
+    diff3=[]
+    
+    for j in range(len(xval_0sr1)):
+        diff1.append(np.linalg.norm(xval_0sr1[j]-final_x1))
+    
+    for j in range(len(xval_prox_grad)):
+        diff2.append(np.linalg.norm(xval_prox_grad[j]-final_x2))
+        
+    for j in range(len(xval_l_bfgs_b)):
+        diff3.append(np.linalg.norm(xval_l_bfgs_b[j]-final_x3))
+    
+    quot1, quot2, quot3 = [], [], []
+    for i in range(len(diff1)-1):
+        quot1.append(diff1[i+1] / diff1[i])
+    
+    for i in range(len(diff2)-1):
+        quot2.append(diff2[i+1] / diff2[i])
+        
+    for i in range(len(diff3)-1):
+        quot3.append(diff3[i+1] / diff3[i])
+        
+    
+    
+    line1, = plt.plot(range(len(quot1)), quot1, 'r', label = '0SR1', lw = 2)
+    line2, = plt.plot(range(len(quot2)), quot2, 'b', label = 'ProxGrad', lw = 2)
+    line3, = plt.plot(range(len(quot3)), quot3, 'g', label = 'L-BFGS-B', lw = 2)
+    plt.xlim([0, 10000])
+    #plt.yscale('log')
+    #plt.ylim([0, 1e5])
     plt.ylabel('Function Value')
     plt.xlabel('Number of Iterations')
     plt.legend(handles = [line1, line2, line3])
@@ -66,7 +99,7 @@ if __name__ == "__main__":
     import numpy as np
     
     A, b, b_l_bfgs_b, A_sq, Ab, Ab_l_bfgs_b, x0, x0_l_bfgs_b, bounds, l, L = initialize_lasso((1500, 3000), 0.1)
-    fval_l_bfgs_b = []
+    xval_l_bfgs_b = []
     x0 *= 0.1
     x0_l_bfgs_b *= 0.1
     

@@ -273,7 +273,7 @@ class StochasticOptimizer(Optimizer):
                 X_S, z_S = self._draw_sample(X, z=z, b=b,
                                          recursion_depth=recursion_depth-1)
 
-        if self.debug:
+        if self.debug and X_S is not None and z_S is not None:
                 print("sample length: %d, %d" % (len(X_S), len(z_S)))
         return X_S, z_S
 

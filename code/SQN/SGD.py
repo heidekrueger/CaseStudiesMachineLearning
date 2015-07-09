@@ -59,6 +59,7 @@ class SGD(StochasticOptimizer):
         self.options['batch_size'] = 1
         self.options['batch_size_H'] = 1
         self.options['testinterval'] = 0
+        self.options['two_loop'] = False
         
         self.options['updates_per_batch'] = 1
         if options is not None:
@@ -209,7 +210,8 @@ class SQN(SGD):
             if self.wbar_previous is not None:
                 if self.debug: print("HESSE")
                 self._update_correction_pairs(g, X, z)
-                self.H = self._get_H()
+                if not self.options['two_loop']:
+                        self.H = self._get_H()
             self.wbar_previous = self.wbar
             self.wbar = np.zeros(self.options['dim'])
 
@@ -228,10 +230,12 @@ class SQN(SGD):
         '''
         search_direction = -g_S(self.w)
         if len(self.y) >= 2:
-            if self.H is None:
-                self.H = self._get_H()
-            search_direction = self.H.dot(search_direction)
-            #search_direction2 = self._two_loop_recursion(search_direction)
+            if not self.options['two_loop']:
+                    if self.H is None:
+                        self.H = self._get_H()
+                    search_direction = self.H.dot(search_direction)
+            else:
+                    search_direction = self._two_loop_recursion(search_direction)
             #print np.linalg.norm(search_direction - search_direction2)
             
         if self.debug:

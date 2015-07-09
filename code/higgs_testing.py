@@ -80,7 +80,7 @@ def print_f_vals(sqn, options, filepath, testcase=None, rowlim=None):
     
 def benchmark(batch_size_G, batch_size_H, updates_per_batch, options):
         folderpath = "../outputs/higgs/"
-        filepath =  folderpath + "%d_%d_%d_armijo.txt" %(b_G, b_H, updates_per_batch)
+        filepath =  folderpath + "%d_%d_%d.txt" %(b_G, b_H, updates_per_batch)
         options['batch_size'] = b_G
         options['batch_size_H'] = b_H
         options['updates_per_batch'] = updates_per_batch

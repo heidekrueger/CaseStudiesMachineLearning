@@ -165,12 +165,12 @@ if __name__ == '__main__':
                                        batch_size=10,
                                        verbose=10)
 
-    sdl2 = SqnDictionaryLearning(n_components=100,
+    sdl2 = SqnDictionaryLearning(n_components=150,
                                  option=None,
                                  alpha=0.01,
-                                 n_iter=1,
-                                 max_iter=10,
-                                 batch_size=50,
+                                 n_iter=190,
+                                 max_iter=20,
+                                 batch_size=500,
                                  verbose=10)
 
     # check sdl2 attributes
@@ -180,7 +180,7 @@ if __name__ == '__main__':
     data, lena, distorted = preprocess_data(lena)
 
     # takes dictionary
-    case = 3
+    case = 2
     if case == 1:
         sdl.fit(data)
         D = sdl.components
@@ -196,20 +196,20 @@ if __name__ == '__main__':
 
     # post process data
     data, intercept = postprocess_data(lena)
-
+    print "postprocessed"
     from sklearn.decomposition.dict_learning import sparse_encode
 
     t0 = time()
     title = 'first try'
     reconstructions = lena.copy()
-
+    
     # encode noisy patches with learnt dictionary
     code = sparse_encode(data, D.T, gram=None,
                          cov=None, algorithm='lars',
                          n_nonzero_coefs=20, alpha=None,
                          copy_cov=True, init=None,
                          max_iter=1000, n_jobs=1)
-
+    print "encoded"
     patch_size = (7, 7)
     height, width = lena.shape
 
@@ -223,9 +223,11 @@ if __name__ == '__main__':
 
     dt = time() - t0
     print('done in %.2fs.' % dt)
-
+    print "O"
     # show the difference
     show_with_diff(distorted, lena, 'Distorted image')
+    print "O"
     show_with_diff(reconstructions, lena,
                    title + ' (time: %.1fs)' % dt)
+    print "O"
     plt.show()

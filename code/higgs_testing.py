@@ -10,8 +10,7 @@ Logistic Regression
 from SQN.LogisticRegression import LogisticRegression
 from SQN.LogisticRegressionTest import LogisticRegressionTest
 
-from SQN.NewSQN import SQN
-from SQN.SGD import SGD
+from SQN.SGD import SQN, SGD
 
 # from SQN.PSQN import PSQN
 import numpy as np
@@ -20,6 +19,7 @@ import data.datasets as datasets
 import sys
 from SQN import stochastic_tools
 import re
+import random
 
 def print_f_vals(sqn, options, filepath, testcase=None, rowlim=None):
  
@@ -30,7 +30,7 @@ def print_f_vals(sqn, options, filepath, testcase=None, rowlim=None):
     
     logreg = LogisticRegression(lam_1=0.0, lam_2=0.0)
     logreg.get_sample = lambda l, X, z: datasets.get_higgs_mysql(l, db, cur, dimensions)
-    sqn.set_start(dim=sqn.options['dim'])
+    sqn.set_start(w1=np.array([ random.randint(-100,100) * random.random() for i in range(sqn.options['dim']) ]))
     w = sqn.get_position()
 
     sqn.set_options({'sampleFunction': logreg.sample_batch})
@@ -76,8 +76,8 @@ def print_f_vals(sqn, options, filepath, testcase=None, rowlim=None):
     return results
     
 def benchmark(batch_size_G, batch_size_H, updates_per_batch, options):
-        folderpath = "../outputs/"
-        filepath =  folderpath + "%d_%d_%d.txt" %(b_G, b_H, updates_per_batch)
+        folderpath = "../outputs/higgs/"
+        filepath =  folderpath + "%d_%d_%d_armijo.txt" %(b_G, b_H, updates_per_batch)
         options['batch_size'] = b_G
         options['batch_size_H'] = b_H
         options['updates_per_batch'] = updates_per_batch

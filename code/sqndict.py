@@ -2,7 +2,7 @@ import itertools
 import numpy as np
 from time import time
 from DictLearning.dictionary_learning import StochasticDictionaryLearning
-from SQN.NewSQN import SQN
+from SQN.SGD import SQN
 
 
 class SqnDictionaryLearning(StochasticDictionaryLearning):
@@ -117,7 +117,14 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
 
                 return np.asmatrix(alpha)
         """
-
+        
+        def normalization(self, d):
+                print("YEI")
+                D = self.vector_to_matrix(d)
+                for col in range(D.shape[1]):
+                        D[:,col] = np.multiply(min(1.0, 1.0/np.linalg.norm(D[:,col])), D[:,col])
+                return(self.matrix_to_vector(D))
+                        
         def fit(self, X):
             '''
             This method runs online dictionary learning on data X and update
@@ -152,7 +159,8 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
                        'batch_size_H': 10,
                        'L': 50000,
                        'normalize': True,
-                       'updates_per_batch': 3}
+                       'normalization': self.normalization,
+                       'updates_per_batch': 20}
 
             print ""
             print "Intialize sqn"

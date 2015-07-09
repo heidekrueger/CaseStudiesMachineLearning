@@ -38,17 +38,6 @@ class Optimizer:
         self.options['eps'] = 1e-8
         self.options['r_diff'] = 0.01
         
-        self.options['sampleFunction'] = sample_batch
-        self.options['M'] = 10
-        self.options['L'] = 1
-        self.options['N'] = None
-        self.options['beta'] = 1
-        self.options['batch_size'] = 1
-        self.options['batch_size_H'] = 1
-        self.options['testinterval'] = 0
-        self.options['normalize'] = False
-        self.options['updates_per_batch'] = 1
-        
         # If options is given
         if options is not None:
                 self.set_options(options)

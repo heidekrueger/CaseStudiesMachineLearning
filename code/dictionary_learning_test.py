@@ -199,7 +199,7 @@ if __name__ == '__main__':
                                  option=None,
                                  alpha=0.001,
                                  n_iter=20,
-                                 max_iter=20,
+                                 max_iter=5,
                                  batch_size=10,
                                  verbose=10)
 

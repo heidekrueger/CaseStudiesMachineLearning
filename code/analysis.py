@@ -38,7 +38,7 @@ def load_result_file_w(filepath):
         return w
 
 
-file_dir = '../outputs/'
+file_dir = '../outputs/higgs/'
 file_name = '1000_0_1.txt'
 file_path = file_dir + file_name
 

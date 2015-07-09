@@ -1,6 +1,6 @@
 import numpy as np
 import math
-from SQN import SQN
+from SGD import SQN
 
 
 class LogisticRegression():

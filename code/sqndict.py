@@ -6,6 +6,15 @@ from SQN.SGD import SQN
 import matplotlib.pyplot as plt
 
 
+class DictSQN(SQN):
+        normalization = None
+        def _perform_update(self, f_S, g_S, k = None):
+                search_direction = self._get_search_direction(g_S)
+                alpha = 0.001
+                self.w = self.w + np.multiply(alpha, search_direction)
+                self.w = self.normalization(self.w)
+                return self.w
+
 class SqnDictionaryLearning(StochasticDictionaryLearning):
 
         # store lasso coefficients
@@ -123,10 +132,9 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
                 return np.asmatrix(alpha)
         """
         
+        
         def normalization(self, d):
-                print("YEI")
                 D = self.vector_to_matrix(d)
-                print D.shape
                 for col in range(D.shape[1]):
                         D[:,col] = np.multiply(min(1.0, 1.0/np.linalg.norm(D[:,col])), D[:,col])
                 return(self.matrix_to_vector(D))
@@ -162,16 +170,15 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
                        'batch_size': self.batch_size,
                        'beta': 1.,
                        'M': 5,
-                       'batch_size_H': 20,
-                       'L': 50000,
-                       'normalize': True,
-                       'normalization': self.normalization,
+                       'batch_size_H': 10,
+                       'L': 2,
                        'updates_per_batch': self.max_iter}
 
             print ""
             print "Intialize sqn"
-            sqn = SQN(options)
-
+            sqn = DictSQN(options)
+            sqn.normalization = self.normalization
+            
             # initial dictionary : take some elements of X
             jd = np.random.randint(0, len(X[:]), self.n_components)
             self.components = X[jd, :].T
@@ -219,8 +226,7 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
                 - what does it do ?
                 - Should we remove it ?
                 """
-                def draw_sample(w, X, z, b):
-                    return Xt, None
+                draw_sample = lambda w, X, z, b: Xt, None
 
                 sqn.draw_sample = draw_sample
 

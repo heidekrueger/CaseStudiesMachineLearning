@@ -37,6 +37,7 @@ def get_fixed_F(size):
     F = 1/size * sum_i f(w, x_i, y_i) 
     """
     X_fix, y_fix = get_fixed_sample(size)
+    logreg = LR()
     return lambda w: logreg.F(w,X_fix,y_fix)
 
 def load_result_file(filepath):
@@ -71,129 +72,176 @@ def load_result_file_w(filepath):
 def get_moving_average(values, memory_length):
     return [np.mean(values[:i]) if i<=memory_length else np.mean(values[i-memory_length:i]) for i in range(len(values))]
 
-"""
-########################
-Here be the action:
-########################
 
 
-Init Params:
-"""
-maxIters = 1000
-fixed_F_size = 10000
-
-# will consider corresponding pairs of these:
-b_G = [100,100,100,100, 1000,1000,1000,1000, 10000,10000,10000,10000]
-b_H = [0,100,1000,4000, 0,100,1000,4000, 0,100,1000,4000]
-
-#make color cycle
-
-color_cycle=iter(cm.gist_rainbow(np.linspace(0,1,len(b_G))))
+def big_test():
+    """
+    ########################
+    Here be the action:
+    ########################
 
 
-logreg = LR()
-F = get_fixed_F(fixed_F_size)
+    Init Params:
+    """
+    maxIters = 1000
+    fixed_F_size = 10000
 
-""" Initialize plots: """
-stochF_vs_iters = plt.figure(1)
-plt.title("Sample Objective vs. Iterations")
-plt.ylabel("Stochastic objective on batch")
-plt.xlabel("Iterations")
+    # will consider corresponding pairs of these:
+    b_G = [100,100,100,100, 1000,1000,1000,1000, 10000,10000,10000,10000]
+    b_H = [0,100,1000,4000, 0,100,1000,4000, 0,100,1000,4000]
 
+    #make color cycle
 
-stochF_vs_time = plt.figure(2)
-plt.title("Sample Objective vs. CPU time (s)")
-
-stochF_vs_adp = plt.figure(3)
-plt.title("Sample Objective vs. Accessed Data Points")
-plt.xscale('log')
-
-stochF_vs_fevals = plt.figure(4)
-plt.title("Sample Objective vs. Function Evaluations")
-plt.xscale('log')
+    color_cycle=iter(cm.gist_rainbow(np.linspace(0,1,len(b_G))))
 
 
+    logreg = LR()
+    F = get_fixed_F(fixed_F_size)
 
-fixed_vs_iters = plt.figure(5)
-plt.title("Fixed Subset Objective vs. Iterations")
-
-fixed_vs_time = plt.figure(6)
-plt.title("Fixed Subset Objective vs. CPU time (s)")
-
-fixed_vs_adp = plt.figure(7)
-plt.title("Fixed Subset Objective vs. Accessed Data Points")
-plt.xscale('log')
-
-fixed_vs_fevals = plt.figure(8)
-plt.title("Fixed Subset Objective vs. Function Evaluations")
-plt.xscale('log')
-
-for i in range(8):
-    plt.figure(i+1)
-    plt.yscale('log')
+    """ Initialize plots: """
+    stochF_vs_iters = plt.figure(1)
+    plt.title("Sample Objective vs. Iterations")
+    plt.ylabel("Stochastic objective on batch")
+    plt.xlabel("Iterations")
 
 
-for bg, bh in zip(b_G, b_H):
-    """Load the results """
-    filepath, filepath_w = get_filepaths(bg, bh)
-    iters, fevals, gevals, adp, f_S, g_norm_S, time = load_result_file(filepath)
-    w = load_result_file_w(filepath_w)
+    stochF_vs_time = plt.figure(2)
+    plt.title("Sample Objective vs. CPU time (s)")
 
-    """Plot the results """ 
-    # next color
-    c = next(color_cycle)
+    stochF_vs_adp = plt.figure(3)
+    plt.title("Sample Objective vs. Accessed Data Points")
+    plt.xscale('log')
 
-    if bh == 0:
-        l = 'SGD, b: '+str(bg)
-        ls = '--'
-    elif bg <1000:
-        l = 'SQN, bG '+str(bg)+' bH '+str(bh)
-        ls = '-'
-    else:
-        l = 'SQN, bG '+str(bg/1000)+'k bH '+str(bh)
-        ls = '-'
+    stochF_vs_fevals = plt.figure(4)
+    plt.title("Sample Objective vs. Function Evaluations")
+    plt.xscale('log')
 
-    plt.figure(1)
-    plt.plot(iters[:maxIters], f_S[:maxIters], label = l, c=c, ls=ls)
-    # plot moving averages
-    #plt.plot(iters[:maxIters], get_moving_average(f_S,100)[:maxIters], label = ('Avg bG '+str(bg)+' bH '+str(bh)))
 
-    plt.figure(2)
-    plt.plot(time[:maxIters], f_S[:maxIters], label = l, c=c, ls=ls)
 
-    plt.figure(3)
-    plt.plot(adp[:maxIters], f_S[:maxIters], label = l, c=c, ls=ls)
+    fixed_vs_iters = plt.figure(5)
+    plt.title("Fixed Subset Objective vs. Iterations")
 
-    plt.figure(4)
-    plt.plot(fevals[:maxIters], f_S[:maxIters], label = l, c=c, ls=ls)
+    fixed_vs_time = plt.figure(6)
+    plt.title("Fixed Subset Objective vs. CPU time (s)")
 
-    
-    
+    fixed_vs_adp = plt.figure(7)
+    plt.title("Fixed Subset Objective vs. Accessed Data Points")
+    plt.xscale('log')
 
-    # get vals on fixed set
-    Fvals = [F(w_i) for w_i in w[:maxIters]]
-    plt.figure(5)
-    plt.plot(iters[:maxIters], Fvals, label = l, c=c, ls=ls)
+    fixed_vs_fevals = plt.figure(8)
+    plt.title("Fixed Subset Objective vs. Function Evaluations")
+    plt.xscale('log')
 
-    plt.figure(6)
-    plt.plot(time[:maxIters], Fvals, label = l, c=c, ls=ls)
+    for i in range(8):
+        plt.figure(i+1)
+        plt.yscale('log')
 
-    plt.figure(7)
-    plt.plot(adp[:maxIters], Fvals, label = l, c=c, ls= ls)
 
-    plt.figure(8)
-    plt.plot(fevals[:maxIters], Fvals, label = l, c=c, ls=ls)
+    for bg, bh in zip(b_G, b_H):
+        """Load the results """
+        filepath, filepath_w = get_filepaths(bg, bh)
+        iters, fevals, gevals, adp, f_S, g_norm_S, time = load_result_file(filepath)
+        w = load_result_file_w(filepath_w)
 
-for i in range(8):
-    plt.figure(i+1)
+        """Plot the results """ 
+        # next color
+        c = next(color_cycle)
+
+        if bh == 0:
+            l = 'SGD, b: '+str(bg)
+            ls = '--'
+        elif bg <1000:
+            l = 'SQN, bG '+str(bg)+' bH '+str(bh)
+            ls = '-'
+        else:
+            l = 'SQN, bG '+str(bg/1000)+'k bH '+str(bh)
+            ls = '-'
+
+        plt.figure(1)
+        plt.plot(iters[:maxIters], f_S[:maxIters], label = l, c=c, ls=ls)
+        # plot moving averages
+        #plt.plot(iters[:maxIters], get_moving_average(f_S,100)[:maxIters], label = ('Avg bG '+str(bg)+' bH '+str(bh)))
+
+        plt.figure(2)
+        plt.plot(time[:maxIters], f_S[:maxIters], label = l, c=c, ls=ls)
+
+        plt.figure(3)
+        plt.plot(adp[:maxIters], f_S[:maxIters], label = l, c=c, ls=ls)
+
+        plt.figure(4)
+        plt.plot(fevals[:maxIters], f_S[:maxIters], label = l, c=c, ls=ls)
+
+        
+        
+
+        # get vals on fixed set
+        Fvals = [F(w_i) for w_i in w[:maxIters]]
+        plt.figure(5)
+        plt.plot(iters[:maxIters], Fvals, label = l, c=c, ls=ls)
+
+        plt.figure(6)
+        plt.plot(time[:maxIters], Fvals, label = l, c=c, ls=ls)
+
+        plt.figure(7)
+        plt.plot(adp[:maxIters], Fvals, label = l, c=c, ls= ls)
+
+        plt.figure(8)
+        plt.plot(fevals[:maxIters], Fvals, label = l, c=c, ls=ls)
+
+    for i in range(8):
+        plt.figure(i+1)
+        plt.legend()
+
+    plt.show()
+
+
+def plot_armijo():
+    maxIters = 200
+    fixed_F_size = 1000
+
+    # will consider corresponding pairs of these:
+    b_G = [10000, 10000, 10000, 10000, 10000, 10000]
+    b_H = [0,0,1000,1000,4000, 4000]
+    update_rule = ['1', '1_armijo','1', '1_armijo','1', '1_armijo']
+    #make color cycle
+    color_cycle=iter(cm.gist_rainbow(np.linspace(0,1,len(b_G))))
+
+    logreg = LR()
+    F = get_fixed_F(fixed_F_size)
+
+    plt.figure()
+
+    for bg, bh, upd in zip(b_G, b_H, update_rule):
+        """Load the results """
+        filepath, filepath_w = get_filepaths(bg, bh,upd)
+        iters, fevals, gevals, adp, f_S, g_norm_S, time = load_result_file(filepath)
+        w = load_result_file_w(filepath_w)
+
+        """Plot the results """ 
+        # next color
+        c = next(color_cycle)
+        if bh == 0:
+            l = 'SGD, b: '+str(bg)
+            ls = '--'
+        elif bg <1000:
+            l = 'SQN, bG '+str(bg)+' bH '+str(bh)
+            ls = '-'
+        else:
+            l = 'SQN, bG '+str(bg/1000)+'k bH '+str(bh)
+            ls = '-'
+
+        if upd == '1_armijo':
+            l = l+ ' Armijo'
+
+        # get vals on fixed set
+        plt.plot(iters[:maxIters], f_S[:maxIters], label = l, c=c, ls=ls)
+        print "fvals" + str(bg), str(bh)
+        Fvals = [F(w_i) for w_i in w[:maxIters]]
     plt.legend()
+    plt.yscale('log')
+    plt.show()
 
-
-plt.show()
-
-
-
-
+plot_armijo()
 
 
 

@@ -8,12 +8,14 @@ import matplotlib.pyplot as plt
 
 class DictSQN(SQN):
         normalization = None
-        def _perform_update(self, f_S, g_S, k = None):
+
+        def _perform_update(self, f_S, g_S, k=None):
                 search_direction = self._get_search_direction(g_S)
                 alpha = 0.001
                 self.w = self.w + np.multiply(alpha, search_direction)
                 self.w = self.normalization(self.w)
                 return self.w
+
 
 class SqnDictionaryLearning(StochasticDictionaryLearning):
 
@@ -131,14 +133,13 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
 
                 return np.asmatrix(alpha)
         """
-        
-        
+
         def normalization(self, d):
                 D = self.vector_to_matrix(d)
                 for col in range(D.shape[1]):
-                        D[:,col] = np.multiply(min(1.0, 1.0/np.linalg.norm(D[:,col])), D[:,col])
+                        D[:, col] = np.multiply(min(1.0, 1.0/np.linalg.norm(D[:, col])), D[:, col])
                 return(self.matrix_to_vector(D))
-                        
+
         def fit(self, X):
             '''
             This method runs online dictionary learning on data X and update
@@ -169,8 +170,8 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
                        'max_iter': self.n_iter,
                        'batch_size': self.batch_size,
                        'beta': 1.,
-                       'M': 5,
-                       'batch_size_H': 10,
+                       'M': 20,
+                       'batch_size_H': 20,
                        'L': 2,
                        'updates_per_batch': self.max_iter}
 
@@ -178,7 +179,7 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
             print "Intialize sqn"
             sqn = DictSQN(options)
             sqn.normalization = self.normalization
-            
+
             # initial dictionary : take some elements of X
             jd = np.random.randint(0, len(X[:]), self.n_components)
             self.components = X[jd, :].T

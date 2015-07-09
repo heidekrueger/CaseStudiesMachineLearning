@@ -105,13 +105,13 @@ plt.xlabel("Iterations")
 stochF_vs_time = plt.figure(2)
 plt.title("Sample Objective vs. CPU time (s)")
 
-# stochF_vs_adp = plt.figure(3)
-# plt.title("Sample Objective vs. Accessed Data Points")
-# plt.xscale('log')
+stochF_vs_adp = plt.figure(3)
+plt.title("Sample Objective vs. Accessed Data Points")
+#plt.xscale('log')
 
-# stochF_vs_fevals = plt.figure(4)
-# plt.title("Sample Objective vs. Function Evaluations")
-# plt.xscale('log')
+stochF_vs_fevals = plt.figure(4)
+plt.title("Sample Objective vs. Function Evaluations")
+#plt.xscale('log')
 
 
 
@@ -121,13 +121,13 @@ plt.title("Fixed Subset Objective vs. Iterations")
 fixed_vs_time = plt.figure(6)
 plt.title("Fixed Subset Objective vs. CPU time (s)")
 
-# fixed_vs_adp = plt.figure(7)
-# plt.title("Fixed Subset Objective vs. Accessed Data Points")
-# plt.xscale('log')
+fixed_vs_adp = plt.figure(7)
+plt.title("Fixed Subset Objective vs. Accessed Data Points")
+#plt.xscale('log')
 
-# fixed_vs_fevals = plt.figure(8)
-# plt.title("Fixed Subset Objective vs. Function Evaluations")
-# plt.xscale('log')
+fixed_vs_fevals = plt.figure(8)
+plt.title("Fixed Subset Objective vs. Function Evaluations")
+#plt.xscale('log')
 
 for i in range(8):
     plt.figure(i+1)
@@ -162,11 +162,11 @@ for bg, bh in zip(b_G, b_H):
     plt.figure(2)
     plt.plot(time[:maxIters], f_S[:maxIters], label = l, c=c, ls=ls)
 
-    # plt.figure(3)
-    # plt.plot(adp[:maxIters], f_S[:maxIters], label = l, c=c, ls=ls)
+    plt.figure(3)
+    plt.plot(adp[:maxIters], f_S[:maxIters], label = l, c=c, ls=ls)
 
-    # plt.figure(4)
-    # plt.plot(fevals[:maxIters], f_S[:maxIters], label = l, c=c, ls=ls)
+    plt.figure(4)
+    plt.plot(fevals[:maxIters], f_S[:maxIters], label = l, c=c, ls=ls)
 
     
     
@@ -182,11 +182,11 @@ for bg, bh in zip(b_G, b_H):
     plt.figure(6)
     plt.plot(time[:maxIters], Fvals, label = l, c=c, ls=ls)
 
-    # plt.figure(7)
-    # plt.plot(adp[:maxIters], Fvals, label = l, c=c, ls= ls)
+    plt.figure(7)
+    plt.plot(adp[:maxIters], Fvals, label = l, c=c, ls= ls)
 
-    # plt.figure(8)
-    # plt.plot(fevals[:maxIters], Fvals, label = l, c=c, ls=ls)
+    plt.figure(8)
+    plt.plot(fevals[:maxIters], Fvals, label = l, c=c, ls=ls)
 
 for i in range(8):
     plt.figure(i+1)

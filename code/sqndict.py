@@ -1,13 +1,18 @@
 import itertools
 import numpy as np
-from time import time
+# from time import time
 from DictLearning.dictionary_learning import StochasticDictionaryLearning
 from SQN.NewSQN import SQN
+import matplotlib.pyplot as plt
 
 
 class SqnDictionaryLearning(StochasticDictionaryLearning):
 
+        # store lasso coefficients
         recon = []
+
+        # store dictionaries updates
+        updates = []
 
         def matrix_to_vector(self, D):
                 return D.flat[:]
@@ -149,7 +154,7 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
                        'batch_size': self.batch_size,
                        'beta': 1.,
                        'M': 5,
-                       'batch_size_H': 10,
+                       'batch_size_H': 20,
                        'L': 50000,
                        'normalize': True,
                        'updates_per_batch': 3}
@@ -161,8 +166,12 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
             # initial dictionary : take some elements of X
             jd = np.random.randint(0, len(X[:]), self.n_components)
             self.components = X[jd, :].T
-            #sqn._armijo_rule = lambda f, g, s, start, beta, gamma: 0.001
+            self.updates.append(self.components)
+
+            # sqn._armijo_rule = lambda f, g, s, start, beta, gamma: 0.001
             sqn.set_start(w1=np.array(self.components.flat))
+
+            # initial position
             d = sqn.get_position()
 
             # check first dictionary
@@ -175,36 +184,62 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
                 print "check first position"
                 print "position dim", d.shape
 
-            for k in itertools.count():
-                print k
+            print ""
+            print "max_iter to perform :", self.max_iter
 
-                # sqn.options['batch_size'])
-                j = np.random.randint(0, len(X),options['batch_size'])
+            # loop to learn dictionary
+            for k in itertools.count():
+
+                print ""
+                print "iter :", k + 1
+
+                # Create batch for the iteration
+                j = np.random.randint(0, len(X), options['batch_size'])
                 Xt = X[j, :]
                 Xt = np.asmatrix(Xt)
-                print ""
-                print "check subsample dim"
-                print "subsample dim", Xt.shape
 
+                # Control batch dimension
+                if self.verbose > 20:
+                    print ""
+                    print "check subsample dim"
+                    print "subsample dim", Xt.shape
+
+                # Draw sample function for sqn class
+                """
+                QUESTIONS :
+                - what does it do ?
+                - Should we remove it ?
+                """
                 def draw_sample(w, X, z, b):
                     return Xt, None
+
                 sqn.draw_sample = draw_sample
 
                 # dictionary reshaping
                 self.components = self.vector_to_matrix(d)
-                
+
                 # check dictionary shape
                 if self.verbose > 20:
                     print ""
                     print "check dictionary dim"
                     print "dictionary dim", self.components.shape
 
+                # Solve first sub problem
+                """
+                QUESTIONS :
+                - should we use prox methd from now on ?
+                - Do we ask Fin to implement it ?
+                """
                 self.recon = self.lasso_subproblem(Xt.T)
-                #print self.recon
 
+                # update dictionary with sqn
                 d = sqn.solve_one_step(self.f, self.g, X, None, k)
-            #     # print d[1:10]
-            #     # self.recon = []
+
+                # transform dictionary into a matrix
+                self.components = self.vector_to_matrix(d)
+
+                # store each dictionary update
+                self.updates.append(self.components)
 
                 # condition to stop the loop
                 if k > sqn.options['max_iter'] or sqn.termination_counter > 2:
@@ -215,9 +250,12 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
                 print("Terminated successfully!")
 
             self.components = self.vector_to_matrix(d)
-            
+
+            # plot successive dictionaries
+            plt.show()
+
             print "SQN done!"
-            
+
 
 if __name__ == '__main__':
         print "main"

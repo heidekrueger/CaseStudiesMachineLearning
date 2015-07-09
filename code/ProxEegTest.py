@@ -24,9 +24,9 @@ def prox_meth_lr(X, y, x0, l_reg = 1, tau = 0.01, batch_size = 1):
     Return:
     w_opt = Optimal parameter
     """
-    
-    import Prox_LogReg as lr
-    import StochProxMeth as spm
+    from future import division
+    import ProximalMethod.Prox_LogReg as lr
+    import ProximalMethod.StochProxMeth as spm
     
     _, w_opt = spm.compute_0sr1(lr.F, lr.G, x0, X, y, l_reg = l_reg, 
                                 tau = tau, batch_size = batch_size)

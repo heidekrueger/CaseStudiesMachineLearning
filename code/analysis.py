@@ -21,7 +21,7 @@ def get_filepaths(b_G, b_H, upd_stp = 1):
     """
     Returns the corresponding result paths for a pair of batch sizes
     """
-    filedir = '../outputs/'
+    filedir = '../outputs/higgs/'
     filename = str(b_G) + '_' + str(b_H) + '_' + str(upd_stp) + '.txt'
     filename_w = filename + '_w.txt'
     return filedir+filename, filedir+filename_w
@@ -184,11 +184,9 @@ for bg, bh in zip(b_G, b_H):
     plt.figure(8)
     plt.plot(fevals[:maxIters], Fvals, label = l, c=c, ls=ls)
 
-
 for i in range(8):
     plt.figure(i+1)
     plt.legend()
-
 
 plt.show()
 

@@ -9,7 +9,7 @@ Logistic Regression
 from SQN.LogisticRegression import LogisticRegression
 from SQN.LogisticRegressionTest import LogisticRegressionTest
 
-from SQN.SQN import SQN
+from SQN.SGD import SQN
 # from SQN.PSQN import PSQN
 
 import numpy as np

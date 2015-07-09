@@ -170,7 +170,7 @@ if __name__ == '__main__':
                                  alpha=0.001,
                                  n_iter=20,
                                  max_iter=5,
-                                 batch_size=100,
+                                 batch_size=10,
                                  verbose=10)
 
     # check sdl2 attributes

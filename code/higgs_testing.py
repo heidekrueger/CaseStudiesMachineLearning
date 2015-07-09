@@ -10,8 +10,7 @@ Logistic Regression
 from SQN.LogisticRegression import LogisticRegression
 from SQN.LogisticRegressionTest import LogisticRegressionTest
 
-from SQN.NewSQN import SQN
-from SQN.SGD import SGD
+from SQN.SGD import SQN, SGD
 
 # from SQN.PSQN import PSQN
 import numpy as np
@@ -20,6 +19,7 @@ import data.datasets as datasets
 import sys
 from SQN import stochastic_tools
 import re
+import random
 
 def print_f_vals(sqn, options, filepath, testcase=None, rowlim=None):
  
@@ -30,7 +30,7 @@ def print_f_vals(sqn, options, filepath, testcase=None, rowlim=None):
     
     logreg = LogisticRegression(lam_1=0.0, lam_2=0.0)
     logreg.get_sample = lambda l, X, z: datasets.get_higgs_mysql(l, db, cur, dimensions)
-    sqn.set_start(dim=sqn.options['dim'])
+    sqn.set_start(w1=np.array([ random.randint(-100,100) * random.random() for i in range(sqn.options['dim']) ]))
     w = sqn.get_position()
 
     sqn.set_options({'sampleFunction': logreg.sample_batch})
@@ -45,6 +45,14 @@ def print_f_vals(sqn, options, filepath, testcase=None, rowlim=None):
     locations = []
     f_evals = []
     for k in itertools.count():
+        
+        if filepath is not None:
+            line = sep.join([ str(r) for r in results[-1] ])[:-1] + "\n"
+            ffile.write(line)
+            wfile.write(sep.join([str(l) for l in locations[-1]]) + "\n")
+        else:    
+            print(k, logreg.adp, "%0.2f, %0.2f" % (float(sqn.f_vals[-1]), float(sqn.g_norms[-1])))
+        
         w = sqn.solve_one_step(logreg.F, logreg.G, k=k)
         
         #X_S, z_S = sqn._draw_sample(b = 100)
@@ -60,12 +68,6 @@ def print_f_vals(sqn, options, filepath, testcase=None, rowlim=None):
         results.append([k, logreg.fevals, logreg.gevals, logreg.adp, sqn.f_vals[-1], sqn.g_norms[-1], timeit.default_timer()-t_start])
         locations.append(w)
         
-        if filepath is not None:
-            line = sep.join([ str(r) for r in results[-1] ])[:-1] + "\n"
-            ffile.write(line)
-            wfile.write(sep.join([str(l) for l in locations[-1]]) + "\n")
-        else:    
-            print(k, logreg.adp, "%0.2f, %0.2f" % (float(sqn.f_vals[-1]), float(sqn.g_norms[-1])))
         if k > sqn.options['max_iter'] or sqn.termination_counter > 4:
             iterations = k
             break
@@ -76,8 +78,8 @@ def print_f_vals(sqn, options, filepath, testcase=None, rowlim=None):
     return results
     
 def benchmark(batch_size_G, batch_size_H, updates_per_batch, options):
-        folderpath = "../outputs/"
-        filepath =  folderpath + "%d_%d_%d.txt" %(b_G, b_H, updates_per_batch)
+        folderpath = "../outputs/higgs/"
+        filepath =  folderpath + "%d_%d_%d_armijo.txt" %(b_G, b_H, updates_per_batch)
         options['batch_size'] = b_G
         options['batch_size_H'] = b_H
         options['updates_per_batch'] = updates_per_batch

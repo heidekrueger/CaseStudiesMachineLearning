@@ -81,11 +81,11 @@ Here be the action:
 Init Params:
 """
 maxIters = 200
-fixed_F_size = 10000
+fixed_F_size = 1000
 
 # will consider corresponding pairs of these:
-b_G = [100,100, 1000,1000, 10000]
-b_H = [0,100,0,100,0]
+b_G = [100,100,100,100, 1000,1000,1000, 10000]
+b_H = [0,100,1000,4000,0,100,1000,0]
 
 #make color cycle
 
@@ -172,7 +172,10 @@ for bg, bh in zip(b_G, b_H):
     
 
     # get vals on fixed set
-    Fvals = [F(w_i) for w_i in w[:maxIters]]
+    print str(bg), str(bh)
+    print len(fevals), len(w)
+    Fvals = [F(w_i) for w_i in w[1:maxIters+1]]
+    print len(iters), len(Fvals)
     plt.figure(5)
     plt.plot(iters[:maxIters], Fvals, label = l, c=c, ls=ls)
 

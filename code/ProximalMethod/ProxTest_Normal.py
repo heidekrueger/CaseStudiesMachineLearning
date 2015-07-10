@@ -121,16 +121,15 @@ def x_conv_plot(xval_0sr1, xval_prox_grad):
     line1, = plt.plot(range(len(q_0sr1)), q_0sr1, 'r', label = '0SR1', lw = 2)
     line2, = plt.plot(range(len(q_prox_grad)), q_prox_grad, 'b', label = 'ProxGrad', lw = 2)
     line3, = plt.plot(range(len(q_l_bfgs_b)), q_l_bfgs_b, 'g', label = 'L-BFGS-B', lw = 2)
-    plt.figure()
+    
     #plt.xscale('log')
-    plt.xlim([0, 550])
+    plt.xlim([0, 600])
     #plt.yscale('log')
     #plt.ylim([0, 1e5])
     plt.ylabel('Convergence Factor')
     plt.xlabel('Number of Iterations')
     plt.legend(handles = [line1, line2, line3])
-    #tikz_save( 'myfile2.tikz' );
-    plt.show()
+    tikz_save( 'conv.tikz' );
     
     return
     
@@ -207,6 +206,6 @@ if __name__ == "__main__":
     
     fval_0sr1, xval_0sr1, fval_prox_grad, xval_prox_grad = prox_comparison()
     f_conv_plot(fval_0sr1, fval_prox_grad)
-    #x_conv_plot(xval_0sr1, xval_prox_grad)
+    x_conv_plot(xval_0sr1, xval_prox_grad)
     #t_0sr1, t_prox_grad, t_l_bfgs_b = conv_time()
     

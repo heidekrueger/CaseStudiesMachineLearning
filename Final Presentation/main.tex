@@ -54,15 +54,19 @@
         \end{itemize}
         \vspace{5pt}
         \alert{Examples:}
-        \begin{columns}
+        \begin{columns}\hspace{5pt}
         	\begin{column}{.5\linewidth}
-        		Electroence-phalography (EEG)\\
-        		\includegraphics[width = 0.8\linewidth]{eeg_pic.jpg}\\
+        		Electroencephalography (EEG)\\
+        		\vspace{5pt}
+        		\includegraphics[width = 0.8\linewidth]{EEG_oscillation.png}\\
+        		\vspace{5pt}
         		\alert{Section 4}
-        	\end{column}\hspace{-10pt}
+        	\end{column}
         	\begin{column}{.5\linewidth}
         		Image Denoising\\
-        		\includegraphics[width = 0.8\linewidth]{lena_pic.jpg}\\
+        		\vspace{5pt}
+        		\includegraphics[width = 0.6\linewidth]{lena_pic.jpg}\\
+        		\vspace{5pt}
         		\alert{Section 5}
         	\end{column}
         \end{columns}
@@ -74,11 +78,9 @@
     $$ \omega^* = \argmin_{\omega} F(\omega, X, z)$$
     
     \begin{itemize}
-      \item \alert{$F$}: Loss function of chosen ML-model
-      \item \alert{$X$}: The training data ($N:=\#$samples $\times$ $\#$features matrix)
-      \item \alert{$z$}: Training labels (only in classification models; vector of size $N$)
-      
-      \item The dimension $n$ of $\omega$ is model dependent, often $\#$features$+1$
+      \item \alert{$F$}: Loss function
+      \item \alert{$X$}: The training data
+      \item \alert{$z$}: Training labels
     \end{itemize}   
   \end{frame}
 
@@ -100,9 +102,8 @@
         \item Construction of very large models
         \item Handling high memory/computational demands
       \end{itemize}
-      \vspace{36pt}
-      
-    \centering \large{Ansatz: \alert{Stochastic Methods}}
+      \vspace{35pt}
+    \centering \huge{\alert{Stochastic Methods}}
   \end{frame}
   
   \begin{frame}{Introduction: Stochastic Framework}
@@ -174,10 +175,9 @@
       \end{itemize}
   \end{frame}
 
-  \subsection*{Behavior}
 
   \begin{frame}
-    \frametitle{Behavior I}
+    \frametitle{SQN: Performance I}
 
       \begin{columns}[T]
       \begin{column}{.5\textwidth}
@@ -192,30 +192,31 @@
   \end{frame}
 
   \begin{frame}
-    \frametitle{Behavior II}
-    \resizebox{\linewidth}{!}{\input{'EEG Fixed Subset Objective vs. Accessed Data Points.tikz'}}
+    \frametitle{SQN: Performance II}
+    \resizebox{0.8\linewidth}{!}{\input{'EEG Fixed Subset Objective vs. Accessed Data Points.tikz'}}
     \center{Performance on EEG Dataset, Problem size: $69550 \times 600$\\
     \tiny{Armijo-stepsizes, Further SQN-parameters: $L=10$, $M=5$}}
   \end{frame}
 
-  \begin{frame}\frametitle{Results}
+  \begin{frame}\frametitle{SQN: Main Results}
     \begin{itemize}
       \item Can be faster than SGD on appropriate Datasets
       \item Requires tedious, manual tuning of hyperparameters to be efficient!
+      \item Convergence conditions
     \end{itemize}
   
   \end{frame}
 
  \section{Proximal Method}
 
-   \begin{frame}{Proximal Method}
+   \begin{frame}{Proximal Method: Basic Theory}
        \begin{flalign*}
        	\text{\alert{Problem}}&&
        	\min_x &\;F(x) := \underbrace{f(x)}_{smooth} \quad + \underbrace{h(x)}_{non-smooth}&
        \end{flalign*}
        
        \begin{flalign*}
-       	\text{\alert{Proximity Operator}}&&\prox_f(v) = &\underset{x}{\argmin} \; \bigl( f(x) + \frac{1}{2} \lVert x - v \rVert^2_2 \bigr)&
+       	\text{\alert{Proximity Operator}}&&\prox_h(v) = &\underset{x}{\argmin} \; \bigl( h(x) + \frac{1}{2} \lVert x - v \rVert^2_2 \bigr)&
        \end{flalign*}
 		\begin{figure}[t] 
 			
@@ -225,7 +226,7 @@
 		\end{figure} 	
    \end{frame}
    
-   \begin{frame}{Proximal Method}
+   \begin{frame}{Proximal Method: Zero-Memory Rank-One Update}
    	\alert{Traditional Proximal Gradient Step:}
    	\begin{equation*}
    	x_{k+1} = \prox_{\lambda_kh}(x_k - \lambda_k\nabla f(x_k))
@@ -234,10 +235,12 @@
    	\begin{equation*}
    	x_{k+1} = \prox_h^{B_k}(x_k - B_k^{-1}\nabla f(x_k)),
    	\end{equation*}
-   	with $B_k = \underbrace{D_k}_{diag} + \underbrace{u_k}_{\in\mathbb{R}^n}u_k^T$.
+   	with $B_k = \underbrace{D_k}_{diag} + \underbrace{u_k}_{\in\mathbb{R}^n}u_k^T$.\\
+   	\vspace{5pt}
+   	A zero-memory approach is used
    \end{frame}
    
-   \begin{frame}{Proximal Method}
+   \begin{frame}{Proximal Method: Performance I}
    	\begin{columns}[T]
    		\begin{column}{.5\textwidth}
    			$F(x) = \lVert Ax - b \rVert + \lambda \lVert x \rVert_1$\\
@@ -285,8 +288,8 @@
    \begin{frame}{Proximal Method: Stochastic Extension}
    High-dimensional data:
    Extension to stochastic framework\\
-   \vspace{10pt}
-   \alert{Effect of batch size}
+   \vspace{25pt}
+   \centering\alert{Effect of batch size}
    	\begin{columns}[T]
    		\hspace{-16pt}
    		\begin{column}{.3\textwidth}
@@ -306,8 +309,17 @@
    		\end{column}
    	\end{columns}
    \end{frame}
+   
+   \begin{frame}{Proximal Method: Main Results}
+   	\begin{itemize}
+   		\item Superior results to standard proximal gradient
+   		\item Competitive with other standard methods
+   		\item Extension to stochastic framework possible
+   		\item Applicable to large-scale problems
+   	\end{itemize}
+   \end{frame}
 
-\section{Logistic Regression: An Example}
+\section{Classification}
 
 \plain{Electroencephalography (EEG)\\
 	\vspace{10pt}
@@ -319,34 +331,38 @@
 	\small Predict next slow wave
 	}
 
-\begin{frame}{EEG: Logistic Regression}
-	
-\end{frame}
-
-  \begin{frame}\frametitle{Results}
-    Nice table with SQN, SGD (no reg, L2), (Lasso,) Prox (L1) showing
-    Obj. value in found optimum, CPU time, Iterations, F1 score of prediction model
-
-    \begin{table}[t]
-    \centering
-      \begin{tabular}{r|c|c|c}
-        \phantom 0 & \textbf{$F(\omega^*)$} & \textbf{Model Score} & \textbf{Cost}\\
-      \hline \alert{No regularization}   &      & &  \\
-        SGD   & $0.01$  & $96\%$  & $x$ sec, $y$ AP\\
-        SQN   & $0.5$  & $96\%$  & $x$ sec, $y$ AP\\
-        Prox   & $0.01$  & $96\%$  & $x$ sec, $y$ AP\\
-      \hline \hline \alert{L1}        &    &   &  \\
-      LASSO & $.71$  &  $55\%$ & blablabla \\
-        Prox   & $0.01$  & $96\%$  & $x$ sec, $y$ AP\\
-      \hline \hline \alert{L2}        &    &   &  \\
-       SGD & $.71$  &  $55\%$ & blablabla \\
-        SQN   & $0.01$  & $96\%$  & $x$ sec, $y$ AP\\
-      \end{tabular}
-    \end{table}
-  \end{frame}
+  
+    	\begin{frame}{Classification: Results for SQN}
+    		\begin{center}
+    		\begin{tabular}{c|c||c|c}
+    			
+    			
+    			\textbf{Batch-size} &  1000, 1000 &  500, 500&  500, 500 \\  \hline
+    			\textbf{ Mean Score} &   0.8	&  0.8 & 0.8 \\	\hline  
+    			\textbf{ Std} &  0.007 &  0.006 &  0.005\\ \hline
+    			\textbf{ Running Time} &  65 s &  31 s & 31 s \\ \hline 
+    			\textbf{ M} &  5 &  5 & 50 \\ \hline
+    			\textbf{ L} &  10 &  10 &\ 10 \\ 
+    			
+    		\end{tabular}
+    \end{center}
+    \end{frame}
+    \begin{frame}\frametitle{Classification: Results for 0SR1}
+    	\begin{center}
+    		\begin{tabular}{c|c|c||c|c}
+    			
+    			&\textbf{ $\lambda$=0.1 } &\textbf{  $\lambda$=0.01}&\textbf{ $\lambda$=0.1 } &\textbf{ $\lambda$=0.01} \\ \hline
+    			\textbf{Batch-size} & 100 &  100&  1000 &  1000\\  \hline
+    			\textbf{ Mean Score} &   0.8	&  0.67 & 0.8 & 0.8\\	\hline  
+    			\textbf{ Std} &  0.01 &  0.14 &  0.01& 0.016\\ \hline
+    			\textbf{ Running Time} &  63 s &  45 s & 68 s& 69 s \\ 
+    			
+    		\end{tabular}
+    	\end{center}
+    \end{frame}
 
 \section{Dictionary Learning}
-\plain{Dictionary Learning\\
+\plain{Image Denoising\\
 	\vspace{10pt}
 	\alert{Can we recover the image?}
 	\vspace{15pt}\\
@@ -355,16 +371,62 @@
 	\small Image is partially destroyed\\
 	\small Reconstruct image
 }
-\begin{frame}{Dictionary Learning}
-	bla
+\begin{frame}{Dictionary Learning: Basic Theory}
+	\center Well-known machine learning model:
+	\begin{equation*}
+	\min_{D, \alpha} \frac{1}{N} \sum_{i=1}^N \|\underbrace{ x_i - D \alpha_i }_{\text{\alert{a) SQN}}}\|_2^2 + \underbrace{\lambda \| 
+		\alpha_i \|_1}_{\text{\alert{b) Prox}}}
+	\end{equation*}
+	\center \alert{ 2-phase optimization problem}
+	\begin{itemize}
+		\item[1.] Update "dictionary" 
+		\item[2.] Induce sparsity
+	\end{itemize}
+	$\Rightarrow$ Example: Reconstruction of partially distorted images
 \end{frame}
+
+\begin{frame}
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width=0.8\textwidth]{lena_noisy.png}
+		\caption{Noisy image}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width = 0.8\linewidth]{lena_reconstructed.png}
+		\caption{Reconstructed image}
+	\end{figure}
+\end{frame}
+
+
+
 
 \section{Conclusion}
 
   \begin{frame}{Summary}
-    \begin{center}\ccbysa\end{center}
+    \begin{itemize}
+    	\item Large amounts of data
+    	\item Need for stochastic algorithms
+    	\item Second order methods to improve speed
+    	\item For smooth and non-smooth problems
+    	\item Good performance of implementation on various problems
+    \end{itemize}
   \end{frame}
-  
+\plain{
+	
+	
+	\begin{center}
+		
+		\includegraphics[width = 0.7\linewidth]{noisy_picture.png}\\
+		
+		
+		
+		\includegraphics[width = 0.7\linewidth]{reconstructed.png}\\
+	\end{center}
+}  
 
   \plain{Questions?}
 
@@ -375,38 +437,4 @@
 
   \end{frame}
 
-\section{Appendix}
-\begin{frame}{Proximal Method}
-	\centering\includegraphics[width = 0.9\textwidth]{ProxNormal_full.png}
-\end{frame}
-\begin{frame}{Proximal Method}
-	\begin{columns}[T]
-		\begin{column}{.5\textwidth}
-			$F(x) = \lVert Ax - b \rVert + \lambda \lVert x \rVert_1$\\
-			$A \in \mathbb{R}^{1500 \times 3000},\:b \in \mathbb{R}^{1500}$\\
-			$A_{ij},\:b_i\:$ \textasciitilde $\:\mathcal{N}(0,1)$, $\:\lambda = 0.1$\\
-			\vspace{28pt}
-			\resizebox{\linewidth}{!}{\input{convNormal.tikz}}
-		\end{column}\hfill
-		\begin{column}{.5\textwidth}
-			$F(x) = \lVert Ax - b \rVert + \lambda \lVert x \rVert_1$\\
-			$A \in \mathbb{R}^{2197 \times 2197},\:b \in \mathbb{R}^{2197}$\\
-			$A$: \small Discretization of 3D Laplacian\\
-			\normalsize$\lambda = 1$\\
-			\vspace{10pt}
-			\resizebox{\linewidth}{!}{\input{convPDE.tikz}}
-		\end{column}
-	\end{columns}
-\end{frame}
-
-
-\begin{frame}\frametitle{SQN: CPU Time}
-    \resizebox{0.85\linewidth}{!}{\input{'EEG Fixed Subset Objective vs. CPU time.tikz'}}
-\end{frame}
-
-\begin{frame}{Proximal Method}
-	\centering\includegraphics[width=0.9\textwidth]{lambda1.png}\\
-	\centering\includegraphics[width=0.9\textwidth]{lambda2.png}
-
-\end{frame}
 \end{document}

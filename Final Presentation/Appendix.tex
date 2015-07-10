@@ -1,0 +1,72 @@
+%!TEX program = xelatex
+\documentclass[10pt]{beamer}
+
+\usetheme[noframetitleoffset, block=fill]{m}
+%\definecolor{TUMblue}{RGB}{55,55,255}
+%\setbeamercolor{alerted text}{fg=TUMblue}
+
+\usepackage{booktabs}
+\usepackage[scale=2]{ccicons}
+
+\usepackage{pgfplots}
+\usepackage{tikz}
+\usepgfplotslibrary{dateplot}
+\usepackage{caption}
+
+\newlength\figureheight
+\newlength\figurewidth
+\DeclareMathOperator{\prox}{prox}
+\DeclareMathOperator{\argmin}{argmin}
+
+\title{Stochastic Optimization in Machine Learning}
+\subtitle{Case Studies in Nonlinear Optimization}
+\date{\today}
+\author{F. Bauer \and S. Chambon \and R. Halbig \and S. Heidekrüger \and J. Heuke}
+\institute{Technische Universität München}
+%\titlegraphic{\hfill\includegraphics[height=1.5cm]{logo.eps}}
+\begin{document}
+\section{Appendix}
+
+\begin{frame}\frametitle{SQN: CPU Time}
+	\resizebox{0.85\linewidth}{!}{\input{'EEG Fixed Subset Objective vs. CPU time.tikz'}}
+\end{frame}
+
+\begin{frame}{Proximal Method}
+	\centering\includegraphics[width = 0.9\textwidth]{ProxNormal_full.png}
+\end{frame}
+\begin{frame}{Proximal Method}
+	\begin{columns}[T]
+		\begin{column}{.5\textwidth}
+			$F(x) = \lVert Ax - b \rVert + \lambda \lVert x \rVert_1$\\
+			$A \in \mathbb{R}^{1500 \times 3000},\:b \in \mathbb{R}^{1500}$\\
+			$A_{ij},\:b_i\:$ \textasciitilde $\:\mathcal{N}(0,1)$, $\:\lambda = 0.1$\\
+			\vspace{28pt}
+			\resizebox{\linewidth}{!}{\input{convNormal.tikz}}
+		\end{column}\hfill
+		\begin{column}{.5\textwidth}
+			$F(x) = \lVert Ax - b \rVert + \lambda \lVert x \rVert_1$\\
+			$A \in \mathbb{R}^{2197 \times 2197},\:b \in \mathbb{R}^{2197}$\\
+			$A$: \small Discretization of 3D Laplacian\\
+			\normalsize$\lambda = 1$\\
+			\vspace{10pt}
+			\resizebox{\linewidth}{!}{\input{convPDE.tikz}}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Proximal Method}
+	\centering\includegraphics[width=0.9\textwidth]{lambda1.png}\\
+	\centering\includegraphics[width=0.9\textwidth]{lambda2.png}
+
+\end{frame}
+
+
+\begin{frame}
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[scale=0.25]{lena_dictionary.png}
+		\caption{Dictionary learned}
+	\end{figure}
+	
+\end{frame}
+\end{document}

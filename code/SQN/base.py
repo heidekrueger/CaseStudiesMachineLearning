@@ -244,7 +244,7 @@ class StochasticOptimizer(Optimizer):
             raise NotImplementedError
 
 
-    def _draw_sample(self, X=None, z=None, b=None, recursion_depth=1):
+    def _draw_sample(self, X=None, z=None, w = None, b=None, recursion_depth=1):
         """
         Draw sample from smaple function. Recurse if empty sample was drawn.
 

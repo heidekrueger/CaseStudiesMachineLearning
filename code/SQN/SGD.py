@@ -82,8 +82,7 @@ class SGD(StochasticOptimizer):
                 "Please provide either a data set or a sampling function"
             
             # Draw sample batch
-            X_S, z_S = self._draw_sample(X, z, b=self.options['batch_size'])
-            
+            X_S, z_S = self._draw_sample(X, z, w = self.w, b=self.options['batch_size'])
             # Stochastic functions
             f_S = lambda x: f(x, X_S, z_S)  
             g_S = lambda x: g(x, X_S, z_S)
@@ -280,7 +279,7 @@ class SQN(SGD):
         """
         
         # draw hessian sample and get the corresponding stochastic gradient
-        X_SH, y_SH = self._draw_sample(X, z, b=self.options['batch_size_H'])
+        X_SH, y_SH = self._draw_sample(X, z, w = self.w, b=self.options['batch_size_H'])
         g_SH = lambda x: g(x, X_SH, y_SH)
 
         s_t, y_t = self._get_correction_pairs(g_SH,

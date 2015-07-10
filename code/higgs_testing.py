@@ -30,7 +30,8 @@ def print_f_vals(sqn, options, filepath, testcase=None, rowlim=None):
     
     logreg = LogisticRegression(lam_1=0.0, lam_2=0.0)
     logreg.get_sample = lambda l, X, z: datasets.get_higgs_mysql(l, db, cur, dimensions)
-    sqn.set_start(w1=np.array([ random.randint(-100,100) * random.random() for i in range(sqn.options['dim']) ]))
+    #sqn.set_start(w1=np.array([ random.randint(-100,100) * random.random() for i in range(sqn.options['dim']) ]))
+    sqn.set_start(w1=np.ones(options['dim']))
     w = sqn.get_position()
 
     sqn.set_options({'sampleFunction': logreg.sample_batch})

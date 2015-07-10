@@ -7,6 +7,7 @@ import re
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.pyplot import cm
+from matplotlib2tikz import save as tikz_save
 from data.datasets import load_eeg as load_eeg
 from SQN.LogisticRegression import LogisticRegression as LR
 
@@ -81,12 +82,22 @@ Here be the action:
 Init Params:
 """
 maxIters = 200
-fixed_F_size = 1000
+fixed_F_size = 10000
 
 # will consider corresponding pairs of these:
-b_G = [100,100,100,100, 1000,1000,1000, 10000]
-b_H = [0,100,1000,4000,0,100,1000,0]
+b_G = [100,100,100,100, 1000,1000,1000] #Left out 10000, 0
+b_H = [0,100,1000,4000,0,100,1000]
 
+
+titles = ["EEG: Sample Objective vs. Iterations",
+            "EEG: Sample Objective vs. CPU time",
+            "EEG: Sample Objective vs. Accessed Data Points",
+            "EEG: Sample Objective vs. Function Evaluations",
+            "EEG: Fixed Subset Objective vs. Iterations",
+            "EEG: Fixed Subset Objective vs. CPU time",
+            "EEG: Fixed Subset Objective vs. Accessed Data Points",
+            "EEG: Fixed Subset Objective vs. Function Evaluations"
+            ]
 #make color cycle
 
 color_cycle=iter(cm.gist_rainbow(np.linspace(0,1,len(b_G))))
@@ -97,37 +108,48 @@ F = get_fixed_F(fixed_F_size)
 
 """ Initialize plots: """
 stochF_vs_iters = plt.figure(1)
-plt.title("Sample Objective vs. Iterations")
-plt.ylabel("Stochastic objective on batch")
+plt.title(titles[0])
+plt.ylabel(r'$F_{S_k}(\omega^k)$')
 plt.xlabel("Iterations")
 
 
+
 stochF_vs_time = plt.figure(2)
-plt.title("Sample Objective vs. CPU time (s)")
+plt.title(titles[1])
+plt.ylabel(r'$F_{S_k}(\omega^k)$')
+plt.xlabel('CPU time (s)')
 
 stochF_vs_adp = plt.figure(3)
-plt.title("Sample Objective vs. Accessed Data Points")
-#plt.xscale('log')
+plt.title(titles[2])
+plt.ylabel(r'$F_{S_k}(\omega^k)$')
+plt.xlabel('ADP')
 
 stochF_vs_fevals = plt.figure(4)
-plt.title("Sample Objective vs. Function Evaluations")
-#plt.xscale('log')
+plt.title(titles[3])
+plt.ylabel(r'$F_{S_k}(\omega^k)$')
+plt.xlabel('Function Evaluations')
 
 
 
 fixed_vs_iters = plt.figure(5)
-plt.title("Fixed Subset Objective vs. Iterations")
+plt.title(titles[4])
+plt.ylabel(r'$F_{[10000]}(\omega^k)$')
+plt.xlabel('Iterations')
 
 fixed_vs_time = plt.figure(6)
-plt.title("Fixed Subset Objective vs. CPU time (s)")
+plt.title(titles[5])
+plt.ylabel(r'$F_{[10000]}(\omega^k)$')
+plt.xlabel('CPU time (s)')
 
 fixed_vs_adp = plt.figure(7)
-plt.title("Fixed Subset Objective vs. Accessed Data Points")
-#plt.xscale('log')
+plt.title(titles[6])
+plt.ylabel(r'$F_{[10000]}(\omega^k)$')
+plt.xlabel('ADP')
 
 fixed_vs_fevals = plt.figure(8)
-plt.title("Fixed Subset Objective vs. Function Evaluations")
-#plt.xscale('log')
+plt.title(titles[7])
+plt.ylabel(r'$F_{[10000]}(\omega^k)$')
+plt.xlabel('Function Evaluations')
 
 for i in range(8):
     plt.figure(i+1)
@@ -173,9 +195,9 @@ for bg, bh in zip(b_G, b_H):
 
     # get vals on fixed set
     print str(bg), str(bh)
-    print len(fevals), len(w)
+    # print len(fevals), len(w)
     Fvals = [F(w_i) for w_i in w[1:maxIters+1]]
-    print len(iters), len(Fvals)
+    # print len(iters), len(Fvals)
     plt.figure(5)
     plt.plot(iters[:maxIters], Fvals, label = l, c=c, ls=ls)
 
@@ -192,6 +214,8 @@ for i in range(8):
     plt.figure(i+1)
     plt.legend()
 
+plt.figure(1)
+tikz_save( 'test.tikz' );
 
 plt.show()
 

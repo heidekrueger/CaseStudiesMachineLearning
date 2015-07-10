@@ -46,7 +46,7 @@
 
 \section{Introduction}
 
-  \begin{frame}[t]\frametitle{Introduction: What is Machine Learning?}
+  \begin{frame}[t]\frametitle{Introduction: What is Machine Learning (ML) ?}
 	  	Implementation of autonomously learning software for:
         \begin{itemize}
         	\item Discovery of patterns and relationships in data
@@ -68,25 +68,25 @@
         \end{columns}
   \end{frame}
 
-  \begin{frame}\frametitle{ML and Optimization I}
+  \begin{frame}\frametitle{Introduction: ML and Optimization I}
     \alert{Training} a Machine Learning model means finding optimal parameters $\omega$:
 
     $$ \omega^* = \argmin_{\omega} F(\omega, X, z)$$
-    \pause
+    
     \begin{itemize}
       \item \alert{$F$}: Loss function of chosen ML-model
       \item \alert{$X$}: The training data ($N:=\#$samples $\times$ $\#$features matrix)
       \item \alert{$z$}: Training labels (only in classification models; vector of size $N$)
-      \pause
+      
       \item The dimension $n$ of $\omega$ is model dependent, often $\#$features$+1$
     \end{itemize}   
   \end{frame}
 
-  \begin{frame}\frametitle{ML and Optimization II}
+  \begin{frame}\frametitle{Introduction: ML and Optimization II}
     After we have found $\omega^*$, we can do \alert{Prediction} on new data points:
 
     $$ \hat {z_i} := h(\omega^*, x_i)$$
-    \pause
+    
     \begin{itemize}
       \item \alert{$x_i$}: new data point with \emph{unknown} label \alert{$z_i$}
       \item \alert{$h$}: hypothesis function of the ML model
@@ -94,18 +94,18 @@
   \end{frame}
 
   \begin{frame}
-    \frametitle{Challenges in Machine Learning}
+    \frametitle{Introduction: Challenges in Machine Learning}
       \begin{itemize}
         \item Massive amounts of training data 
         \item Construction of very large models
         \item Handling high memory/computational demands
       \end{itemize}
       \vspace{36pt}
-      \pause
+      
     \centering \large{Ansatz: \alert{Stochastic Methods}}
   \end{frame}
   
-  \begin{frame}{Stochastic Framework}
+  \begin{frame}{Introduction: Stochastic Framework}
     $$ F(\omega) := \mathbb{E}\left[f(\omega, \xi)\right] \uncover<3>{= \frac{1}{N}\sum_{i=1}^N f(\omega, x_i, z_i)}$$
     \begin{itemize}
       \item<2-> \alert{$\xi$}: Random variable; takes the form of an input-output-pair $(x_i, z_i)$
@@ -113,7 +113,7 @@
     \end{itemize}
   \end{frame}
 
-  \begin{frame}{Stochastic Methods}
+  \begin{frame}{Introduction: Stochastic Methods}
     \begin{columns}[T]
       \begin{column}{.5\textwidth}
         \centering \alert{Gradient Method}
@@ -143,9 +143,9 @@
       \begin{itemize}
         \item \alert{Stochastically} use second-order information
         \item Based on BFGS-method.
-        \pause
+        \
         \item Basic idea: $$ \omega^{k+1} = \omega^{k} - \alpha_k \alert{H_t} \nabla \hat F(\omega^{k})$$
-        \pause
+        
         \item $t$ running on slower time-scale than $k$. 
         \item $H_t$ update in $\mathcal O(n)$ time and constant memory, using several tricks
       \end{itemize}
@@ -190,7 +190,7 @@
        	\text{\alert{Problem}}&&
        	\min_x &\;F(x) := \underbrace{f(x)}_{smooth} \quad + \underbrace{h(x)}_{non-smooth}&
        \end{flalign*}
-       \pause
+       
        \begin{flalign*}
        	\text{\alert{Proximity Operator}}&&\prox_f(v) = &\underset{x}{\argmin} \; \bigl( f(x) + \frac{1}{2} \lVert x - v \rVert^2_2 \bigr)&
        \end{flalign*}
@@ -234,7 +234,7 @@
    					\end{tabular}
    				}
    			\end{center}
-   		\pause
+   		
    		\end{column}\hfill
    		\begin{column}{.5\textwidth}
    			$F(x) = \lVert Ax - b \rVert + \lambda \lVert x \rVert_1$\\
@@ -376,7 +376,13 @@
 	\end{columns}
 \end{frame}
 
+
 \begin{frame}\frametitle{SQN: CPU Time}
     \resizebox{\linewidth}{!}{\input{'EEG Fixed Subset Objective vs. CPU time.tikz'}}
+
+\begin{frame}{Proximal Method}
+	\centering\includegraphics[width=0.9\textwidth]{lambda1.png}\\
+	\centering\includegraphics[width=0.9\textwidth]{lambda2.png}
+
 \end{frame}
 \end{document}

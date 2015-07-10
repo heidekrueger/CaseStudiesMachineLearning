@@ -1,4 +1,5 @@
 import numpy as np
+import itertools
 from stochastic_tools import sample_batch
 
 class Optimizer:

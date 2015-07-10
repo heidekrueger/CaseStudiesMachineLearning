@@ -120,7 +120,7 @@
         $$\min F(\omega) $$
 
         \uncover<2->{
-        $$\omega^{(k+1)}:= \omega^{(k)}-\alpha_k \nabla F(\omega^{(k)})$$\\
+        $$\omega^{(k+1)}:= \omega^{k}-\alpha_k \nabla F(\omega^{k})$$\\
         \phantom{zeile}
         }
       \end{column}\hfill
@@ -128,9 +128,9 @@
         \centering \alert{Stochastic Gradient Descent}
         $$\min \mathbb E \left [f(\omega, \xi)\right]$$
         \uncover<3>{
-          $$\omega^{(k+1)}:= \omega^{(k)}-\alpha_k \alert{\nabla \hat F(\omega^{(k)})} $$
+          $$\omega^{k+1}:= \omega^{k}-\alpha_k \alert{\nabla \hat F(\omega^{k})} $$
           with
-          $$\alert{\nabla \hat F(\omega^{(k)})} := \frac{1}{b}\sum_{i\in \mathcal S_k}f(\omega, x_i, z_i)$$
+          $$\alert{\nabla \hat F(\omega^{k})} := \frac{1}{b}\sum_{i\in \mathcal S_k}f(\omega, x_i, z_i)$$
           where $\mathcal S_k \subset [N], \quad b:=|\mathcal S_k| \ll N$\\\alert{"Mini Batch"}
         }
       \end{column}
@@ -153,7 +153,7 @@
         \item \alert{Stochastically} use second-order information
         \item Based on BFGS-method.
         \pause
-        \item Basic idea: $$ \omega^{(k+1)} = \omega^{(k)} - \alpha_k \alert{H_t} \nabla \hat F(\omega^{(k)})$$
+        \item Basic idea: $$ \omega^{k+1} = \omega^{k} - \alpha_k \alert{H_t} \nabla \hat F(\omega^{k})$$
         \pause
         \item $t$ running on slower time-scale than $k$. 
         \item $H_t$ update in $\mathcal O(n)$ time and constant memory, using several tricks
@@ -163,8 +163,15 @@
 
   \begin{frame}
     \frametitle{Behavior}
-      Pretty picures about the behaviour of SQN on HIGGS
-      and comparison with traditional SGD
+
+      \begin{columns}[T]
+      \begin{column}{.5\textwidth}
+        \resizebox{\linewidth}{!}{\input{'EEG Sample Objective vs. Iterations.tikz'}}
+      \end{column}\hfill
+      \begin{column}{.5\textwidth}
+        \resizebox{\linewidth}{!}{\input{'EEG Fixed Subset Objective vs. Iterations.tikz'}}
+      \end{column}
+    \end{columns}
   \end{frame}
 
   \begin{frame}\frametitle{Results}

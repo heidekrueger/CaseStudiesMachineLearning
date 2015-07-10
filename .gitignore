@@ -8,5 +8,6 @@
 datasets/HIGGS.csv
 datasets/HIGGS.csv.gz
 datasets/*
+outputs/eeg/*
 
 *.pyc

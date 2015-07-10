@@ -14,12 +14,13 @@ def proximal_gradient(f, grad_f, x0, t, X, y, **options):
     
     options.setdefault('l_reg', 1)
     options.setdefault('batch_size', 1)
+    options.setdefault('max_iter', 1e7)
     
     x_old = x0
     N = len(X)
     fval = []
     
-    for i in range(100):
+    for i in range(options['max_iter']):
         
         batch = np.random.choice(N, options['batch_size'], False)
         y_b = y[batch].reshape(options['batch_size'], 1)
@@ -35,7 +36,7 @@ def proximal_gradient(f, grad_f, x0, t, X, y, **options):
         x_old = x_new
         fval.append(float(f(x_new, X, y)))
         
-    return fval, x_new
+    return fval, x_new, i
     
 def prox(x, t, **options):
     

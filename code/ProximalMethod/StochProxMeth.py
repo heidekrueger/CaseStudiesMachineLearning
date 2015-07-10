@@ -34,6 +34,7 @@ def compute_0sr1(f, grad_f, x0, X, z, **options):
     options.setdefault('l_reg', 1)
     options.setdefault('ls', 1)
     options.setdefault('beta', 0.5)
+    options.setdefault('max_iter', 1e7)
     n = len(x0)
     options.setdefault('dim', n)
     options.setdefault('batch_size', 1)
@@ -46,7 +47,7 @@ def compute_0sr1(f, grad_f, x0, X, z, **options):
     p = np.empty((n, 1))
     fval = []
     
-    for k in range(1, 101): # make while or itercount later
+    for k in range(1, int(options['max_iter'])+1): # make while or itercount later
         
         batch = np.random.choice(N, options['batch_size'], False)
         X_b = X[batch]
@@ -68,7 +69,7 @@ def compute_0sr1(f, grad_f, x0, X, z, **options):
         y = grad_f(x_new, X_b, z_b) - grad_f(x_old, X_b, z_b)
         fval.append(float(f(x_new, X, z)))
         
-    return fval, x_new
+    return fval, x_new, k
 
 
 def compute_sr1_update(s, y, **options):

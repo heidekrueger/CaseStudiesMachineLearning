@@ -82,13 +82,13 @@ Here be the action:
 Init Params:
 """
 maxIters = 200
-fixed_F_size = 10000
+fixed_F_size = 1000
 
 # will consider corresponding pairs of these:
 b_G = [100,100,100,100, 1000,1000,1000] #Left out 10000, 0
 b_H = [0,100,1000,4000,0,100,1000]
 
-
+#titles for the plots
 titles = ["EEG: Sample Objective vs. Iterations",
             "EEG: Sample Objective vs. CPU time",
             "EEG: Sample Objective vs. Accessed Data Points",
@@ -98,6 +98,9 @@ titles = ["EEG: Sample Objective vs. Iterations",
             "EEG: Fixed Subset Objective vs. Accessed Data Points",
             "EEG: Fixed Subset Objective vs. Function Evaluations"
             ]
+#Defines, which graphs will be printed to .tikz
+active = [True, False, False, False, True, True, True, False]
+
 #make color cycle
 
 color_cycle=iter(cm.gist_rainbow(np.linspace(0,1,len(b_G))))
@@ -122,7 +125,7 @@ plt.xlabel('CPU time (s)')
 stochF_vs_adp = plt.figure(3)
 plt.title(titles[2])
 plt.ylabel(r'$F_{S_k}(\omega^k)$')
-plt.xlabel('ADP')
+plt.xlabel('Epochs')
 
 stochF_vs_fevals = plt.figure(4)
 plt.title(titles[3])
@@ -133,22 +136,22 @@ plt.xlabel('Function Evaluations')
 
 fixed_vs_iters = plt.figure(5)
 plt.title(titles[4])
-plt.ylabel(r'$F_{[10000]}(\omega^k)$')
+plt.ylabel(r'$F_{[1000]}(\omega^k)$')
 plt.xlabel('Iterations')
 
 fixed_vs_time = plt.figure(6)
 plt.title(titles[5])
-plt.ylabel(r'$F_{[10000]}(\omega^k)$')
+plt.ylabel(r'$F_{[1000]}(\omega^k)$')
 plt.xlabel('CPU time (s)')
 
 fixed_vs_adp = plt.figure(7)
 plt.title(titles[6])
-plt.ylabel(r'$F_{[10000]}(\omega^k)$')
-plt.xlabel('ADP')
+plt.ylabel(r'$F_{[1000]}(\omega^k)$')
+plt.xlabel('Epochs')
 
 fixed_vs_fevals = plt.figure(8)
 plt.title(titles[7])
-plt.ylabel(r'$F_{[10000]}(\omega^k)$')
+plt.ylabel(r'$F_{[1000]}(\omega^k)$')
 plt.xlabel('Function Evaluations')
 
 for i in range(8):
@@ -185,7 +188,7 @@ for bg, bh in zip(b_G, b_H):
     plt.plot(time[:maxIters], f_S[:maxIters], label = l, c=c, ls=ls)
 
     plt.figure(3)
-    plt.plot(adp[:maxIters], f_S[:maxIters], label = l, c=c, ls=ls)
+    plt.plot([a/69550.0 for a in adp[:maxIters]], f_S[:maxIters], label = l, c=c, ls=ls)
 
     plt.figure(4)
     plt.plot(fevals[:maxIters], f_S[:maxIters], label = l, c=c, ls=ls)
@@ -196,7 +199,7 @@ for bg, bh in zip(b_G, b_H):
     # get vals on fixed set
     print str(bg), str(bh)
     # print len(fevals), len(w)
-    Fvals = [F(w_i) for w_i in w[1:maxIters+1]]
+    Fvals = [F(w_i) for w_i in w[:maxIters]]
     # print len(iters), len(Fvals)
     plt.figure(5)
     plt.plot(iters[:maxIters], Fvals, label = l, c=c, ls=ls)
@@ -205,17 +208,19 @@ for bg, bh in zip(b_G, b_H):
     plt.plot(time[:maxIters], Fvals, label = l, c=c, ls=ls)
 
     plt.figure(7)
-    plt.plot(adp[:maxIters], Fvals, label = l, c=c, ls= ls)
+    plt.plot([a/69550.0 for a in adp[:maxIters]], Fvals, label = l, c=c, ls= ls)
 
     plt.figure(8)
     plt.plot(fevals[:maxIters], Fvals, label = l, c=c, ls=ls)
 
 for i in range(8):
     plt.figure(i+1)
-    plt.legend()
+    if i+1 != 1: #don't plot legend for 1, as 1 and 5 will be displ. next to each other
+        plt.legend()
 
-plt.figure(1)
-tikz_save( 'test.tikz' );
+    if active[i]:
+        tikz_save('../outputs/plots/'+titles[i].replace(':','')+'.tikz')
+
 
 plt.show()
 

@@ -186,7 +186,12 @@
        \begin{flalign*}
        	\text{\alert{Proximity Operator}}&&\prox_f(v) = &\underset{x}{\argmin} \; \bigl( f(x) + \frac{1}{2} \lVert x - v \rVert^2_2 \bigr)&
        \end{flalign*}
+		\begin{figure}[t] 
+			
 			\centering\includegraphics[width = 0.5\textwidth]{prox_boyd.jpg}
+			\caption{\footnotesize Evaluating a proximal operator at various points. \textit{N Parikh, S Boyd, Proximal Methods,
+					Foundations and Trends in Optimization 1, 2014}}
+		\end{figure} 	
    \end{frame}
    
    \begin{frame}{Proximal Method}
@@ -207,15 +212,41 @@
    			$F(x) = \lVert Ax - b \rVert + \lambda \lVert x \rVert_1$\\
    			$A \in \mathbb{R}^{1500 \times 3000},\:b \in \mathbb{R}^{1500}$\\
    			$A_{ij},\:b_i\:$ \textasciitilde $\:\mathcal{N}(0,1)$, $\:\lambda = 0.1$\\
-   			\vspace{28pt}
+   			\vspace{15pt}
    			\resizebox{\linewidth}{!}{\input{ProxNormal.tikz}}
+   			\begin{center}
+   				\hspace{-3pt}
+   				\scalebox{0.85}{
+   					\begin{tabular}{|c|c|c|c|}
+   						\hline                       
+   						&\tiny \textbf{0SR1} & \tiny \textbf{ProxGrad} &  \tiny \textbf{L-BFGS-B} \\ \hline
+   						\tiny \textbf{Iterations} &\tiny  1,822	& \tiny 135,328 & \tiny 1,989 \\	\hline  
+   						\tiny \textbf{Run-Time}&\tiny 68 s & \tiny 1,144 s &\tiny 56 s  \\ \hline
+   						
+   					\end{tabular}
+   				}
+   			\end{center}
+   		\pause
    		\end{column}\hfill
    		\begin{column}{.5\textwidth}
    			$F(x) = \lVert Ax - b \rVert + \lambda \lVert x \rVert_1$\\
    			$A \in \mathbb{R}^{2197 \times 2197},\:b \in \mathbb{R}^{2197}$\\
-   			$A$ from 7-point finite difference stencil for 3D Laplacian on a Box $\:\lambda = 1$\\
-   			\vspace{10pt}
+   			$A$: \small Discretization of 3D Laplacian\\
+   			\normalsize$\lambda = 1$\\
+   			\vspace{8pt}
    			\resizebox{\linewidth}{!}{\input{ProxPDE.tikz}}
+   			\begin{center}
+   				\hspace{5pt}
+   				\scalebox{0.85}{
+   					\begin{tabular}{|c|c|c|c|}
+   						\hline                       
+   						&\tiny \textbf{0SR1} & \tiny \textbf{ProxGrad} &  \tiny \textbf{L-BFGS-B} \\ \hline
+   						\tiny \textbf{Iterations}& \tiny  7	& \tiny 18 & \tiny 10 \\	\hline  
+   						\tiny \textbf{Run-Time}& \tiny 0.037 s &\tiny 0.004 s &\tiny 0.022 s\\ \hline
+   						
+   					\end{tabular}
+   				}
+   			\end{center}
    		\end{column}
    	\end{columns}
    \end{frame}
@@ -313,4 +344,27 @@
 
   \end{frame}
 
+\section{Appendix}
+\begin{frame}{Proximal Method}
+	\centering\includegraphics[width = 0.9\textwidth]{ProxNormal_full.png}
+\end{frame}
+\begin{frame}{Proximal Method}
+	\begin{columns}[T]
+		\begin{column}{.5\textwidth}
+			$F(x) = \lVert Ax - b \rVert + \lambda \lVert x \rVert_1$\\
+			$A \in \mathbb{R}^{1500 \times 3000},\:b \in \mathbb{R}^{1500}$\\
+			$A_{ij},\:b_i\:$ \textasciitilde $\:\mathcal{N}(0,1)$, $\:\lambda = 0.1$\\
+			\vspace{28pt}
+			\resizebox{\linewidth}{!}{\input{convNormal.tikz}}
+		\end{column}\hfill
+		\begin{column}{.5\textwidth}
+			$F(x) = \lVert Ax - b \rVert + \lambda \lVert x \rVert_1$\\
+			$A \in \mathbb{R}^{2197 \times 2197},\:b \in \mathbb{R}^{2197}$\\
+			$A$: \small Discretization of 3D Laplacian\\
+			\normalsize$\lambda = 1$\\
+			\vspace{10pt}
+			\resizebox{\linewidth}{!}{\input{convPDE.tikz}}
+		\end{column}
+	\end{columns}
+\end{frame}
 \end{document}

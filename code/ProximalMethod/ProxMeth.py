@@ -65,7 +65,7 @@ def compute_0sr1(f, grad_f, x0, **options):
             if k % 100 == 0:
                 print(k)
         
-    return x_new, fval, xval
+    return x_new, fval, xval, k
 
 
 

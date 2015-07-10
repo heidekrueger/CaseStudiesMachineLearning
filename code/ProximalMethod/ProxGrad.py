@@ -43,7 +43,7 @@ def proximal_gradient(f, grad_f, x0, t, **options):
             if i % 10000 == 0:
                 print(i)
         
-    return x_new, fval, xval
+    return x_new, fval, xval, i
     
 def prox(x, t, **options):
     

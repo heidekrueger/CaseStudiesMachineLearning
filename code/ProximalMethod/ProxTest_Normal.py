@@ -145,17 +145,19 @@ def conv_time():
     t_prox_grad = 0
     t_l_bfgs_b = 0
     
-    for i in range(10):
+    for i in range(2):
     
         t0 = time.time()
-        _, _, _ = pm.compute_0sr1(f, gf, x0, l_reg = l, tau = 1 / L, 
-                                  timing = 1, epsilon = 1e-6, 
-                                  max_iter = max_iter)
+        _, _, _, iter_0sr1 = pm.compute_0sr1(f, gf, x0, l_reg = l, tau = 1 / L, 
+                                             timing = 1, epsilon = 1e-6, 
+                                             max_iter = max_iter)
         t_0sr1 += time.time() - t0
         
         t0 = time.time()
-        _, _, _ = pg.proximal_gradient(f, gf, x0, 1 / L, l_reg = l, timing = 1,
-                                       max_iter = max_iter, epsilon = 1e-6)
+        _, _, _, iter_prox_grad = pg.proximal_gradient(f, gf, x0, 1 / L, 
+                                                       l_reg = l, timing = 1, 
+                                                       max_iter = max_iter, 
+                                                       epsilon = 1e-6)
         t_prox_grad += time.time() - t0
         
         t0 = time.time()
@@ -167,7 +169,7 @@ def conv_time():
     t_prox_grad /= 10
     t_l_bfgs_b /= 10
     
-    return t_0sr1, t_prox_grad, t_l_bfgs_b
+    return t_0sr1, t_prox_grad, t_l_bfgs_b, iter_0sr1, iter_prox_grad
 
 
 if __name__ == "__main__":
@@ -175,7 +177,7 @@ if __name__ == "__main__":
     import numpy as np
     
     (A, b, b_l_bfgs_b, A_sq, Ab, Ab_l_bfgs_b, x0, x0_l_bfgs_b, bounds, l, L, 
-     fval_l_bfgs_b, xval_l_bfgs_b, max_iter) = initialize_lasso((1500, 3000),
+     fval_l_bfgs_b, xval_l_bfgs_b, max_iter) = initialize_lasso((15, 30),
                                                                 0.1, 1e6)
     
     def f(x):
@@ -204,8 +206,8 @@ if __name__ == "__main__":
                       
         return np.concatenate((temp, -temp)).T - Ab_l_bfgs_b + l
     
-    fval_0sr1, xval_0sr1, fval_prox_grad, xval_prox_grad = prox_comparison()
-    f_conv_plot(fval_0sr1, fval_prox_grad)
-    x_conv_plot(xval_0sr1, xval_prox_grad)
-    #t_0sr1, t_prox_grad, t_l_bfgs_b = conv_time()
+    #fval_0sr1, xval_0sr1, fval_prox_grad, xval_prox_grad = prox_comparison()
+    #f_conv_plot(fval_0sr1, fval_prox_grad)
+    #x_conv_plot(xval_0sr1, xval_prox_grad)
+    t_0sr1, t_prox_grad, t_l_bfgs_b, iter_0sr1, iter_prox_grad = conv_time()
     

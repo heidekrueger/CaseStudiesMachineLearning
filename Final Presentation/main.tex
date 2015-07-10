@@ -1,7 +1,7 @@
 %!TEX program = xelatex
 \documentclass[10pt]{beamer}
 
-\usetheme[progressbar=frametitle, noframetitleoffset, block=fill]{m}
+%\usetheme[progressbar=frametitle, noframetitleoffset, block=fill]{m}
 %\definecolor{TUMblue}{RGB}{55,55,255}
 %\setbeamercolor{alerted text}{fg=TUMblue}
 
@@ -156,11 +156,11 @@
         \centering \alert{Stochastic Newton Method}
         $$\min \mathbb E \left [f(\omega, \xi)\right]$$
         \uncover<3>{
-          $$\omega^{k+1}:= \omega^{k}-\alpha_k \alert{\nabla \hat^2 F(\omega^{k})}^{-1} \alert{\nabla \hat F(\omega^{k})} $$
+        $$\omega^{k+1}:= \omega^{k}-\alpha_k \alert{\nabla^2 \hat F(\omega^{k})^{-1}} \alert{\nabla \hat F(\omega^{k})} $$
           with
-          $$\alert{\nabla \hat^2 F(\omega^{k})} := \frac{1}{b_H}\sum_{i\in \mathcal S_{H,k}}f(\omega, x_i, z_i)$$
+          $$\alert{\nabla^2 \hat F(\omega^{k})} := \frac{1}{b_H}\sum_{i\in \mathcal S_{H,k}}f(\omega, x_i, z_i)$$
           where $\mathcal S_{H,k} \subset [N], \quad b:=|\mathcal S_{H,k}| \ll N$\\\alert{"Mini Batch"}
-        }
+         }
       \end{column}
     \end{columns}
   \end{frame}

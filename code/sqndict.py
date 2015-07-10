@@ -4,7 +4,8 @@ import numpy as np
 from DictLearning.dictionary_learning import StochasticDictionaryLearning
 from SQN.SGD import SQN
 import matplotlib.pyplot as plt
-
+from sklearn.linear_model import LassoLars
+        
 
 class DictSQN(SQN):
         normalization = None
@@ -12,6 +13,7 @@ class DictSQN(SQN):
         def _perform_update(self, f_S, g_S, k=None):
                 search_direction = self._get_search_direction(g_S)
                 alpha = 0.001
+                alpha = self._armijo_rule(f_S, g_S, search_direction, start=self.options['beta'], beta=.5, gamma=1e-2)
                 self.w = self.w + np.multiply(alpha, search_direction)
                 self.w = self.normalization(self.w)
                 return self.w
@@ -61,7 +63,7 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
                 one_f = []
                 # print np.array(self.recon.T[0].flat)
                 # print "dot", D.dot(np.array(self.recon.T[0].flat))
-                for x, a in zip(X, self.recon.T):
+                for x, a in zip(X, z.T):
                         x = np.asarray(x.flat)
                         a = np.asarray(a.flat)
                         l2_norm = 0.5 * np.linalg.norm(x - D.dot(a))**2
@@ -78,41 +80,13 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
                         step[i] += r
                         # print step-d
                         grad[i] = (self.f(step, X, z) - self.f(d, X, z))/r
-                        # print grad[i]
                 return grad
 
         def g_fast(self, d, X, z=None):
                 D = self.vector_to_matrix(d)
-                grad = np.zeros(d.shape)
-                for x, a in zip(X, self.recon.T):
-                    a = np.array(a.flat)
-                    x = np.array(x.flat)
-                    Dx = (D.T).dot(x)
-                    grad += (np.outer(Dx, x) - np.outer(a, x)).flat[:]
-
-                return np.multiply(1.0/len(X), grad)
-
-        def g_comp_wise(self, d, X, z=None):
-                D = self.vector_to_matrix(d)
-                grad = np.zeros(d.shape)
-                for x, a in zip(X, self.recon.T):
-                    a = np.array(a.flat)
-                    x = np.array(x.flat)
-                    index = 0
-                    for i in range(D.shape[1]):
-                            S = 0.0
-                            for k in range(D.shape[0]):
-                                    S += D[k, i] * x[k]
-                            for j in range(D.shape[0]):
-                                    grad[index] += x[j] * S - a[i]*x[j]
-                                    index += 1
-                return np.multiply(1.0/len(X), grad)
-
-        def g_fast_new(self, d, X, z=None):
-                D = self.vector_to_matrix(d)
                 GD = np.multiply(0.0, D.copy())
                 
-                for x, a in zip(X, self.recon.T):
+                for x, a in zip(X, z.T):
                         a = np.array(a.flat)
                         x = np.array(x.flat)
                         GD_S = np.multiply(0.0, D.copy())
@@ -133,33 +107,31 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
                 print np.max(self.g_comp_wise(d, X, z) - \
                  self.g_fast(d, X, z))
                 """
-                if False:
-                        fd = self.finite_differences(d, X, z)
-                        
-                        print "fast new", np.linalg.norm(self.g_fast_new(d, X, z) - fd)
-                        print "fast old", np.max(self.g_fast(d, X, z)  - fd)
-                        return fd
-                    
-                return self.finite_differences(d, X, z)
-                #return self.g_fast_new(d, X, z)
-
-        """
-        def lasso_subproblem(self, X):
-                D = self.components
-                zielfun = lambda a, x: 0.5*np.linalg.norm(x - D.dot(a))**2
-                a = np.zeros( (D.shape[1], 1) )
-
-                alpha = [ minimize(lambda w: zielfun(w, x), a) \
-                ['x'] for x in X.T ]
-
-                return np.asmatrix(alpha)
-        """
+                #return self.finite_differences(d, X, z)
+                return self.g_fast(d, X, z)
 
         def normalization(self, d):
                 D = self.vector_to_matrix(d)
                 for col in range(D.shape[1]):
                         D[:, col] = np.multiply(min(1.0, 1.0/np.linalg.norm(D[:, col])), D[:, col])
                 return(self.matrix_to_vector(D))
+        
+        
+        def lasso_subproblem(self, Xt, comp):
+                print "inside lasso"
+                # 4: Sparse coding with LARS
+                lars = LassoLars(alpha=self.alpha, verbose=False)
+
+                lars.fit(comp, Xt)
+                coef = lars.coef_
+                # print coef
+                coef = (np.asmatrix(coef)).T
+
+                # Dimension control
+                if self.verbose > 20:
+                    print "coef shape :", coef.shape
+
+                return coef
 
         def fit(self, X):
             '''
@@ -170,47 +142,35 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
             - self : sdl object
             - X : data
             '''
-
             if self.verbose > 0:
                 print ""
                 print "Running online dictionary learning"
                 print str(self.n_iter), "iter to perform"
 
-            def sample_batch(w, X, z, b):
-                n_s = len(X[:, 0])
-                j = np.random.randint(0, n_s, b)
-                X_S = []
-                for i in j:
-                    X_S.append(X[i])
-                return X_S, None
-
-            def stochastic_gradient(g, w, X=None, z=None):
-                    return g(w, X, z)
-
+            print ""
+            print "Intialize sqn"
             options = {'dim': len(X[0])*self.n_components,
                        'max_iter': self.n_iter,
                        'batch_size': self.batch_size,
                        'beta': 1.,
-                       'M': 20,
-                       'batch_size_H': 20,
-                       'L': 2,
+                       'M': 3,
+                       'batch_size_H': 2000,
+                       'L': 6,
+                       'two_loop': True,
                        'updates_per_batch': self.max_iter}
 
-            print ""
-            print "Intialize sqn"
             sqn = DictSQN(options)
             sqn.normalization = self.normalization
-
+            #sqn.debug = True
+            
             # initial dictionary : take some elements of X
             jd = np.random.randint(0, len(X[:]), self.n_components)
             self.components = X[jd, :].T
             self.updates.append(self.components)
 
-            # sqn._armijo_rule = lambda f, g, s, start, beta, gamma: 0.001
-            sqn.set_start(w1=np.array(self.components.flat))
-
             # initial position
-            d = sqn.get_position()
+            d = np.array(self.components.flat)
+            sqn.set_start(w1=d)
 
             # check first dictionary
             if self.verbose > 20:
@@ -224,54 +184,43 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
 
             print ""
             print "max_iter to perform :", self.max_iter
-
+            def draw_sample(X, z, w, b):
+                    
+                    index_list = np.random.randint(0, len(X), options['batch_size'])
+                    Xt = np.asmatrix( X[index_list, :] )
+                    z = self.lasso_subproblem(Xt.T, self.vector_to_matrix(w))
+                    return Xt, z
+            sqn._draw_sample = draw_sample
+            
             # loop to learn dictionary
             for k in itertools.count():
 
-                print ""
-                print "iter :", k + 1
-
-                # Create batch for the iteration
-                j = np.random.randint(0, len(X), options['batch_size'])
-                Xt = X[j, :]
-                Xt = np.asmatrix(Xt)
-
+                print "\niter :", k + 1
+                
                 # Control batch dimension
                 if self.verbose > 20:
                     print ""
                     print "check subsample dim"
                     print "subsample dim", Xt.shape
 
-                # Draw sample function for sqn class
-                """
-                QUESTIONS :
-                - what does it do ?
-                - Should we remove it ?
-                """
-                draw_sample = lambda w, X, z, b: Xt, None
-
-                sqn.draw_sample = draw_sample
-
-                # dictionary reshaping
-                self.components = self.vector_to_matrix(d)
-
                 # check dictionary shape
                 if self.verbose > 20:
                     print ""
                     print "check dictionary dim"
                     print "dictionary dim", self.components.shape
-
+                
+                # dictionary reshaping
+                self.components = self.vector_to_matrix(d)
                 # Solve first sub problem
                 """
                 QUESTIONS :
                 - should we use prox methd from now on ?
                 - Do we ask Fin to implement it ?
                 """
-                self.recon = self.lasso_subproblem(Xt.T)
-
                 # update dictionary with sqn
                 d = sqn.solve_one_step(self.f, self.g, X, None, k)
-
+                print sqn.f_vals[-1]
+                
                 # transform dictionary into a matrix
                 self.components = self.vector_to_matrix(d)
 
@@ -285,8 +234,6 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
 
             if iterations < sqn.options['max_iter']:
                 print("Terminated successfully!")
-
-            self.components = self.vector_to_matrix(d)
 
             # plot successive dictionaries
             plt.show()

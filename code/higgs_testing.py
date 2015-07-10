@@ -30,7 +30,8 @@ def print_f_vals(sqn, options, filepath, testcase=None, rowlim=None):
     
     logreg = LogisticRegression(lam_1=0.0, lam_2=0.0)
     logreg.get_sample = lambda l, X, z: datasets.get_higgs_mysql(l, db, cur, dimensions)
-    sqn.set_start(w1=np.array([ random.randint(-100,100) * random.random() for i in range(sqn.options['dim']) ]))
+    #sqn.set_start(w1=np.array([ random.randint(-100,100) * random.random() for i in range(sqn.options['dim']) ]))
+    sqn.set_start(w1=np.ones(options['dim']))
     w = sqn.get_position()
 
     sqn.set_options({'sampleFunction': logreg.sample_batch})
@@ -80,7 +81,7 @@ def print_f_vals(sqn, options, filepath, testcase=None, rowlim=None):
     
 def benchmark(batch_size_G, batch_size_H, updates_per_batch, options):
         folderpath = "../outputs/higgs/"
-        filepath =  folderpath + "%d_%d_%d_armijo.txt" %(b_G, b_H, updates_per_batch)
+        filepath =  folderpath + "%d_%d_%d.txt" %(b_G, b_H, updates_per_batch)
         options['batch_size'] = b_G
         options['batch_size_H'] = b_H
         options['updates_per_batch'] = updates_per_batch

@@ -139,15 +139,6 @@
 
 \section{SQN: A Stochastic Quasi-Newton Method}
 
-  \begin{frame}
-    \frametitle{Higgs-Boson classification problem}
-      \begin{itemize}
-        \item Data from Monte-Carlo simulations
-        \item $X\in \mathbb R^{11.000.000 \times 29}$\\\emph{Lots} of samples, relatively small, dense feature set.
-        \item Here, we use \emph{Logistic Regression} for classification.
-      \end{itemize}
-  \end{frame}
-
   \begin{frame}\frametitle{Stochastic Quasi-Newton Method (SQN)}
       \begin{itemize}
         \item \alert{Stochastically} use second-order information
@@ -160,9 +151,10 @@
       \end{itemize}
   \end{frame}
 
+  \subsection*{Behavior}
 
   \begin{frame}
-    \frametitle{Behavior}
+    \frametitle{Behavior I}
 
       \begin{columns}[T]
       \begin{column}{.5\textwidth}
@@ -172,6 +164,15 @@
         \resizebox{\linewidth}{!}{\input{'EEG Fixed Subset Objective vs. Iterations.tikz'}}
       \end{column}
     \end{columns}
+    \center{Performance on EEG Dataset, Problem size: $69550 \times 600$\\
+    \tiny{Armijo-stepsizes, Further SQN-parameters: $L=10$, $M=5$}}
+  \end{frame}
+
+  \begin{frame}
+    \frametitle{Behavior II}
+    \resizebox{\linewidth}{!}{\input{'EEG Fixed Subset Objective vs. Accessed Data Points.tikz'}}
+    \center{Performance on EEG Dataset, Problem size: $69550 \times 600$\\
+    \tiny{Armijo-stepsizes, Further SQN-parameters: $L=10$, $M=5$}}
   \end{frame}
 
   \begin{frame}\frametitle{Results}

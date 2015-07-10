@@ -81,7 +81,7 @@ Here be the action:
 
 Init Params:
 """
-maxIters = 200
+maxIters = 1000
 fixed_F_size = 1000
 
 # will consider corresponding pairs of these:
@@ -168,7 +168,7 @@ for bg, bh in zip(b_G, b_H):
     filepath, filepath_w = get_filepaths(bg, bh)
     iters, fevals, gevals, adp, f_S, g_norm_S, time = load_result_file(filepath)
     w = load_result_file_w(filepath_w)
-
+    loop_maxIters = max(maxIters, len(iters))-10
     """Plot the results """ 
     # next color
     c = next(color_cycle)
@@ -184,18 +184,18 @@ for bg, bh in zip(b_G, b_H):
         ls = '-'
 
     plt.figure(1)
-    plt.plot(iters[:maxIters], f_S[:maxIters], label = l, c=c, ls=ls)
+    plt.plot(iters[:loop_maxIters], f_S[:loop_maxIters], label = l, c=c, ls=ls)
     # plot moving averages
     #plt.plot(iters[:maxIters], get_moving_average(f_S,100)[:maxIters], label = ('Avg bG '+str(bg)+' bH '+str(bh)))
 
     plt.figure(2)
-    plt.plot(time[:maxIters], f_S[:maxIters], label = l, c=c, ls=ls)
+    plt.plot(time[:loop_maxIters], f_S[:loop_maxIters], label = l, c=c, ls=ls)
 
     plt.figure(3)
     plt.plot([a/69550.0 for a in adp[:maxIters]], f_S[:maxIters], label = l, c=c, ls=ls)
 
     plt.figure(4)
-    plt.plot(fevals[:maxIters], f_S[:maxIters], label = l, c=c, ls=ls)
+    plt.plot(fevals[:loop_maxIters], f_S[:loop_maxIters], label = l, c=c, ls=ls)
 
     
     
@@ -203,19 +203,19 @@ for bg, bh in zip(b_G, b_H):
     # get vals on fixed set
     print str(bg), str(bh)
     # print len(fevals), len(w)
-    Fvals = [F(w_i) for w_i in w[:maxIters]]
+    Fvals = [F(w_i) for w_i in w[:loop_maxIters]]
     # print len(iters), len(Fvals)
     plt.figure(5)
-    plt.plot(iters[:maxIters], Fvals, label = l, c=c, ls=ls)
+    plt.plot(iters[:loop_maxIters], Fvals, label = l, c=c, ls=ls)
 
     plt.figure(6)
-    plt.plot(time[:maxIters], Fvals, label = l, c=c, ls=ls)
+    plt.plot(time[:loop_maxIters], Fvals, label = l, c=c, ls=ls)
 
     plt.figure(7)
-    plt.plot([a/69550.0 for a in adp[:maxIters]], Fvals, label = l, c=c, ls= ls)
+    plt.plot([a/69550.0 for a in adp[:loop_maxIters]], Fvals, label = l, c=c, ls= ls)
 
     plt.figure(8)
-    plt.plot(fevals[:maxIters], Fvals, label = l, c=c, ls=ls)
+    plt.plot(fevals[:loop_maxIters], Fvals, label = l, c=c, ls=ls)
 
 for i in range(8):
     plt.figure(i+1)

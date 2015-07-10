@@ -89,13 +89,17 @@ b_G = [10,20,50, 100, 100] #Left out 10000, 0
 b_H = [5,  10, 10, 10, 50]
 
 #titles for the plots
-titles = ["EEG: Sample Objective vs. Iterations",
-            "EEG: Sample Objective vs. CPU time",
-            "EEG: Sample Objective vs. Accessed Data Points",
-            "EEG: Sample Objective vs. Function Evaluations"
+titles = ["EEGLM: Sample Objective vs. Iterations",
+            "EEGLM: Sample Objective vs. CPU time",
+            "EEGLM: Sample Objective vs. Accessed Data Points",
+            "EEGLM: Sample Objective vs. Function Evaluations",
+            "EEGLM: Fixed Subset Objective vs. Iterations",
+            "EEGLM: Fixed Subset Objective vs. CPU time",
+            "EEGLM: Fixed Subset Objective vs. Accessed Data Points",
+            "EEGLM: Fixed Subset Objective vs. Function Evaluations"
             ]
 #Defines, which graphs will be printed to .tikz
-active = [True, True, True, True]
+active = [True, False, False, False, True, False, False, False]
 
 #make color cycle
 
@@ -136,10 +140,36 @@ plt.title(titles[4])
 plt.ylabel(r'$F_{S_k}(\omega^k)$')
 plt.xlabel('Function Evaluations')
 
-for i in range(4):
+
+fixed_vs_iters = plt.figure(5)
+plt.title(titles[4])
+plt.ylabel(r'$F_{[1000]}(\omega^k)$')
+plt.xlabel('Iterations')
+plt.ylim(.8,100)
+
+fixed_vs_time = plt.figure(6)
+plt.title(titles[5])
+plt.ylabel(r'$F_{[1000]}(\omega^k)$')
+plt.xlabel('CPU time (s)')
+plt.xlim(0, 180)
+plt.ylim(0.8, 20)
+
+fixed_vs_adp = plt.figure(7)
+plt.title(titles[6])
+plt.ylabel(r'$F_{[1000]}(\omega^k)$')
+plt.xlabel('Epochs')
+plt.xlim(0,2)
+plt.ylim(.7, 40)
+
+fixed_vs_fevals = plt.figure(8)
+plt.title(titles[7])
+plt.ylabel(r'$F_{[1000]}(\omega^k)$')
+plt.xlabel('Function Evaluations')
+plt.xlim(0,200)
+
+for i in range(8):
     plt.figure(i+1)
     plt.yscale('log')
-
 
 for bg, bh in zip(b_G, b_H):
     """Load the results """
@@ -158,7 +188,7 @@ for bg, bh in zip(b_G, b_H):
     # next color
     c = next(color_cycle)
     l = 'SQN, L '+str(bg)+' M '+str(bh)
-    
+    ls = '-'
     plt.figure(1)
     plt.plot(iters[:loop_maxIters], f_S[:loop_maxIters], label = l, c=c, ls=ls)
     # plot moving averages
@@ -194,7 +224,7 @@ for bg, bh in zip(b_G, b_H):
     plt.figure(8)
     plt.plot(fevals[:loop_maxIters], Fvals, label = l, c=c, ls=ls)
 
-for i in range(4):
+for i in range(8):
     plt.figure(i+1)
     if i+1 != 1: #don't plot legend for 1, as 1 and 5 will be displ. next to each other
         plt.legend() # too make smaller give arg: prop={'size':8}

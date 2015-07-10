@@ -135,7 +135,7 @@ class SGD(StochasticOptimizer):
     def _test_normality(self, f, level = 0.01, burn_in = 200):
             if len(f) <= burn_in + 1:
                     return False
-            return lillifors(f)[1] > level
+            return lillifors(f)[1] >= level
     
     def _is_stationary(self):
             """

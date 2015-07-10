@@ -7,7 +7,7 @@ Created on Wed Jul  8 22:13:15 2015
 # from future import division
 
 
-def prox_meth_lr(X, y, x0, l_reg=1., tau=0.01, batch_size=1):
+def prox_meth_lr(X, y, x0, l_reg=1., tau=0.01, batch_size=1, max_iter=1000):
     """
     Stochast Proximal Method (0SR1)
 
@@ -27,13 +27,13 @@ def prox_meth_lr(X, y, x0, l_reg=1., tau=0.01, batch_size=1):
     import ProximalMethod.Prox_LogReg as lr
     import ProximalMethod.StochProxMeth as spm
 
-    _, w_opt = spm.compute_0sr1(lr.F, lr.G, x0, X, y, l_reg=l_reg,
-                                tau=tau, batch_size=batch_size)
+    _, w_opt,_ = spm.compute_0sr1(lr.F, lr.G, x0, X, y, l_reg=l_reg,
+                                tau=tau, batch_size=batch_size, max_iter = max_iter)
 
     return w_opt
 
 
-def prox_grad_lr(X, y, x0, l_reg=1., tau=0.01, batch_size=1):
+def prox_grad_lr(X, y, x0, l_reg=1., tau=0.01, batch_size=1, max_iter = 1000):
     """
     Stochastic Proximal Gradient
 
@@ -54,8 +54,8 @@ def prox_grad_lr(X, y, x0, l_reg=1., tau=0.01, batch_size=1):
     import Prox_LogReg as lr
     import StochProxGrad as spg
 
-    _, w_opt = spg.compute_0sr1(lr.F, lr.G, x0, tau, X, y, l_reg=l_reg,
-                                batch_size=batch_size)
+    _, w_opt,_ = spg.compute_0sr1(lr.F, lr.G, x0, tau, X, y, l_reg=l_reg,
+                                batch_size=batch_size, max_iter=max_iter)
 
     return w_opt
 

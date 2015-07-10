@@ -71,7 +71,7 @@ if __name__ == "__main__":
 
     # define a list of params sets
     l_params = []
-    for n in [1, 10, 25, 50, 75, 100]:
+    for n in [1, 5, 10, 15, 20]:
         params = dict(n_components=100,
                       option=None,
                       alpha=0.01,
@@ -84,8 +84,14 @@ if __name__ == "__main__":
 
     # run parallel dict learning
     l_dict = parallel_sqndl(data, l_params, n_jobs=5)
-    np.save('list_dictionaries', l_dict)
 
+    # store parameters and dictionaries
+    influence = []
+    influence.append(l_params)
+    influence.append(l_dict)
+    np.save('influence_n_iter', influence)
+
+    # plot dictionaries for fun
     for d in l_dict:
         plot_dictionary(d)
 

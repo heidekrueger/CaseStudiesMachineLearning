@@ -83,12 +83,12 @@ def big_test():
 
     Init Params:
     """
-    maxIters = 1000
-    fixed_F_size = 10000
+    maxIters = 5000
+    fixed_F_size = 1000
 
     # will consider corresponding pairs of these:
-    b_G = [100,100,100,100, 1000,1000,1000,1000, 10000,10000,10000,10000]
-    b_H = [0,100,1000,4000, 0,100,1000,4000, 0,100,1000,4000]
+    b_G = [100, 100, 10000, 15000]
+    b_H = [4000, 10000, 4000, 6000]
 
     #make color cycle
 
@@ -138,10 +138,12 @@ def big_test():
 
 
     for bg, bh in zip(b_G, b_H):
+        print bg, bh
         """Load the results """
         filepath, filepath_w = get_filepaths(bg, bh)
         iters, fevals, gevals, adp, f_S, g_norm_S, time = load_result_file(filepath)
-        w = load_result_file_w(filepath_w)
+        if not (bg == 100 and bh == 4000):
+            w = load_result_file_w(filepath_w)
 
         """Plot the results """ 
         # next color
@@ -173,20 +175,20 @@ def big_test():
 
         
         
+        if not (bg==100 and bh == 4000):
+            # get vals on fixed set
+            Fvals = [F(w_i) for w_i in w[1:maxIters+1]]
+            plt.figure(5)
+            plt.plot(iters[:maxIters], Fvals, label = l, c=c, ls=ls)
 
-        # get vals on fixed set
-        Fvals = [F(w_i) for w_i in w[:maxIters]]
-        plt.figure(5)
-        plt.plot(iters[:maxIters], Fvals, label = l, c=c, ls=ls)
+            plt.figure(6)
+            plt.plot(time[:maxIters], Fvals, label = l, c=c, ls=ls)
 
-        plt.figure(6)
-        plt.plot(time[:maxIters], Fvals, label = l, c=c, ls=ls)
+            plt.figure(7)
+            plt.plot(adp[:maxIters], Fvals, label = l, c=c, ls= ls)
 
-        plt.figure(7)
-        plt.plot(adp[:maxIters], Fvals, label = l, c=c, ls= ls)
-
-        plt.figure(8)
-        plt.plot(fevals[:maxIters], Fvals, label = l, c=c, ls=ls)
+            plt.figure(8)
+            plt.plot(fevals[:maxIters], Fvals, label = l, c=c, ls=ls)
 
     for i in range(8):
         plt.figure(i+1)
@@ -196,7 +198,7 @@ def big_test():
 
 
 def plot_armijo():
-    maxIters = 200
+    maxIters = 2000
     fixed_F_size = 1000
 
     # will consider corresponding pairs of these:
@@ -212,6 +214,7 @@ def plot_armijo():
     plt.figure()
 
     for bg, bh, upd in zip(b_G, b_H, update_rule):
+        print bg, bh
         """Load the results """
         filepath, filepath_w = get_filepaths(bg, bh,upd)
         iters, fevals, gevals, adp, f_S, g_norm_S, time = load_result_file(filepath)
@@ -241,8 +244,8 @@ def plot_armijo():
     plt.yscale('log')
     plt.show()
 
-plot_armijo()
-
+#plot_armijo()
+big_test()
 
 
 # 

@@ -165,10 +165,10 @@ if __name__ == '__main__':
                                        batch_size=10,
                                        verbose=10)
 
-    sdl2 = SqnDictionaryLearning(n_components=10,
+    sdl2 = SqnDictionaryLearning(n_components=100,
                                  option=None,
                                  alpha=0.01,
-                                 n_iter=400,
+                                 n_iter=40,
                                  max_iter=1,
                                  batch_size=30,
                                  verbose=10)
@@ -202,13 +202,13 @@ if __name__ == '__main__':
     t0 = time()
     title = 'first try'
     reconstructions = lena.copy()
-    
+
     # encode noisy patches with learnt dictionary
     code = sparse_encode(data, D.T, gram=None,
                          cov=None, algorithm='lars',
                          n_nonzero_coefs=20, alpha=None,
                          copy_cov=True, init=None,
-                         max_iter=1000, n_jobs=1)
+                         max_iter=10, n_jobs=1)
     print "encoded"
     patch_size = (7, 7)
     height, width = lena.shape

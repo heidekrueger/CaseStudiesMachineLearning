@@ -5,6 +5,7 @@ from DictLearning.dictionary_learning import StochasticDictionaryLearning
 from SQN.SGD import SQN
 import matplotlib.pyplot as plt
 from sklearn.linear_model import LassoLars
+from ProxEegTest import prox_meth_lr
 
 
 class DictSQN(SQN):
@@ -195,6 +196,7 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
                                                    options['batch_size'])
                     Xt = np.asmatrix(X[index_list, :])
                     z = self.lasso_subproblem(Xt.T, self.vector_to_matrix(w))
+
                     return Xt, z
             sqn._draw_sample = draw_sample
 
@@ -205,12 +207,7 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
 
                 # dictionary reshaping
                 self.components = self.vector_to_matrix(d)
-                # Solve first sub problem
-                """
-                QUESTIONS :
-                - should we use prox methd from now on ?
-                - Do we ask Fin to implement it ?
-                """
+
                 # update dictionary with sqn
                 d = sqn.solve_one_step(self.f, self.g, X, None, k)
                 print sqn.f_vals[-1]

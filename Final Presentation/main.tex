@@ -55,24 +55,14 @@
         \vspace{5pt}
         \alert{Examples:}
         \begin{columns}
-        	\begin{column}{.2\linewidth}
-        		Higgs-Boson\\
-        		\includegraphics[width = \linewidth]{CMS_Higgs-event.jpg}\\
-        		\alert{Section 2}
-        	\end{column}\hspace{-10pt}
-        	\begin{column}{.2\linewidth}
-        		Computed Tomography (CT)\\
-        		\includegraphics[width =\linewidth]{plot_tomography_l1_reconstruction_001.png}\\
-        		\alert{Section 3}
-        	\end{column}\hspace{-10pt}
-        	\begin{column}{.2\linewidth}
+        	\begin{column}{.5\linewidth}
         		Electroence-phalography (EEG)\\
-        		\includegraphics[width = \linewidth]{eeg_pic.jpg}\\
+        		\includegraphics[width = 0.8\linewidth]{eeg_pic.jpg}\\
         		\alert{Section 4}
         	\end{column}\hspace{-10pt}
-        	\begin{column}{.2\linewidth}
+        	\begin{column}{.5\linewidth}
         		Image Denoising\\
-        		\includegraphics[width = \linewidth]{lena_pic.jpg}\\
+        		\includegraphics[width = 0.8\linewidth]{lena_pic.jpg}\\
         		\alert{Section 5}
         	\end{column}
         \end{columns}
@@ -148,11 +138,6 @@
   \end{frame}
 
 \section{SQN: A Stochastic Quasi-Newton Method}
- \plain{Classification\\
- 	\vspace{10pt}
- 	\alert{Did we just detect a Higgs-Boson?}
- 	\vspace{15pt}\\
- 	\includegraphics[width = 0.5\textwidth]{CMS_Higgs-event.jpg}}
 
   \begin{frame}
     \frametitle{Higgs-Boson classification problem}
@@ -191,17 +176,7 @@
   \end{frame}
 
  \section{Proximal Method}
- \plain{Computed Tomography (CT)\\
- 	\vspace{10pt}
- 	\alert{What did the original object look like?}
- 	\vspace{15pt}\\
- 	\includegraphics[width = 0.8\textwidth]{plot_tomography_l1_reconstruction_001.png}\\
- 	\vspace{15pt}
- 	\small Images of object from different angles\\
- 	\small Reconstruct original object
- 	}
- 
- 
+
    \begin{frame}{Proximal Method}
        \begin{flalign*}
        	\text{\alert{Problem}}&&
@@ -243,12 +218,6 @@
    			\resizebox{\linewidth}{!}{\input{ProxPDE.tikz}}
    		\end{column}
    	\end{columns}
-   \end{frame}
-   
-   \begin{frame}{Proximal Method}
-   	\alert{Effect of regularization parameter $\lambda$ on solution:}\\
-   	\centering\includegraphics[width = 0.7\textwidth]{lambda1.png}\\
-   	\centering\includegraphics[width = 0.7\textwidth]{lambda2.png}
    \end{frame}
    
    \begin{frame}{Proximal Method: Stochastic Extension}
@@ -314,6 +283,19 @@
     \end{table}
   \end{frame}
 
+\section{Dictionary Learning}
+\plain{Dictionary Learning\\
+	\vspace{10pt}
+	\alert{Can we recover the image?}
+	\vspace{15pt}\\
+	\includegraphics[width=0.4\textwidth]{lena_pic.jpg}\\
+	\vspace{15pt}
+	\small Image is partially destroyed\\
+	\small Reconstruct image
+}
+\begin{frame}{Dictionary Learning}
+	bla
+\end{frame}
 
 \section{Conclusion}
 

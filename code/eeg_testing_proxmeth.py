@@ -24,9 +24,10 @@ X -= nn[:, None]
 nn = np.sqrt(np.sqrt(np.sum(X * X, axis=1)))
 X /= nn[:, None]
 
-# features extraction
-XX = np.concatenate((np.std(X, axis=1)[:, None],
-                     stats.kurtosis(X, axis=1)[:, None]), axis=1)
+# # features extraction
+# XX = np.concatenate((np.std(X, axis=1)[:, None],
+#                      stats.kurtosis(X, axis=1)[:, None]), axis=1)
+XX = X[:, 500:600]
 
 # number of runs for cv
 n_cv = 5
@@ -35,7 +36,7 @@ n_cv = 5
 sss = StratifiedShuffleSplit(y, n_cv, train_size=0.8, random_state=0)
 
 # parameter to modify
-w0 = X[0, :]
+w0 = XX[0, :]
 l_reg = 0.1
 tau = 0.001
 batch_size = 100
@@ -44,22 +45,25 @@ batch_size = 100
 scores = []
 
 # cross-validation loop
-t0 = time()
 l_nzc = []
+
+# time counting
+t0 = time()
 
 c_cv = 0
 for train, test in sss:
     c_cv += 1
-    print "iter :", c_cv
+    print "cv iter :", c_cv
 
-    x_train = X[train, :]
+    x_train = XX[train, :]
     y_train = y[train]
 
-    x_test = X[test, :]
+    x_test = XX[test, :]
     y_test = y[test]
 
     w = prox_meth_lr(x_train, y_train, w0,
-                     l_reg=l_reg, tau=tau, batch_size=batch_size)
+                     l_reg=l_reg, tau=tau, batch_size=batch_size,
+                     max_iter=100)
 
     # compute the sparsity of w
     nzc = 0

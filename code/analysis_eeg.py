@@ -115,13 +115,14 @@ plt.title(titles[0])
 plt.ylabel(r'$F_{S_k}(\omega^k)$')
 plt.xlabel("Iterations")
 plt.ylim(.8,100)
-
-
+plt.xlim(0,200)
 
 stochF_vs_time = plt.figure(2)
 plt.title(titles[1])
 plt.ylabel(r'$F_{S_k}(\omega^k)$')
 plt.xlabel('CPU time (s)')
+plt.xlim(0, 180)
+plt.ylim(0.8, 20)
 
 stochF_vs_adp = plt.figure(3)
 plt.title(titles[2])
@@ -135,7 +136,6 @@ plt.ylabel(r'$F_{S_k}(\omega^k)$')
 plt.xlabel('Function Evaluations')
 
 
-
 fixed_vs_iters = plt.figure(5)
 plt.title(titles[4])
 plt.ylabel(r'$F_{[1000]}(\omega^k)$')
@@ -146,17 +146,21 @@ fixed_vs_time = plt.figure(6)
 plt.title(titles[5])
 plt.ylabel(r'$F_{[1000]}(\omega^k)$')
 plt.xlabel('CPU time (s)')
+plt.xlim(0, 180)
+plt.ylim(0.8, 20)
 
 fixed_vs_adp = plt.figure(7)
 plt.title(titles[6])
 plt.ylabel(r'$F_{[1000]}(\omega^k)$')
 plt.xlabel('Epochs')
-plt.xlim(0,3.1)
+plt.xlim(0,2)
+plt.ylim(.7, 40)
 
 fixed_vs_fevals = plt.figure(8)
 plt.title(titles[7])
 plt.ylabel(r'$F_{[1000]}(\omega^k)$')
 plt.xlabel('Function Evaluations')
+plt.xlim(0,200)
 
 for i in range(8):
     plt.figure(i+1)
@@ -168,7 +172,14 @@ for bg, bh in zip(b_G, b_H):
     filepath, filepath_w = get_filepaths(bg, bh)
     iters, fevals, gevals, adp, f_S, g_norm_S, time = load_result_file(filepath)
     w = load_result_file_w(filepath_w)
-    loop_maxIters = max(maxIters, len(iters))-10
+    if bg == 1000:
+        loop_maxIters = 200
+    elif bg == 100 and bh == 100:
+        loop_maxIters = min(1500, len(iters))
+    elif bg == 100 and bh == 0:
+        loop_maxIters = min(2000, len(iters))
+    else:
+        loop_maxIters = min(maxIters, len(iters))
     """Plot the results """ 
     # next color
     c = next(color_cycle)
@@ -204,6 +215,7 @@ for bg, bh in zip(b_G, b_H):
     print str(bg), str(bh)
     # print len(fevals), len(w)
     Fvals = [F(w_i) for w_i in w[:loop_maxIters]]
+    print loop_maxIters, len(Fvals), len (w[:loop_maxIters])
     # print len(iters), len(Fvals)
     plt.figure(5)
     plt.plot(iters[:loop_maxIters], Fvals, label = l, c=c, ls=ls)

@@ -152,7 +152,7 @@ if __name__ == '__main__':
     Testing and correcting StochasticDictionaryLearning
     '''
 
-    patch_size = (5, 5)
+    patch_size = (7, 7)
 
     # create sdl object
     sdl = StochasticDictionaryLearning(n_components=100,
@@ -173,7 +173,7 @@ if __name__ == '__main__':
 
     import matplotlib.image as mpimg
 
-    lena = mpimg.imread('us.jpeg')
+    lena = mpimg.imread('Lucy.jpg')
     lena = np.dot(lena[..., :3], [0.299, 0.587, 0.144])
 
     # loads data

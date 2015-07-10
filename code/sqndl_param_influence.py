@@ -13,6 +13,7 @@ from scipy.misc import lena
 from dictionary_learning_test import preprocess_data
 from dictionary_learning_test import plot_dictionary
 from joblib import Parallel, delayed
+import numpy as np
 
 
 def inner_sqndl(data, params):
@@ -70,17 +71,20 @@ if __name__ == "__main__":
 
     # define a list of params sets
     l_params = []
-    for n in [5, 10, 15, 20, 25, 30]:
-        params = dict(n_components=n,
+    for n in [1, 10, 25, 50, 75, 100]:
+        params = dict(n_components=100,
                       option=None,
                       alpha=0.01,
-                      n_iter=1,
-                      max_iter=1,
+                      n_iter=n,
+                      max_iter=20,
                       batch_size=50,
                       verbose=0)
+
         l_params.append(params)
 
+    # run parallel dict learning
     l_dict = parallel_sqndl(data, l_params, n_jobs=5)
+    np.save('list_dictionaries', l_dict)
 
     for d in l_dict:
         plot_dictionary(d)

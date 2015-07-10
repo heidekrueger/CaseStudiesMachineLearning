@@ -138,7 +138,7 @@ def postprocess_data(lena, patch_size=(7, 7)):
     print('Extracting noisy patches... ')
     t0 = time()
 
-    data = extract_patches_2d(distorted[:, height // 2:], patch_size)
+    data = extract_patches_2d(distorted[:, width // 2:], patch_size)
     data = data.reshape(data.shape[0], -1)
     intercept = np.mean(data, axis=0)
     data -= intercept
@@ -152,42 +152,35 @@ if __name__ == '__main__':
     Testing and correcting StochasticDictionaryLearning
     '''
 
-    from scipy.misc import lena
-    # print lena.shape
-
-    patch_size = (20, 20)
+    patch_size = (5, 5)
 
     # create sdl object
     sdl = StochasticDictionaryLearning(n_components=100,
                                        option=None,
-                                       alpha=1.,
-                                       n_iter=10,
+                                       alpha=0.1,
+                                       n_iter=20,
                                        max_iter=10,
                                        batch_size=10,
                                        verbose=10)
 
-    sdl2 = SqnDictionaryLearning(n_components=50,
+    sdl2 = SqnDictionaryLearning(n_components=100,
                                  option=None,
                                  alpha=0.01,
-                                 n_iter=200,
+                                 n_iter=100,
                                  max_iter=1,
-                                 batch_size=30,
+                                 batch_size=50,
                                  verbose=10)
-
-    # check sdl2 attributes
-    sdl2.print_attributes()
 
     import matplotlib.image as mpimg
 
     lena = mpimg.imread('us.jpeg')
     lena = np.dot(lena[..., :3], [0.299, 0.587, 0.144])
-    print lena.shape
 
     # loads data
     data, lena, distorted = preprocess_data(lena, patch_size=patch_size)
 
     # takes dictionary
-    case = 1
+    case = 2
     if case == 1:
         sdl.fit(data)
         D = sdl.components
@@ -204,45 +197,44 @@ if __name__ == '__main__':
     # post process data
     data, intercept = postprocess_data(lena, patch_size=patch_size)
     print "postprocessed"
-    # from sklearn.decomposition.dict_learning import sparse_encode
+    from sklearn.decomposition.dict_learning import sparse_encode
 
-    # t0 = time()
-    # title = 'first try'
-    # reconstructions = lena.copy()
+    t0 = time()
+    title = 'first try'
+    reconstructions = lena.copy()
 
-    # # encode noisy patches with learnt dictionary
-    # code = sparse_encode(data,
-    #                      D.T,
-    #                      gram=None,
-    #                      cov=None,
-    #                      algorithm='omp',
-    #                      n_nonzero_coefs=1,
-    #                      alpha=None,
-    #                      copy_cov=True,
-    #                      init=None,
-    #                      max_iter=10,
-    #                      n_jobs=1)
+    # encode noisy patches with learnt dictionary
+    code = sparse_encode(data,
+                         D.T,
+                         gram=None,
+                         cov=None,
+                         algorithm='lars',
+                         n_nonzero_coefs=10,
+                         alpha=None,
+                         copy_cov=True,
+                         init=None,
+                         max_iter=10,
+                         n_jobs=1)
 
-    # print "encoded"
-    # height, width = lena.shape
+    print "encoded"
+    height, width = lena.shape
 
-    # patches = np.dot(code, D.T)
-    # patches += intercept
-    # patches = patches.reshape(len(data), *patch_size)
+    patches = np.dot(code, D.T)
+    patches += intercept
+    patches = patches.reshape(len(data), *patch_size)
 
-    # # reconstruct noisy image
-    # reconstructions[:, width // 2:] = reconstruct_from_patches_2d(
-    #     patches, (height, width // 2))
+    # reconstruct noisy image
+    reconstructions[:, width // 2:] = reconstruct_from_patches_2d(
+        patches, (height, width // 2))
 
-    # dt = time() - t0
-    # print('done in %.2fs.' % dt)
+    dt = time() - t0
+    print('done in %.2fs.' % dt)
 
     # show the difference
     height, width = lena.shape
-    distorted[:, :width // 2]
 
-    show_with_diff(, lena, 'Distorted image')
+    show_with_diff(distorted, lena, 'Distorted image')
 
-    # show_with_diff(reconstructions, lena,
-    #                title + ' (time: %.1fs)' % dt)
+    show_with_diff(reconstructions, lena,
+                   title + ' (time: %.1fs)' % dt)
     plt.show()

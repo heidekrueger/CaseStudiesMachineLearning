@@ -24,10 +24,10 @@ X -= nn[:, None]
 nn = np.sqrt(np.sqrt(np.sum(X * X, axis=1)))
 X /= nn[:, None]
 
-# # features extraction
-# XX = np.concatenate((np.std(X, axis=1)[:, None],
-#                      stats.kurtosis(X, axis=1)[:, None]), axis=1)
-XX = X[:, 500:600]
+# features extraction
+XX = np.concatenate((np.std(X, axis=1)[:, None],
+                     stats.kurtosis(X, axis=1)[:, None]), axis=1)
+# XX = X[:, 500:600]
 
 # number of runs for cv
 n_cv = 5
@@ -37,9 +37,9 @@ sss = StratifiedShuffleSplit(y, n_cv, train_size=0.8, random_state=0)
 
 # parameter to modify
 w0 = XX[0, :]
-l_reg = 0.1
+l_reg = 0.01
 tau = 0.001
-batch_size = 100
+batch_size = 1000
 
 # store scores
 scores = []

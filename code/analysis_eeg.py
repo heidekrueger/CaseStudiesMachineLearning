@@ -114,6 +114,7 @@ stochF_vs_iters = plt.figure(1)
 plt.title(titles[0])
 plt.ylabel(r'$F_{S_k}(\omega^k)$')
 plt.xlabel("Iterations")
+plt.ylim(.8,100)
 
 
 
@@ -126,6 +127,7 @@ stochF_vs_adp = plt.figure(3)
 plt.title(titles[2])
 plt.ylabel(r'$F_{S_k}(\omega^k)$')
 plt.xlabel('Epochs')
+plt.xlim(0,3.1)
 
 stochF_vs_fevals = plt.figure(4)
 plt.title(titles[3])
@@ -138,6 +140,7 @@ fixed_vs_iters = plt.figure(5)
 plt.title(titles[4])
 plt.ylabel(r'$F_{[1000]}(\omega^k)$')
 plt.xlabel('Iterations')
+plt.ylim(.8,100)
 
 fixed_vs_time = plt.figure(6)
 plt.title(titles[5])
@@ -148,6 +151,7 @@ fixed_vs_adp = plt.figure(7)
 plt.title(titles[6])
 plt.ylabel(r'$F_{[1000]}(\omega^k)$')
 plt.xlabel('Epochs')
+plt.xlim(0,3.1)
 
 fixed_vs_fevals = plt.figure(8)
 plt.title(titles[7])
@@ -216,7 +220,7 @@ for bg, bh in zip(b_G, b_H):
 for i in range(8):
     plt.figure(i+1)
     if i+1 != 1: #don't plot legend for 1, as 1 and 5 will be displ. next to each other
-        plt.legend()
+        plt.legend() # too make smaller give arg: prop={'size':8}
 
     if active[i]:
         tikz_save('../outputs/plots/'+titles[i].replace(':','')+'.tikz')

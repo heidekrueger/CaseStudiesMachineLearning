@@ -106,12 +106,14 @@ if __name__ == '__main__':
     # loads lena
     from scipy.misc import lena
 
+    pi = 'n_components'
+
     # loads dictionaries
-    influence = np.load('influence_n_iter.npy')
+    influence = np.load('influence_' + pi + '.npy')
 
     outer_reconstruction(influence,
                          lena,
-                         pi='n_iter',
+                         pi=pi,
                          algo='lars',
                          nzc=10,
                          n_jobs=5)

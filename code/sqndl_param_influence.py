@@ -69,18 +69,25 @@ if __name__ == "__main__":
     # loads data
     data, lena, distorted = preprocess_data(lena)
 
+    pi = 'n_iter'
+    l_pi = [10, 25, 50, 100, 200]
+
+    # define a basic set of parameters
+    params = dict(n_components=100,
+                  option=None,
+                  alpha=0.01,
+                  n_iter=10,
+                  max_iter=20,
+                  batch_size=50,
+                  verbose=0)
+
     # define a list of params sets
     l_params = []
-    for n in [1, 5, 10, 15, 20]:
-        params = dict(n_components=100,
-                      option=None,
-                      alpha=0.01,
-                      n_iter=n,
-                      max_iter=20,
-                      batch_size=50,
-                      verbose=0)
+    for n in l_pi:
+        p = params.copy()
+        p[pi] = n
 
-        l_params.append(params)
+        l_params.append(p)
 
     # run parallel dict learning
     l_dict = parallel_sqndl(data, l_params, n_jobs=5)
@@ -89,7 +96,7 @@ if __name__ == "__main__":
     influence = []
     influence.append(l_params)
     influence.append(l_dict)
-    np.save('influence_n_iter', influence)
+    np.save('influence_' + pi, influence)
 
     # plot dictionaries for fun
     for d in l_dict:

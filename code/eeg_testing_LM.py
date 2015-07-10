@@ -71,13 +71,16 @@ def print_f_vals(sqn, options, filepath, testcase=None, rowlim=None):
    #             if sqn.options['batch_size'] <= 1e4 and sqn.options['batch_size_H'] < 4e3:
 #                    sqn.set_options({'batch_size': sqn.options['batch_size']+1000, 'batch_size_H': sqn.options['batch_size_H']+400})
                 
-        
-        results.append([k, logreg.fevals, logreg.gevals, logreg.adp, sqn.f_vals[-1], sqn.g_norms[-1], timeit.default_timer()-t_start])
+        runtime = timeit.default_timer()-t_start
+        results.append([k, logreg.fevals, logreg.gevals, logreg.adp, sqn.f_vals[-1], sqn.g_norms[-1], runtime ])
         locations.append(w)
         
-        if k > sqn.options['max_iter'] or sqn.termination_counter > 4:
-            iterations = k
-            break
+        if logreg.adp >= 3.1*len(X) and runtime >= 200:
+                iterations = k
+                break
+        #if k > sqn.options['max_iter'] or sqn.termination_counter > 4:
+          #  
+            #break
     if filepath is not None:
         ffile.close()
         wfile.close()
@@ -114,7 +117,7 @@ if __name__ == "__main__":
                             'L': 10, 
                             'M': 5, 
                             'beta':5., 
-                            'max_iter': 1000, 
+                            'max_iter': 1e10, 
                             'batch_size': 100, 
                             'batch_size_H': 0, 
                             'updates_per_batch': 1, 
@@ -127,8 +130,6 @@ if __name__ == "__main__":
                 print sys.argv
                 b_G, b_H = int(sys.argv[1]), int(sys.argv[2])
                 updates_per_batch = 1
-                if len(sys.argv) > 2:
-                        options['max_iter'] = int(sys.argv[3])
                 benchmark(b_G, b_H, updates_per_batch, options)
         else:
                 batch_sizes_G = [100, 1000]#, 10000]        

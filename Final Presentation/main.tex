@@ -131,7 +131,11 @@
         \uncover<3>{
           $$\omega^{k+1}:= \omega^{k}-\alpha_k \alert{\nabla \hat F(\omega^{k})} $$
           with
+<<<<<<< HEAD
           $$\alert{\nabla \hat F(\omega^{k})} := \frac{1}{b}\sum_{i\in \mathcal S_k} \nabla f(\omega, x_i, z_i)$$
+=======
+          $$\alert{\nabla \hat F(\omega^{k})} := \frac{1}{b}\sum_{i\in \mathcal S_k}\nabla f(\omega^k, x_i, z_i)$$
+>>>>>>> 43b04b819a0cbcda7e2db20cbbe2c7b1a24be539
           where $\mathcal S_k \subset [N], \quad b:=|\mathcal S_k| \ll N$\\\alert{"Mini Batch"}
         }
       \end{column}
@@ -142,6 +146,7 @@
 
  
   \begin{frame}{Stochastic Newton Method}
+
     \begin{columns}[T]
       \begin{column}{.5\textwidth}
         \centering \alert{Stochastic Gradient Descent}
@@ -186,14 +191,14 @@
         \resizebox{\linewidth}{!}{\input{'EEG Fixed Subset Objective vs. Iterations.tikz'}}
       \end{column}
     \end{columns}
-    \center{Performance on EEG Dataset, Problem size: $69550 \times 600$\\
+    \center{Performance on Logistic Regression, Problem size: $69550 \times 600$\\
     \tiny{Armijo-stepsizes, Further SQN-parameters: $L=10$, $M=5$}}
   \end{frame}
 
   \begin{frame}
     \frametitle{SQN: Performance II}
-    \resizebox{0.8\linewidth}{!}{\input{'EEG Fixed Subset Objective vs. Accessed Data Points.tikz'}}
-    \center{Performance on EEG Dataset, Problem size: $69550 \times 600$\\
+    \center{\resizebox{0.8\linewidth}{!}{\input{'EEG Fixed Subset Objective vs. Accessed Data Points.tikz'}}}
+    \center{Performance on Logistic Regression, Problem size: $69550 \times 600$\\
     \tiny{Armijo-stepsizes, Further SQN-parameters: $L=10$, $M=5$}}
   \end{frame}
 
@@ -384,7 +389,7 @@
 	$\Rightarrow$ Example: Reconstruction of partially distorted images
 \end{frame}
 
-\begin{frame}
+\begin{frame}{Dictionary Learning in Image Reconstruction I}
 	\begin{figure}[h!]
 		\centering
 		\includegraphics[width=0.8\textwidth]{lena_noisy.png}
@@ -392,7 +397,7 @@
 	\end{figure}
 \end{frame}
 
-\begin{frame}
+\begin{frame}{Dictionary Learning in Image Reconstruction II}
 	\begin{figure}[h!]
 		\centering
 		\includegraphics[width = 0.8\linewidth]{lena_reconstructed.png}
@@ -413,6 +418,7 @@
     	\item For smooth and non-smooth problems
     	\item Good performance of implementation on various problems
     \end{itemize}
+    \phantom{\cite{SQN}\cite{becker2012quasi}\cite{mairal2010online}\cite{parikh2013proximal}}
   \end{frame}
 \plain{
 	
@@ -429,10 +435,16 @@
 
   \plain{Questions?}
 
-  \begin{frame}[allowframebreaks]\frametitle{Main References}
+  \begin{frame}[allowframebreaks]
 
+    \nocite{*}
+    {\footnotesize{
+    \bibliographystyle{apalike}
     \bibliography{refs}
-    \bibliographystyle{abbrv}
+    }
+    }
+    %\bibliography{refs}
+    %\bibliographystyle{abbrv}
 
   \end{frame}
 

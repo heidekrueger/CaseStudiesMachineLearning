@@ -107,10 +107,11 @@
   \end{frame}
   
   \begin{frame}{Introduction: Stochastic Framework}
-    $$ F(\omega) := \mathbb{E}\left[f(\omega, \xi)\right] \uncover<3>{= \frac{1}{N}\sum_{i=1}^N f(\omega, x_i, z_i)}$$
+    $$ F(\omega) := \mathbb{E}\left[f(\omega, \xi)\right] \uncover<3->{= \frac{1}{N}\sum_{i=1}^N f(\omega, x_i, z_i)}$$
     \begin{itemize}
       \item<2-> \alert{$\xi$}: Random variable; takes the form of an input-output-pair $(x_i, z_i)$
       \item<3-> \alert{$f$}: Partial loss function corresponding to a single data point.
+      \item<4-> Example loss function: $f(\omega, x_i, z_i) = |z_i - \omega^Tx_i|$ (Linear Regression)
     \end{itemize}
   \end{frame}
 
@@ -119,16 +120,16 @@
       \begin{column}{.5\textwidth}
         \centering \alert{Gradient Method}
         $$\min F(\omega) $$
-
-        \uncover<2->{
+        \phantom{0}
+        
         $$\omega^{(k+1)}:= \omega^{k}-\alpha_k \nabla F(\omega^{k})$$\\
         \phantom{zeile}
-        }
+        
       \end{column}\hfill
       \begin{column}{.5\textwidth}
-        \centering \alert{Stochastic Gradient Descent}
+        \centering \alert{Stochastic Gradient Descent (SGD)}
         $$\min \mathbb E \left [f(\omega, \xi)\right]$$
-        \uncover<3>{
+        \uncover<2>{
           $$\omega^{k+1}:= \omega^{k}-\alpha_k \alert{\nabla \hat F(\omega^{k})} $$
           with
           $$\alert{\nabla \hat F(\omega^{k})} := \frac{1}{b}\sum_{i\in \mathcal S_k}\nabla f(\omega^k, x_i, z_i)$$
@@ -156,9 +157,10 @@
   			\uncover<2>{
   				$$\omega^{k+1}:= \omega^{k}-\alpha_k \alert{\nabla^2 \hat F(\omega^{k})^{-1}} {\nabla \hat F(\omega^{k})} $$
   				with
-  				$$\alert{\nabla^2 \hat F(\omega^{k})} := \frac{1}{b_H}\sum_{i\in \mathcal S_{H,\alert{t}}}\nabla^2 f(\omega^k, x_i, z_i)$$
-  				where $\mathcal S_{H,\alert{t}} \subset [N], \quad b_H:=|\mathcal S_{H,\alert{t}}| \ll N$
-  			}
+  				$$\alert{\nabla^2 \hat F(\omega^{k})} := \frac{1}{b_H}\sum_{i\in \mathcal S_{H,\alert{t}}}\nabla^2 f(\omega^{\alert{t}}, x_i, z_i)$$
+          where $\mathcal S_{H,\alert{t}} \subset [N], \quad b_H:=|\mathcal S_{H,\alert{t}}| \ll N$,\\
+          $\alert{(t)}$ subsequence of $(k)$
+          }
   		\end{column}
   	\end{columns}
   \end{frame}

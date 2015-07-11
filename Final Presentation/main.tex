@@ -131,7 +131,7 @@
         \uncover<3>{
           $$\omega^{k+1}:= \omega^{k}-\alpha_k \alert{\nabla \hat F(\omega^{k})} $$
           with
-          $$\alert{\nabla \hat F(\omega^{k})} := \frac{1}{b}\sum_{i\in \mathcal S_k}f(\omega, x_i, z_i)$$
+          $$\alert{\nabla \hat F(\omega^{k})} := \frac{1}{b}\sum_{i\in \mathcal S_k}\nabla f(\omega^k, x_i, z_i)$$
           where $\mathcal S_k \subset [N], \quad b:=|\mathcal S_k| \ll N$\\\alert{"Mini Batch"}
         }
       \end{column}
@@ -145,21 +145,19 @@
   		\begin{column}{.5\textwidth}
   			\centering \alert{Stochastic Gradient Descent}
   			$$\min \mathbb E \left [f(\omega, \xi)\right]$$
-  			\uncover<3>{
-  				$$\omega^{k+1}:= \omega^{k}-\alpha_k \alert{\nabla \hat F(\omega^{k})} $$
-  				with
-  				$$\alert{\nabla \hat F(\omega^{k})} := \frac{1}{b}\sum_{i\in \mathcal S_k}f(\omega, x_i, z_i)$$
-  				where $\mathcal S_k \subset [N], \quad b:=|\mathcal S_k| \ll N$\\\alert{"Mini Batch"}
-  			}
+  				$$\omega^{k+1}:= \omega^{k}-\alpha_k \nabla \hat F(\omega^{k}) $$
+  				
+  				$$\nabla \hat F(\omega^{k}) := \frac{1}{b}\sum_{i\in \mathcal S_k}\nabla f(\omega^k, x_i, z_i)$$
+
   		\end{column}\hfill
   		\begin{column}{.5\textwidth}
   			\centering \alert{Stochastic Newton Method}
   			$$\min \mathbb E \left [f(\omega, \xi)\right]$$
-  			\uncover<3>{
-  				$$\omega^{k+1}:= \omega^{k}-\alpha_k \alert{\nabla^2 \hat F(\omega^{k})^{-1}} \alert{\nabla \hat F(\omega^{k})} $$
+  			\uncover<2>{
+  				$$\omega^{k+1}:= \omega^{k}-\alpha_k \alert{\nabla^2 \hat F(\omega^{k})^{-1}} {\nabla \hat F(\omega^{k})} $$
   				with
-  				$$\alert{\nabla^2 \hat F(\omega^{k})} := \frac{1}{b_H}\sum_{i\in \mathcal S_{H,k}}f(\omega, x_i, z_i)$$
-  				where $\mathcal S_{H,k} \subset [N], \quad b:=|\mathcal S_{H,k}| \ll N$\\\alert{"Mini Batch"}
+  				$$\alert{\nabla^2 \hat F(\omega^{k})} := \frac{1}{b_H}\sum_{i\in \mathcal S_{H,\alert{t}}}\nabla^2 f(\omega^k, x_i, z_i)$$
+  				where $\mathcal S_{H,\alert{t}} \subset [N], \quad b_H:=|\mathcal S_{H,\alert{t}}| \ll N$
   			}
   		\end{column}
   	\end{columns}
@@ -177,14 +175,14 @@
         \resizebox{\linewidth}{!}{\input{'EEG Fixed Subset Objective vs. Iterations.tikz'}}
       \end{column}
     \end{columns}
-    \center{Performance on EEG Dataset, Problem size: $69550 \times 600$\\
+    \center{Performance on Logistic Regression, Problem size: $69550 \times 600$\\
     \tiny{Armijo-stepsizes, Further SQN-parameters: $L=10$, $M=5$}}
   \end{frame}
 
   \begin{frame}
     \frametitle{SQN: Performance II}
-    \resizebox{0.8\linewidth}{!}{\input{'EEG Fixed Subset Objective vs. Accessed Data Points.tikz'}}
-    \center{Performance on EEG Dataset, Problem size: $69550 \times 600$\\
+    \center{\resizebox{0.8\linewidth}{!}{\input{'EEG Fixed Subset Objective vs. Accessed Data Points.tikz'}}}
+    \center{Performance on Logistic Regression, Problem size: $69550 \times 600$\\
     \tiny{Armijo-stepsizes, Further SQN-parameters: $L=10$, $M=5$}}
   \end{frame}
 
@@ -375,7 +373,7 @@
 	$\Rightarrow$ Example: Reconstruction of partially distorted images
 \end{frame}
 
-\begin{frame}
+\begin{frame}{Dictionary Learning in Image Reconstruction I}
 	\begin{figure}[h!]
 		\centering
 		\includegraphics[width=0.8\textwidth]{lena_noisy.png}
@@ -383,7 +381,7 @@
 	\end{figure}
 \end{frame}
 
-\begin{frame}
+\begin{frame}{Dictionary Learning in Image Reconstruction II}
 	\begin{figure}[h!]
 		\centering
 		\includegraphics[width = 0.8\linewidth]{lena_reconstructed.png}
@@ -404,6 +402,7 @@
     	\item For smooth and non-smooth problems
     	\item Good performance of implementation on various problems
     \end{itemize}
+    \phantom{\cite{SQN}\cite{becker2012quasi}\cite{mairal2010online}\cite{parikh2013proximal}}
   \end{frame}
 \plain{
 	
@@ -420,10 +419,16 @@
 
   \plain{Questions?}
 
-  \begin{frame}[allowframebreaks]\frametitle{Main References}
+  \begin{frame}[allowframebreaks]
 
+    \nocite{*}
+    {\footnotesize{
+    \bibliographystyle{apalike}
     \bibliography{refs}
-    \bibliographystyle{abbrv}
+    }
+    }
+    %\bibliography{refs}
+    %\bibliographystyle{abbrv}
 
   \end{frame}
 

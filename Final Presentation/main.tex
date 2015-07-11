@@ -131,7 +131,7 @@
         \uncover<3>{
           $$\omega^{k+1}:= \omega^{k}-\alpha_k \alert{\nabla \hat F(\omega^{k})} $$
           with
-          $$\alert{\nabla \hat F(\omega^{k})} := \frac{1}{b}\sum_{i\in \mathcal S_k}f(\omega, x_i, z_i)$$
+          $$\alert{\nabla \hat F(\omega^{k})} := \frac{1}{b}\sum_{i\in \mathcal S_k} \nabla f(\omega, x_i, z_i)$$
           where $\mathcal S_k \subset [N], \quad b:=|\mathcal S_k| \ll N$\\\alert{"Mini Batch"}
         }
       \end{column}
@@ -149,8 +149,7 @@
         \uncover<3>{
           $$\omega^{k+1}:= \omega^{k}-\alpha_k \alert{\nabla \hat F(\omega^{k})} $$
           with
-          $$\alert{\nabla \hat F(\omega^{k})} := \frac{1}{b}\sum_{i\in \mathcal S_k}f(\omega, x_i, z_i)$$
-          where $\mathcal S_k \subset [N], \quad b:=|\mathcal S_k| \ll N$\\\alert{"Mini Batch"}
+          $$\alert{\nabla \hat F(\omega^{k})} := \frac{1}{b}\sum_{i\in \mathcal S_k} \nabla f(\omega, x_i, z_i)$$
         }
       \end{column}\hfill
       \begin{column}{.5\textwidth}
@@ -200,9 +199,9 @@
 
   \begin{frame}\frametitle{SQN: Main Results}
     \begin{itemize}
-      \item Can be faster than SGD on appropriate Datasets
-      \item Requires tedious, manual tuning of hyperparameters to be efficient!
-      \item Convergence conditions
+      \item Much faster than SGD on smooth problems
+      \item Performance highly dependent on choice of hyperparameters
+      \item Determining convergence is not trivial
     \end{itemize}
   
   \end{frame}

@@ -130,7 +130,7 @@ if __name__ == "__main__":
         if len(sys.argv) > 1:
                 print sys.argv
                 b_G, b_H = int(sys.argv[1]), int(sys.argv[2])
-                updates_per_batch = 1
+                updates_per_batch = 2
                 benchmark(b_G, b_H, updates_per_batch, options)
         else:
                 batch_sizes_G = [100, 1000]#, 10000]        

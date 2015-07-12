@@ -64,10 +64,8 @@ class LogisticRegression():
     #   print (w)
     #   print (type(w))
     #   print ("debug:", np.multiply(w,X))
-
-
-        #return self.sigmoid(np.multiply(w, X).sum())
-        return np.multiply(w, X).sum()
+    
+        return self.sigmoid(np.multiply(w, X).sum())
 
     def f(self, w, X, y):
         '''

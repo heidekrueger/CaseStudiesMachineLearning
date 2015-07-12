@@ -165,6 +165,14 @@
   	\end{columns}
   \end{frame}
 
+  \begin{frame}\frametitle{Stochastic Quasi-Newton Method (SQN)}
+      \begin{itemize}
+        \item \alert{Stochastically} use second-order information
+        \item Approximate $\nabla ^2 \hat F(\omega^{k})$ by BFGS matrix $H_t$
+        \item $t$ running on slower time-scale than $k$. 
+        \item $H_t$ update in $\mathcal O(n)$ time and constant memory, using several tricks
+      \end{itemize}
+  \end{frame}
 
   \begin{frame}
     \frametitle{SQN: Performance I}
@@ -192,7 +200,7 @@
     \begin{itemize}
       \item Can be faster than SGD on appropriate Datasets
       \item Requires tedious, manual tuning of hyperparameters to be efficient!
-      \item Convergence conditions
+      \item Choice of termination criterion unclear.
     \end{itemize}
   
   \end{frame}
@@ -321,6 +329,17 @@
 	\small Predict next slow wave
 	}
 
+  \begin{frame}\frametitle{Logistic Regression}
+  $$ f(\omega, x_i, y_i) = -y_i \log(h(\omega,x_i)) - (1-y_i) \log(1- h(\omega, x_i))$$
+  with
+  $$h(\omega, x_i) := sigmoid(\omega^Tx_i):= \frac{1}{1+e^{-\omega^T x_i}} $$      
+
+  \begin{figure}
+  \includegraphics[width=.5\linewidth]{sigmoid.png}\caption{The sigmoid function.}
+  \end{figure}
+  
+  \end{frame}
+
   
     	\begin{frame}{Classification: Results for SQN}
     		\begin{center}
@@ -433,5 +452,7 @@
     %\bibliographystyle{abbrv}
 
   \end{frame}
+
+
 
 \end{document}

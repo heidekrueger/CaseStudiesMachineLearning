@@ -34,7 +34,7 @@ def sigmoid(w, X):
     """
     
     z = np.dot(X.T, w)
-    z = np.sign(z) * min([np.abs(z), 30]) # What's the min doing???
+    z = np.sign(z) * min([np.abs(z), 30])
     
     return float(1 / (1.0 + np.exp(-z)))
 

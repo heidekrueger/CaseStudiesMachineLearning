@@ -95,7 +95,7 @@ def preprocess_data(lena, patch_size=(7, 7)):
     - distorted: right half of the image distorted
     '''
 
-    lena = lena / 256.0
+    lena = lena() / 256.0
 
     # downsample for higher speed
     lena = lena[::2, ::2] + lena[1::2, ::2] + lena[::2, 1::2] + lena[1::2, 1::2]
@@ -167,14 +167,15 @@ if __name__ == '__main__':
                                  option=None,
                                  alpha=0.01,
                                  n_iter=100,
-                                 max_iter=1,
+                                 max_iter=10,
                                  batch_size=50,
                                  verbose=10)
 
-    import matplotlib.image as mpimg
+    # import matplotlib.image as mpimg
+    # lena = mpimg.imread('milzarek.jpg')
+    # lena = np.dot(lena[..., :3], [0.299, 0.587, 0.144])
 
-    lena = mpimg.imread('Lucy.jpg')
-    lena = np.dot(lena[..., :3], [0.299, 0.587, 0.144])
+    from scipy.misc import lena
 
     # loads data
     data, lena, distorted = preprocess_data(lena, patch_size=patch_size)

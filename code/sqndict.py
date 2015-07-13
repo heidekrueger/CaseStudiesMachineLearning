@@ -5,7 +5,7 @@ from DictLearning.dictionary_learning import StochasticDictionaryLearning
 from SQN.SGD import SQN
 import matplotlib.pyplot as plt
 from sklearn.linear_model import LassoLars
-from ProxEegTest import prox_meth_lr
+from ProxDictLearn import dl_prox_meth
 
 
 class DictSQN(SQN):
@@ -191,13 +191,39 @@ class SqnDictionaryLearning(StochasticDictionaryLearning):
             print "max_iter to perform :", self.n_iter
 
             def draw_sample(X, z, w, b):
+                '''
+                This function draw a sample from data array X and solve
+                Lasso sub problem
 
-                    index_list = np.random.randint(0, len(X),
-                                                   options['batch_size'])
-                    Xt = np.asmatrix(X[index_list, :])
-                    z = self.lasso_subproblem(Xt.T, self.vector_to_matrix(w))
+                INPUTS:
+                - X
+                - z
+                - w
+                - b
 
-                    return Xt, z
+                OUTPUTS:
+                - Xt: sub sample
+                - z: lasso subproblem solution
+                '''
+                index_list = np.random.randint(0, len(X),
+                                               options['batch_size'])
+                Xt = np.asmatrix(X[index_list, :])
+
+                z = np.zeros((self.n_components, self.batch_size))
+                z = np.asmatrix(z)
+
+                if self.verbose > 20:
+                    print "solve lasso sub problem"
+                for i in range(0, self.batch_size):
+                    z[:, i] = np.asarray(dl_prox_meth(self.components,
+                                                      Xt[0].T,
+                                                      self.alpha,
+                                                      max_iter=1e4))
+
+                if self.verbose > 20:
+                    print "lasso sub problem solved"
+                return Xt, z
+
             sqn._draw_sample = draw_sample
 
             # loop to learn dictionary

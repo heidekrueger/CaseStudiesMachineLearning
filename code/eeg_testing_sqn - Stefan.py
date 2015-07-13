@@ -2,7 +2,7 @@
 """
 Created on Tuesday 9 July
 
-@author: Roland Halbich / Stanislas Chambon
+@author: Roland Halbich / Stanislas Chambon, Stefan Heidekrueger
 """
 
 import numpy as np

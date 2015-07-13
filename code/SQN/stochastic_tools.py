@@ -74,7 +74,7 @@ def sample_batch(w, X, z=None, b=None, r=None, debug=False):
     """
 
     #TODO: Documentation Outdated!!!
-    returns a subset of [N] as a list?
+    returns a uniformly distr. subset of [N] as a list
 
     Parameters:
         N: Size of the original set

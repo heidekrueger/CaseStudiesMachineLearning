@@ -11,7 +11,7 @@ import ProxMeth as pm
 def dl_prox_meth(D, x, l_reg, max_iter=1e5):
     """
     Computes optimal point alpha for Lasso:
-    1/2 ||D*alpha - x|| + l_reg*||alpha||
+    1/(2*nsamples) ||D*alpha - x||² + l_reg*||alpha||_1
 
     Arguments
     ---------
@@ -36,9 +36,10 @@ def dl_prox_meth(D, x, l_reg, max_iter=1e5):
 
         D_sq = np.dot(D.T, D)
 
-        return  np.dot(D_sq, alpha) - np.dot(D.T, x)
+        return  1 / m * np.dot(D_sq, alpha) - np.dot(D.T, x)
 
     alpha, _, _, _ = pm.compute_0sr1(dl_lasso_f, dl_lasso_gf, alpha0, timing=1,
-                                     l_reg=l_reg, max_iter=max_iter)
+                                     l_reg=l_reg, max_iter=max_iter,
+                                     epsilon=1e-6)
 
     return alpha

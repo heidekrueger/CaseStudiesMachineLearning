@@ -65,7 +65,9 @@ class LogisticRegression():
     #   print (type(w))
     #   print ("debug:", np.multiply(w,X))
 
-        return self.sigmoid(np.multiply(w, X).sum())
+
+        #return self.sigmoid(np.multiply(w, X).sum())
+        return np.multiply(w, X).sum()
 
     def f(self, w, X, y):
         '''
@@ -84,7 +86,7 @@ class LogisticRegression():
         hyp = self.h(w, X)
         self.fevals += 1
 
-        return -y * np.log(hyp) - (1-y) * (np.log(1-hyp))
+        return -y * np.log(hyp) - (1-y) * (np.log(1-hyp))+self.L_2(w)
 
     def L_2(self, w):
         '''
@@ -131,7 +133,7 @@ class LogisticRegression():
         '''
 
         #return sum(map(lambda t: self.f(w, t[0], t[1]), zip(X, y)))/len(X) +  self.L_2(w) 
-        return sum([self.f(w,X[i],y[i]) for i in range(len(y))])/float(len(y)) + self.L_2(w) + self.L_1(w)
+        return sum([self.f(w,X[i],y[i]) for i in range(len(y))])/float(len(y))
 
     def g(self, w, X, y):
         '''
@@ -152,7 +154,7 @@ class LogisticRegression():
         self.gevals += 1
         #print "hyp-y, "(hyp-y).shape
         #print X
-        return np.dot((hyp - y), X) + self.lam_2 * w + self.lam_1 * w
+        return np.dot((hyp - y), X) + self.lam_2 * w  + self.lam_1 * w
 
     def G(self, w, X, Y):
         """

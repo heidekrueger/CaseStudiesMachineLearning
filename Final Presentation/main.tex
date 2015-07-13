@@ -107,10 +107,11 @@
   \end{frame}
   
   \begin{frame}{Introduction: Stochastic Framework}
-    $$ F(\omega) := \mathbb{E}\left[f(\omega, \xi)\right] \uncover<3>{= \frac{1}{N}\sum_{i=1}^N f(\omega, x_i, z_i)}$$
+    $$ F(\omega) := \mathbb{E}\left[f(\omega, \xi)\right] \uncover<3->{= \frac{1}{N}\sum_{i=1}^N f(\omega, x_i, z_i)}$$
     \begin{itemize}
       \item<2-> \alert{$\xi$}: Random variable; takes the form of an input-output-pair $(x_i, z_i)$
       \item<3-> \alert{$f$}: Partial loss function corresponding to a single data point.
+      \item<4-> Example loss function: $f(\omega, x_i, z_i) = |z_i - \omega^Tx_i|$ (Linear Regression)
     \end{itemize}
   \end{frame}
 
@@ -119,16 +120,16 @@
       \begin{column}{.5\textwidth}
         \centering \alert{Gradient Method}
         $$\min F(\omega) $$
-
-        \uncover<2->{
+        \phantom{0}
+        
         $$\omega^{(k+1)}:= \omega^{k}-\alpha_k \nabla F(\omega^{k})$$\\
         \phantom{zeile}
-        }
+        
       \end{column}\hfill
       \begin{column}{.5\textwidth}
-        \centering \alert{Stochastic Gradient Descent}
+        \centering \alert{Stochastic Gradient Descent (SGD)}
         $$\min \mathbb E \left [f(\omega, \xi)\right]$$
-        \uncover<3>{
+        \uncover<2>{
           $$\omega^{k+1}:= \omega^{k}-\alpha_k \alert{\nabla \hat F(\omega^{k})} $$
           with
 <<<<<<< HEAD
@@ -146,6 +147,7 @@
 
  
   \begin{frame}{Stochastic Newton Method}
+<<<<<<< HEAD
 
     \begin{columns}[T]
       \begin{column}{.5\textwidth}
@@ -177,6 +179,29 @@
         \item $t$ running on slower time-scale than $k$. 
         \item $H_t$ update in $\mathcal O(n)$ time and constant memory, using several tricks
       \end{itemize}
+=======
+  	\begin{columns}[T]
+  		\begin{column}{.5\textwidth}
+  			\centering \alert{Stochastic Gradient Descent}
+  			$$\min \mathbb E \left [f(\omega, \xi)\right]$$
+  				$$\omega^{k+1}:= \omega^{k}-\alpha_k \nabla \hat F(\omega^{k}) $$
+  				
+  				$$\nabla \hat F(\omega^{k}) := \frac{1}{b}\sum_{i\in \mathcal S_k}\nabla f(\omega^k, x_i, z_i)$$
+
+  		\end{column}\hfill
+  		\begin{column}{.5\textwidth}
+  			\centering \alert{Stochastic Newton Method}
+  			$$\min \mathbb E \left [f(\omega, \xi)\right]$$
+  			\uncover<2>{
+  				$$\omega^{k+1}:= \omega^{k}-\alpha_k \alert{\nabla^2 \hat F(\omega^{k})^{-1}} {\nabla \hat F(\omega^{k})} $$
+  				with
+  				$$\alert{\nabla^2 \hat F(\omega^{k})} := \frac{1}{b_H}\sum_{i\in \mathcal S_{H,\alert{t}}}\nabla^2 f(\omega^{\alert{t}}, x_i, z_i)$$
+          where $\mathcal S_{H,\alert{t}} \subset [N], \quad b_H:=|\mathcal S_{H,\alert{t}}| \ll N$,\\
+          $\alert{(t)}$ subsequence of $(k)$
+          }
+  		\end{column}
+  	\end{columns}
+>>>>>>> 87ab61f68ba61a3c1d53714c3d8d95657da19f12
   \end{frame}
 
 
@@ -338,15 +363,15 @@
   
     	\begin{frame}{Classification: Results for SQN}
     		\begin{center}
-    		\begin{tabular}{c|c||c|c}
+    		\begin{tabular}{c|c|c}
     			
     			
-    			\textbf{Batch-size} &  1000, 1000 &  500, 500&  500, 500 \\  \hline
-    			\textbf{ Mean Score} &   0.8	&  0.8 & 0.8 \\	\hline  
-    			\textbf{ Std} &  0.007 &  0.006 &  0.005\\ \hline
-    			\textbf{ Running Time} &  65 s &  31 s & 31 s \\ \hline 
-    			\textbf{ M} &  5 &  5 & 50 \\ \hline
-    			\textbf{ L} &  10 &  10 &\ 10 \\ 
+    			\textbf{Batch-size} &  1000, 1000 &  500, 500 \\  \hline
+    			\textbf{ Mean Score} &   0.8	&  0.8  \\	\hline  
+    			\textbf{ Std} &  0.007 &  0.006 \\ \hline
+    			\textbf{ Running Time} &  65 s &  31 s  \\ \hline 
+    			\textbf{ M} &  5 &  5  \\ \hline
+    			\textbf{ L} &  10 &  10  \\ 
     			
     		\end{tabular}
     \end{center}
@@ -437,9 +462,9 @@
 
   \begin{frame}[allowframebreaks]
 
-    \nocite{*}
+
     {\footnotesize{
-    \bibliographystyle{apalike}
+    \bibliographystyle{abbrv}
     \bibliography{refs}
     }
     }

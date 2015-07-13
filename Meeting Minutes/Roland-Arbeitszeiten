@@ -33,8 +33,23 @@ Fr 29.5. 	4h 		TUMMS
 Mo 1.6. 	2h 		Jour Fixe
 Mo 1.6. 	6h 		SQN debugging and testing
 
-10.6.	
 15.6.	1,5h
 21		4h		SQN debugging
 22		6h		SQN debugging higgs dataset
 23		2h		preparation of rsqn class
+
+25.07.  4h SQL access for HIGGS data set
+26.07.  4h PSQN and Multiprocessor execution for Higgs
+29.07.  6h PSQN
+30.06.  3h PSQN
+02.07.  2h eeg
+03.07. 3h some debugging 
+04.07.  4h SQN dictionary learning
+05.07.  3h Doing sth for Proxtest and Logistic regression, changes to SQN structure
+06.07.   4h Testing and debugging  
+08.07.   7h Reordering SQN, introducing SGD, higgstesting
+09.07.  8 h   Preparing and Running Jobs for Plots, Gradient for dictionary learning, Two-Loop recursion
+10.07.  10 h Preparation of Presentation
+
+
+Total 172 h

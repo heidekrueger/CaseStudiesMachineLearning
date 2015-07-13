@@ -141,6 +141,7 @@ plt.title(titles[4])
 plt.ylabel(r'$F_{[1000]}(\omega^k)$')
 plt.xlabel('Iterations')
 plt.ylim(.8,100)
+plt.xlim(0,200)
 
 fixed_vs_time = plt.figure(6)
 plt.title(titles[5])
@@ -180,7 +181,7 @@ for bg, bh in zip(b_G, b_H):
         loop_maxIters = min(2000, len(iters))
     else:
         loop_maxIters = min(maxIters, len(iters))
-    """Plot the results """ 
+    """Plot the results """
     # next color
     c = next(color_cycle)
 

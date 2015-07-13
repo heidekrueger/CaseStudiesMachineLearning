@@ -58,14 +58,14 @@
         	\begin{column}{.5\linewidth}
         		Electroencephalography (EEG)\\
         		\vspace{5pt}
-        		\includegraphics[width = 0.8\linewidth]{EEG_oscillation.png}\\
+        		\includegraphics[width = 0.8\linewidth]{graphics/EEG_oscillation.png}\\
         		\vspace{5pt}
         		\alert{Section 4}
         	\end{column}
         	\begin{column}{.5\linewidth}
         		Image Denoising\\
         		\vspace{5pt}
-        		\includegraphics[width = 0.6\linewidth]{lena_pic.jpg}\\
+        		\includegraphics[width = 0.6\linewidth]{graphics/lena_pic.jpg}\\
         		\vspace{5pt}
         		\alert{Section 5}
         	\end{column}
@@ -132,11 +132,7 @@
         \uncover<2>{
           $$\omega^{k+1}:= \omega^{k}-\alpha_k \alert{\nabla \hat F(\omega^{k})} $$
           with
-<<<<<<< HEAD
-          $$\alert{\nabla \hat F(\omega^{k})} := \frac{1}{b}\sum_{i\in \mathcal S_k} \nabla f(\omega, x_i, z_i)$$
-=======
           $$\alert{\nabla \hat F(\omega^{k})} := \frac{1}{b}\sum_{i\in \mathcal S_k}\nabla f(\omega^k, x_i, z_i)$$
->>>>>>> 43b04b819a0cbcda7e2db20cbbe2c7b1a24be539
           where $\mathcal S_k \subset [N], \quad b:=|\mathcal S_k| \ll N$\\\alert{"Mini Batch"}
         }
       \end{column}
@@ -147,39 +143,7 @@
 
  
   \begin{frame}{Stochastic Newton Method}
-<<<<<<< HEAD
 
-    \begin{columns}[T]
-      \begin{column}{.5\textwidth}
-        \centering \alert{Stochastic Gradient Descent}
-        $$\min \mathbb E \left [f(\omega, \xi)\right]$$
-        \uncover<3>{
-          $$\omega^{k+1}:= \omega^{k}-\alpha_k \alert{\nabla \hat F(\omega^{k})} $$
-          with
-          $$\alert{\nabla \hat F(\omega^{k})} := \frac{1}{b}\sum_{i\in \mathcal S_k} \nabla f(\omega, x_i, z_i)$$
-        }
-      \end{column}\hfill
-      \begin{column}{.5\textwidth}
-        \centering \alert{Stochastic Newton Method}
-        $$\min \mathbb E \left [f(\omega, \xi)\right]$$
-        \uncover<3>{
-        $$\omega^{k+1}:= \omega^{k}-\alpha_k \alert{\nabla^2 \hat F(\omega^{k})^{-1}} \alert{\nabla \hat F(\omega^{k})} $$
-          with
-          $$\alert{\nabla^2 \hat F(\omega^{k})} := \frac{1}{b_H}\sum_{i\in \mathcal S_{H,k}}f(\omega, x_i, z_i)$$
-          where $\mathcal S_{H,k} \subset [N], \quad b:=|\mathcal S_{H,k}| \ll N$\\\alert{"Mini Batch"}
-         }
-      \end{column}
-    \end{columns}
-  \end{frame}
-  
-  \begin{frame}\frametitle{Stochastic Quasi-Newton Method (SQN)}
-      \begin{itemize}
-        \item \alert{Stochastically} use second-order information
-        \item Approximate $\nabla \hat^2 F(\omega^{k})$ by BFGS matrix $H_t$
-        \item $t$ running on slower time-scale than $k$. 
-        \item $H_t$ update in $\mathcal O(n)$ time and constant memory, using several tricks
-      \end{itemize}
-=======
   	\begin{columns}[T]
   		\begin{column}{.5\textwidth}
   			\centering \alert{Stochastic Gradient Descent}
@@ -201,19 +165,26 @@
           }
   		\end{column}
   	\end{columns}
->>>>>>> 87ab61f68ba61a3c1d53714c3d8d95657da19f12
   \end{frame}
 
+  \begin{frame}\frametitle{Stochastic Quasi-Newton Method (SQN)}
+      \begin{itemize}
+        \item \alert{Stochastically} use second-order information
+        \item Approximate $\nabla ^2 \hat F(\omega^{k})$ by BFGS matrix $H_t$
+        \item $t$ running on slower time-scale than $k$. 
+        \item $H_t$ update in $\mathcal O(n)$ time and constant memory, using several tricks
+      \end{itemize}
+  \end{frame}
 
   \begin{frame}
     \frametitle{SQN: Performance I}
 
       \begin{columns}[T]
       \begin{column}{.5\textwidth}
-        \resizebox{\linewidth}{!}{\input{'EEG Sample Objective vs. Iterations.tikz'}}
+        \resizebox{\linewidth}{!}{\input{'graphics/EEG Sample Objective vs. Iterations.tikz'}}
       \end{column}\hfill
       \begin{column}{.5\textwidth}
-        \resizebox{\linewidth}{!}{\input{'EEG Fixed Subset Objective vs. Iterations.tikz'}}
+        \resizebox{\linewidth}{!}{\input{'graphics/EEG Fixed Subset Objective vs. Iterations.tikz'}}
       \end{column}
     \end{columns}
     \center{Performance on Logistic Regression, Problem size: $69550 \times 600$\\
@@ -222,7 +193,7 @@
 
   \begin{frame}
     \frametitle{SQN: Performance II}
-    \center{\resizebox{0.8\linewidth}{!}{\input{'EEG Fixed Subset Objective vs. Accessed Data Points.tikz'}}}
+    \center{\resizebox{0.8\linewidth}{!}{\input{'graphics/EEG Fixed Subset Objective vs. Accessed Data Points.tikz'}}}
     \center{Performance on Logistic Regression, Problem size: $69550 \times 600$\\
     \tiny{Armijo-stepsizes, Further SQN-parameters: $L=10$, $M=5$}}
   \end{frame}
@@ -249,7 +220,7 @@
        \end{flalign*}
 		\begin{figure}[t] 
 			
-			\centering\includegraphics[width = 0.5\textwidth]{prox_boyd.jpg}
+			\centering\includegraphics[width = 0.5\textwidth]{graphics/prox_boyd.jpg}
 			\caption{\footnotesize Evaluating a proximal operator at various points. \textit{N Parikh, S Boyd, Proximal Methods,
 					Foundations and Trends in Optimization 1, 2014}}
 		\end{figure} 	
@@ -276,7 +247,7 @@
    			$A \in \mathbb{R}^{1500 \times 3000},\:b \in \mathbb{R}^{1500}$\\
    			$A_{ij},\:b_i\:$ \textasciitilde $\:\mathcal{N}(0,1)$, $\:\lambda = 0.1$\\
    			\vspace{15pt}
-   			\resizebox{\linewidth}{!}{\input{ProxNormal.tikz}}
+   			\resizebox{\linewidth}{!}{\input{graphics/ProxNormal.tikz}}
    			\begin{center}
    				\hspace{-3pt}
    				\scalebox{0.85}{
@@ -297,7 +268,7 @@
    			$A$: \small Discretization of 3D Laplacian\\
    			\normalsize$\lambda = 1$\\
    			\vspace{8pt}
-   			\resizebox{\linewidth}{!}{\input{ProxPDE.tikz}}
+   			\resizebox{\linewidth}{!}{\input{graphics/ProxPDE.tikz}}
    			\begin{center}
    				\hspace{5pt}
    				\scalebox{0.85}{
@@ -324,17 +295,17 @@
    		\begin{column}{.3\textwidth}
    			\hspace{30pt} \scriptsize Batch size = 1
    			\vspace{10pt}
-   			\resizebox{1.18\linewidth}{!}{\input{StochProx_1.tikz}}
+   			\resizebox{1.18\linewidth}{!}{\input{graphics/StochProx_1.tikz}}
    		\end{column}\hspace{-16pt}
    		\begin{column}{.3\textwidth}
    			\hspace{30pt} \scriptsize Batch size = 50
    			\vspace{10pt}
-   			\resizebox{1.18\linewidth}{!}{\input{StochProx_50.tikz}}
+   			\resizebox{1.18\linewidth}{!}{\input{graphics/StochProx_50.tikz}}
    		\end{column}\hspace{-16pt}
    		\begin{column}{.3\textwidth}
    			\hspace{30pt} \scriptsize Batch size = 150
    			\vspace{10pt}
-   			\resizebox{1.18\linewidth}{!}{\input{StochProx_150.tikz}}
+   			\resizebox{1.18\linewidth}{!}{\input{graphics/StochProx_150.tikz}}
    		\end{column}
    	\end{columns}
    \end{frame}
@@ -354,11 +325,22 @@
 	\vspace{10pt}
 	\alert{How deep is your sleep?}
 	\vspace{15pt}\\
-	\includegraphics[width=0.7\textwidth]{EEG_oscillation.png}\\
+	\includegraphics[width=0.7\textwidth]{graphics/EEG_oscillation.png}\\
 	\vspace{15pt}
 	\small Sleeping patient / 20 nights of EEG recordings\\
 	\small Predict next slow wave
 	}
+
+  \begin{frame}\frametitle{Logistic Regression}
+  $$ f(\omega, x_i, y_i) = -y_i \log(h(\omega,x_i)) - (1-y_i) \log(1- h(\omega, x_i))$$
+  with
+  $$h(\omega, x_i) := sigmoid(\omega^Tx_i):= \frac{1}{1+e^{-\omega^T x_i}} $$      
+
+  \begin{figure}
+  \includegraphics[width=.5\linewidth]{graphics/sigmoid.png}\caption{The sigmoid function.}
+  \end{figure}
+  
+  \end{frame}
 
   
     	\begin{frame}{Classification: Results for SQN}
@@ -395,7 +377,7 @@
 	\vspace{10pt}
 	\alert{Can we recover the image?}
 	\vspace{15pt}\\
-	\includegraphics[width=0.4\textwidth]{lena_pic.jpg}\\
+	\includegraphics[width=0.4\textwidth]{graphics/lena_pic.jpg}\\
 	\vspace{15pt}
 	\small Image is partially destroyed\\
 	\small Reconstruct image
@@ -417,7 +399,7 @@
 \begin{frame}{Dictionary Learning in Image Reconstruction I}
 	\begin{figure}[h!]
 		\centering
-		\includegraphics[width=0.8\textwidth]{lena_noisy.png}
+		\includegraphics[width=0.8\textwidth]{graphics/lena_noisy.png}
 		\caption{Noisy image}
 	\end{figure}
 \end{frame}
@@ -425,7 +407,7 @@
 \begin{frame}{Dictionary Learning in Image Reconstruction II}
 	\begin{figure}[h!]
 		\centering
-		\includegraphics[width = 0.8\linewidth]{lena_reconstructed.png}
+		\includegraphics[width = 0.8\linewidth]{graphics/lena_reconstructed.png}
 		\caption{Reconstructed image}
 	\end{figure}
 \end{frame}
@@ -450,11 +432,11 @@
 	
 	\begin{center}
 		
-		\includegraphics[width = 0.7\linewidth]{noisy_picture.png}\\
+		\includegraphics[width = 0.7\linewidth]{graphics/noisy_picture.png}\\
 		
 		
 		
-		\includegraphics[width = 0.7\linewidth]{reconstructed.png}\\
+		\includegraphics[width = 0.7\linewidth]{graphics/reconstructed.png}\\
 	\end{center}
 }  
 
@@ -472,5 +454,7 @@
     %\bibliographystyle{abbrv}
 
   \end{frame}
+
+
 
 \end{document}

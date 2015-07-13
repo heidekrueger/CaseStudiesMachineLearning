@@ -65,12 +65,18 @@ def parallel_sqndl(data, l_params, n_jobs=1):
 
 
 if __name__ == "__main__":
+    # import matplotlib.image as mpimg
+    patch_size = (7, 7)
+    from scipy.misc import lena
+
+    # lena = mpimg.imread('Lucy.jpg')
+    # lena = np.dot(lena[..., :3], [0.299, 0.587, 0.144])
 
     # loads data
-    data, lena, distorted = preprocess_data(lena)
+    data, lena, distorted = preprocess_data(lena, patch_size=patch_size)
 
-    pi = 'n_iter'
-    l_pi = [10, 25, 50, 100, 200]
+    pi = 'batch_size'
+    l_pi = [20, 50, 100, 200, 500]
 
     # define a basic set of parameters
     params = dict(n_components=100,
@@ -99,7 +105,7 @@ if __name__ == "__main__":
     np.save('influence_' + pi, influence)
 
     # plot dictionaries for fun
-    for d in l_dict:
-        plot_dictionary(d)
+    # for d in l_dict:
+    #     plot_dictionary(d)
 
-    plt.show()
+    # plt.show()

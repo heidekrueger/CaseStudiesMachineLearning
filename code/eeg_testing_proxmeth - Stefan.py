@@ -2,7 +2,7 @@
 """
 Created on Tuesday 9 July
 
-@author: Stanislas Chambon
+@author: Stanislas Chambon, Stefan Heidekrueger
 """
 
 from ProxEegTest import prox_meth_lr, predict
@@ -78,7 +78,6 @@ for train, test in sss:
             nzc += 1
     l_nzc.append(nzc)
 
-    # add a 1 - pred : to predict the class of samples followed by s. o.
     y_pred = predict(w, x_test)
     y_pred_bin = [int(p+.5) for p in y_pred]
     acc = accuracy_score(y_test,y_pred_bin)

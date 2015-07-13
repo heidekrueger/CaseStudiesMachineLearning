@@ -1,0 +1,84 @@
+% This file was created by matplotlib v0.1.0.
+% Copyright (c) 2010--2014, Nico Schlömer <nico.schloemer@gmail.com>
+% All rights reserved.
+% 
+% The lastest updates can be retrieved from
+% 
+% https://github.com/nschloe/matplotlib2tikz
+% 
+% where you can also submit bug reports and leavecomments.
+% 
+\begin{tikzpicture}
+
+\begin{axis}[
+xlabel={Number of Iterations},
+ylabel={Function Value},
+xmin=0, xmax=20,
+ymin=1e-06, ymax=1000,
+ymode=log,
+axis on top,
+legend entries={{0SR1},{ProxGrad},{L-BFGS-B}}
+]
+\addplot [thick, red]
+coordinates {
+(0,344.947171722221)
+(1,344.947171722221)
+(2,221.971344823809)
+(3,105.183268059287)
+(4,24.0246493050018)
+(5,3.8316429574547)
+(6,0.305853582808667)
+(7,6.51020674248988e-06)
+
+};
+\addplot [thick, blue]
+coordinates {
+(0,344.947171722221)
+(1,344.947171722221)
+(2,221.971344823809)
+(3,175.170522815298)
+(4,145.915190646345)
+(5,123.149864486456)
+(6,103.386318060267)
+(7,85.3055719850904)
+(8,68.406762409266)
+(9,52.6898461102236)
+(10,38.4654743969608)
+(11,26.1480751713354)
+(12,16.2522156714462)
+(13,9.06963280069867)
+(14,4.51898312593936)
+(15,1.90484081417415)
+(16,0.662798369115754)
+(17,0.178159154163643)
+(18,0.0227851397424546)
+(19,6.51020673590862e-06)
+
+};
+\addplot [thick, green!50.0!black]
+coordinates {
+(0,344.947171722221)
+(1,344.947171722221)
+(2,270.178125308224)
+(3,230.58345596282)
+(4,168.055709656042)
+(5,53.7596820510628)
+(6,11.3958775990856)
+(7,1.34840826948498)
+(8,0.267676178235767)
+(9,0.0778255109435076)
+(10,0.046406987419385)
+(11,6.51020673590862e-06)
+
+};
+\path [draw=black, fill opacity=0] (axis cs:13,0)--(axis cs:13,0);
+
+\path [draw=black, fill opacity=0] (axis cs:13,1)--(axis cs:13,1);
+
+\path [draw=black, fill opacity=0] (axis cs:0,13)--(axis cs:0,13);
+
+\path [draw=black, fill opacity=0] (axis cs:1,13)--(axis cs:1,13);
+
+\end{axis}
+
+\end{tikzpicture}

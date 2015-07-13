@@ -15,7 +15,8 @@ from sqndict import SqnDictionaryLearning
 from joblib import Parallel, delayed
 
 
-def inner_rec(lena, data, intercept, d, algo='omp', nzc=None):
+def inner_rec(lena, data, intercept, d, algo='omp', nzc=None,
+              patch_size=(7, 7)):
     '''
     INPUTS:
     - lena
@@ -44,7 +45,6 @@ def inner_rec(lena, data, intercept, d, algo='omp', nzc=None):
                          n_jobs=1)
 
     # dimension determination
-    patch_size = (7, 7)
     height, width = lena.shape
 
     # patch reconstruction
@@ -54,14 +54,15 @@ def inner_rec(lena, data, intercept, d, algo='omp', nzc=None):
 
     # reconstruct noisy image
     rec[:, height // 2:] = reconstruct_from_patches_2d(patches,
-                                                       (width, height // 2))
+                                                       (height, width // 2))
 
     # return reconstructed image
     return rec
 
 
 def outer_reconstruction(influence, lena,
-                         pi='n_components', algo='omp', nzc=None, n_jobs=1):
+                         pi='n_components', algo='omp', nzc=None, n_jobs=1,
+                         patch_size=(7, 7)):
     '''
     INPUTS:
     - influence : l_params, l_dict
@@ -76,10 +77,10 @@ def outer_reconstruction(influence, lena,
     '''
 
     # data preprocessing
-    data, lena, distorted = preprocess_data(lena)
+    data, lena, distorted = preprocess_data(lena, patch_size)
 
     # post process data
-    data, intercept = postprocess_data(lena)
+    data, intercept = postprocess_data(lena, patch_size)
 
     l_params = influence[0]
     l_dict = influence[1]
@@ -90,7 +91,8 @@ def outer_reconstruction(influence, lena,
                                                      intercept,
                                                      d,
                                                      algo=algo,
-                                                     nzc=nzc)
+                                                     nzc=nzc,
+                                                     patch_size=patch_size)
                                   for d in l_dict)
     print len(rec)
 
@@ -105,6 +107,11 @@ def outer_reconstruction(influence, lena,
 if __name__ == '__main__':
     # loads lena
     from scipy.misc import lena
+
+    # lena = mpimg.imread('Lucy.jpg')
+    # lena = np.dot(lena[..., :3], [0.299, 0.587, 0.144])
+
+    # from scipy.misc import lena
 
     pi = 'n_components'
 

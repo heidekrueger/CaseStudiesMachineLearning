@@ -1,6 +1,7 @@
 """
 @author: heidekrueger
 Performs analysis and plotting on outputs of SQN benchmarking run
+for the EEG data set.
 """
 
 import re
@@ -163,9 +164,6 @@ plt.ylabel(r'$F_{[1000]}(\omega^k)$')
 plt.xlabel('Function Evaluations')
 plt.xlim(0,200)
 
-for i in range(8):
-    plt.figure(i+1)
-    plt.yscale('log')
 
 
 for bg, bh in zip(b_G, b_H):
@@ -204,20 +202,17 @@ for bg, bh in zip(b_G, b_H):
     plt.plot(time[:loop_maxIters], f_S[:loop_maxIters], label = l, c=c, ls=ls)
 
     plt.figure(3)
+    """Plot against epochs, not ADP, thus devide x by length of dataset"""
     plt.plot([a/69550.0 for a in adp[:maxIters]], f_S[:maxIters], label = l, c=c, ls=ls)
 
     plt.figure(4)
     plt.plot(fevals[:loop_maxIters], f_S[:loop_maxIters], label = l, c=c, ls=ls)
 
     
-    
-
-    # get vals on fixed set
     print str(bg), str(bh)
-    # print len(fevals), len(w)
+    """This next line is the expensive one: Actually evaluating the functions! """
     Fvals = [F(w_i) for w_i in w[:loop_maxIters]]
-    print loop_maxIters, len(Fvals), len (w[:loop_maxIters])
-    # print len(iters), len(Fvals)
+
     plt.figure(5)
     plt.plot(iters[:loop_maxIters], Fvals, label = l, c=c, ls=ls)
 
@@ -232,34 +227,14 @@ for bg, bh in zip(b_G, b_H):
 
 for i in range(8):
     plt.figure(i+1)
-    if i+1 != 1: #don't plot legend for 1, as 1 and 5 will be displ. next to each other
+    plt.yscale('log')
+    """Plot the legends for all but graph 1 
+        (Graphs 1 and 5 will be next to each other in presentation)
+     """
+    if i+1 != 1: 
         plt.legend() # too make smaller give arg: prop={'size':8}
 
     if active[i]:
         tikz_save('../outputs/plots/'+titles[i].replace(':','')+'.tikz')
 
-
 plt.show()
-
-
-
-
-
-
-
-# 
-
-# X_f, y_f = get_fixed_sample(5)
-
-# logreg.w=w[-1]
-# yp = logreg.predict(X_f)
-
-# print yp, y_f
-
-#v = [F(w_i) for w_i in w]
-
-#fig = plt.figure()
-#plt.plot(iters, v)
-#plt.yscale('log')
-#plt.show()
-

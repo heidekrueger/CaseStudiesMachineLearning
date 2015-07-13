@@ -1,9 +1,0 @@
-\select@language {ngerman}
-\contentsline {section}{\numberline {1}Optimal Feature Transform}{1}{section.1}
-\contentsline {subsection}{\numberline {1.1}Model}{1}{subsection.1.1}
-\contentsline {subsection}{\numberline {1.2}Reformulation}{1}{subsection.1.2}
-\contentsline {subsection}{\numberline {1.3}Solution of the eigenvalue problem}{2}{subsection.1.3}
-\contentsline {subsection}{\numberline {1.4}Solution to the PCA problem}{2}{subsection.1.4}
-\contentsline {subsection}{\numberline {1.5}Classification}{2}{subsection.1.5}
-\contentsline {subsection}{\numberline {1.6}Algorithm}{3}{subsection.1.6}
-\contentsline {section}{\numberline {A}Appendix}{i}{appendix.A}

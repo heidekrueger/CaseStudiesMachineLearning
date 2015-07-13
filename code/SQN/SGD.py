@@ -8,6 +8,7 @@ import itertools
 from collections import deque
 from statsmodels.stats.diagnostic import lillifors
 
+"""try-except-behavior for Python 2.7/3.4 compability """
 try: import stochastic_tools
 except: import SQN.stochastic_tools as stochastic_tools
 try: from stochastic_tools import test_normality
@@ -30,7 +31,6 @@ from base import StochasticOptimizer
 
 class SGD(StochasticOptimizer):
     """
-    TODO: Two-Loop-Recursion!
 
     Attributes:
     - s, y: correction pairs
@@ -162,8 +162,6 @@ class SGD(StochasticOptimizer):
 
 class SQN(SGD):
     """
-    TODO: Two-Loop-Recursion!
-
     Attributes:
     - s, y: correction pairs
     - w: location
@@ -326,11 +324,6 @@ class SQN(SGD):
         assert abs(self.y[-1]).sum() != 0, "latest y entry cannot be 0!"
         assert 1/np.inner(self.y[-1], self.s[-1]) != 0, "!"
 
-        # H = (s_t^T y_t^T)/||y_t||^2 * I
-
-        # For now: Standard L-BFGS update
-        # TODO: Two-Loop Recursion
-        # TODO: Hardcode I each time to save memory. (Or sparse???)
         I = np.identity(len(self.s[0]))
         H = np.dot((np.inner(self.s[-1], self.y[-1]) / np.inner(self.y[-1],
                    self.y[-1])), I)
@@ -351,7 +344,6 @@ class SQN(SGD):
         returns:
         z = H_k g_k
         
-        Might have a problem with this function : s not defined
         
         Reference:
         

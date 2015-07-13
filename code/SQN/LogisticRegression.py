@@ -64,10 +64,8 @@ class LogisticRegression():
     #   print (w)
     #   print (type(w))
     #   print ("debug:", np.multiply(w,X))
-
-
-        #return self.sigmoid(np.multiply(w, X).sum())
-        return np.multiply(w, X).sum()
+    
+        return self.sigmoid(np.multiply(w, X).sum())
 
     def f(self, w, X, y):
         '''
@@ -246,6 +244,9 @@ class LogisticRegression():
         returns a subsample X_S, y_S of the data, choosing only datapoints
         that are currently misclassified
 
+        This function can be used in place of the 'generic' 
+        sample_batch function in stochastic_tools
+
         Parameters:
             w: Regression variable
             X: training data
@@ -279,8 +280,6 @@ class LogisticRegression():
             nSamples = N
 
         # Find samples that are not classified correctly
-
-        # TODO:
 
         sampleList = []
         counter = 0
